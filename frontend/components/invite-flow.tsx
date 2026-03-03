@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type WheelEvent } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { FOOD_OPTIONS, GIFT_OPTIONS } from "@/config/options";
@@ -37,6 +37,17 @@ const EVENT_DETAILS = {
   time: "16:00",
   place: "Загородный клуб «Берег»"
 };
+
+const LOGO_IMAGE_URL = "https://pngimg.com/uploads/signature/signature_PNG58.png";
+
+const IMAGE_ASSETS = {
+  car: "https://pngimg.com/uploads/porsche/porsche_PNG10622.png",
+  model: "https://pngimg.com/uploads/girls/girls_PNG6433.png",
+  pasta: "https://pngimg.com/uploads/pasta/pasta_PNG86.png",
+  gift: "https://pngimg.com/uploads/gift/gift_PNG100387.png",
+  disco: "https://pngimg.com/uploads/disco_ball/disco_ball_PNG10.png",
+  plan: "https://pngimg.com/uploads/calendar_2023/Calendar_2023_PNG34.png"
+} as const;
 
 const authSchema = z.object({
   firstName: z.string().trim().min(1, "Введите имя").max(80, "Максимум 80 символов"),
@@ -96,6 +107,7 @@ export function InviteFlow() {
   const [submitting, setSubmitting] = useState(false);
   const [lookMode, setLookMode] = useState<"male" | "female">("male");
   const autoSubmitRef = useRef(false);
+  const wheelLockRef = useRef(0);
 
   const {
     register,
@@ -105,14 +117,41 @@ export function InviteFlow() {
     resolver: zodResolver(authSchema)
   });
 
-  const completedSectionsCount = useMemo(
-    () => SECTION_ORDER.filter((section) => responses[section].acknowledged).length,
-    [responses]
-  );
   const attentionSection = useMemo(
     () => SECTION_ORDER.find((section) => !responses[section].acknowledged && needsAttention[section]),
     [needsAttention, responses]
   );
+  const stageImages = useMemo(() => {
+    if (activeSection === "food") {
+      return {
+        left: IMAGE_ASSETS.model,
+        center: IMAGE_ASSETS.pasta,
+        right: IMAGE_ASSETS.disco
+      };
+    }
+
+    if (activeSection === "gifts") {
+      return {
+        left: IMAGE_ASSETS.car,
+        center: IMAGE_ASSETS.gift,
+        right: IMAGE_ASSETS.disco
+      };
+    }
+
+    if (activeSection === "plan") {
+      return {
+        left: IMAGE_ASSETS.plan,
+        center: IMAGE_ASSETS.disco,
+        right: IMAGE_ASSETS.model
+      };
+    }
+
+    return {
+      left: IMAGE_ASSETS.car,
+      center: IMAGE_ASSETS.model,
+      right: IMAGE_ASSETS.pasta
+    };
+  }, [activeSection]);
 
   const onProfileSubmit = handleSubmit(async (values) => {
     try {
@@ -173,6 +212,28 @@ export function InviteFlow() {
     setActiveSection(nextSection);
     setSubmitMessage(null);
     setSubmitError(null);
+  }
+
+  function shiftSection(direction: 1 | -1) {
+    const currentIndex = SECTION_ORDER.indexOf(activeSection);
+    const nextIndex = (currentIndex + direction + SECTION_ORDER.length) % SECTION_ORDER.length;
+    navigateToSection(SECTION_ORDER[nextIndex]);
+  }
+
+  function handleStageWheel(event: WheelEvent<HTMLElement>) {
+    event.preventDefault();
+
+    const now = Date.now();
+    if (now - wheelLockRef.current < 320) {
+      return;
+    }
+
+    if (Math.abs(event.deltaY) < 5) {
+      return;
+    }
+
+    wheelLockRef.current = now;
+    shiftSection(event.deltaY > 0 ? 1 : -1);
   }
 
   function toggleFoodSelection(category: FoodCategoryKey, key: string) {
@@ -337,8 +398,10 @@ export function InviteFlow() {
   if (authRequired) {
     return (
       <main className="shell">
-        <section className="authSection">
-          <h1 className="logo">ily@olga</h1>
+        <section
+          className="authSection authSectionWithLogoBg"
+          style={{ "--auth-logo-url": `url("${LOGO_IMAGE_URL}")` } as CSSProperties}
+        >
           <form className="authForm" onSubmit={onProfileSubmit}>
             <label className="fieldLabel">
               <span>Имя</span>
@@ -426,11 +489,14 @@ export function InviteFlow() {
         </nav>
       </header>
 
-      <section className={`heroStage stage-${activeSection} look-${lookMode}`}>
-        <h1 className="heroWordmark">ily@olga</h1>
-        <div className="stageProp propLeft" />
-        <div className="stageProp propCenter" />
-        <div className="stageProp propRight" />
+      <section
+        className={`heroStage stage-${activeSection} look-${lookMode}`}
+        style={{ "--hero-logo-url": `url("${LOGO_IMAGE_URL}")` } as CSSProperties}
+      >
+        <div className="stageScrollerZone" onWheel={handleStageWheel} />
+        <img className="stagePropImage propLeft" src={stageImages.left} alt="" />
+        <img className="stagePropImage propCenter" src={stageImages.center} alt="" />
+        <img className="stagePropImage propRight" src={stageImages.right} alt="" />
         {attentionSection ? (
           <div className="stageAlert" aria-label={`Требует заполнения: ${SECTION_LABELS[attentionSection]}`}>
             !
@@ -456,8 +522,6 @@ export function InviteFlow() {
           </button>
         </div>
 
-        <span className="muted">Заполнено разделов: {completedSectionsCount} из {SECTION_ORDER.length}</span>
-
         <button className="nextButton sceneNextButton" type="button" onClick={handleNext} disabled={readOnly}>
           Next
         </button>
@@ -468,12 +532,6 @@ export function InviteFlow() {
       ) : null}
 
       <section className="sceneEditor">
-        {activeSection === "dresscode" ? (
-          <article className="sectionCard sectionCardCompact">
-            <h2>Дресс-код</h2>
-            <p>Раздел без выбора. Нажмите Next после ознакомления.</p>
-          </article>
-        ) : null}
 
         {activeSection === "food" ? (
           <article className="sectionCard sectionCardCompact">

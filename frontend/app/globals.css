@@ -65,195 +65,92 @@ textarea {
   border-radius: 32px;
 }
 
-.heroWordmark {
-  margin: 0;
+.heroStage::before {
+  content: "";
   position: absolute;
-  inset: 22% 0 auto;
-  text-align: center;
-  font-size: clamp(5rem, 16vw, 16rem);
-  line-height: 0.84;
-  letter-spacing: -0.04em;
-  color: #0f68d3;
-  opacity: 0.95;
+  left: 50%;
+  top: 24%;
+  transform: translate(-50%, 0);
+  width: min(720px, 72vw);
+  height: 260px;
+  background-image: var(--hero-logo-url);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
   user-select: none;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.stageProp {
+.stageScrollerZone {
   position: absolute;
-  transition: all 360ms ease;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.16);
+  inset: 0;
+  z-index: 3;
+}
+
+.stagePropImage {
+  position: absolute;
+  transition: transform 380ms ease, top 380ms ease, left 380ms ease, right 380ms ease, width 380ms ease, opacity 260ms ease;
+  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.18));
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
 }
 
 .propLeft {
-  width: 300px;
-  height: 150px;
+  width: 350px;
   left: -90px;
-  top: 280px;
-  border-radius: 70px 40px 28px 24px;
-  background: linear-gradient(120deg, #5f412f, #8f6848 58%, #2a2a2a);
-}
-
-.propLeft::after {
-  content: "";
-  position: absolute;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: #1b1b1b;
-  bottom: -18px;
-  right: 28px;
-  box-shadow: -170px 0 0 #1b1b1b;
+  top: 320px;
+  transform: translateZ(0);
 }
 
 .propCenter {
-  width: 180px;
-  height: 500px;
-  left: calc(50% - 90px);
-  top: 166px;
-  border-radius: 130px 130px 70px 70px;
-  background: linear-gradient(180deg, #f5f4ea 0%, #e6e3d7 70%, #b5b1a0 100%);
-}
-
-.propCenter::after {
-  content: "";
-  position: absolute;
-  width: 66px;
-  height: 66px;
-  border-radius: 50%;
-  background: #eedec9;
-  top: -40px;
-  left: calc(50% - 33px);
+  width: 260px;
+  left: calc(50% - 130px);
+  top: 210px;
 }
 
 .propRight {
-  width: 280px;
-  height: 280px;
-  right: -68px;
-  top: 254px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 62% 62%, #f7d38f 0%, #f0ba66 44%, transparent 45%),
-    radial-gradient(circle at 50% 50%, #f8f8f8 0%, #efefef 64%, #d6d6d6 100%);
+  width: 300px;
+  right: -70px;
+  top: 300px;
 }
 
-.propRight::after {
-  content: "Pasta";
-  position: absolute;
-  top: 38px;
-  left: 64px;
-  transform: rotate(-21deg);
-  color: #ff2d37;
-  font-size: 3rem;
-  font-style: italic;
-  letter-spacing: 0.03em;
-}
-
-.look-female .propCenter {
-  background: linear-gradient(180deg, #ece6d7 0%, #ddd4c2 70%, #b6ab93 100%);
+.look-female .propCenter,
+.look-female .propLeft,
+.look-female .propRight {
+  transform: scale(1.03);
 }
 
 .stage-food .propCenter {
-  width: 390px;
-  height: 390px;
-  top: 210px;
-  left: calc(50% - 195px);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 54%, #f6d389 0%, #f0ba66 38%, transparent 40%),
-    radial-gradient(circle at 50% 50%, #f9f9f9 0%, #efefef 65%, #d4d4d4 100%);
-}
-
-.stage-food .propCenter::after {
-  content: "Pasta";
-  width: auto;
-  height: auto;
-  background: transparent;
-  top: 26px;
-  left: 88px;
-  transform: rotate(-17deg);
-  color: #ff2d37;
-  font-size: 4.5rem;
+  width: 420px;
+  top: 240px;
+  left: calc(50% - 210px);
+  z-index: 2;
 }
 
 .stage-food .propLeft {
-  width: 120px;
-  height: 420px;
-  left: -56px;
-  top: 258px;
-  border-radius: 90px;
-  background: linear-gradient(180deg, #f4f2e6 0%, #dfdac6 64%, #b9b39f 100%);
-}
-
-.stage-food .propLeft::after {
-  content: "";
-  width: 50px;
-  height: 50px;
-  left: calc(50% - 25px);
-  right: auto;
-  bottom: -24px;
-  box-shadow: none;
+  width: 130px;
+  top: 300px;
+  left: -10px;
 }
 
 .stage-food .propRight {
-  width: 190px;
-  height: 300px;
-  right: -34px;
+  width: 220px;
   top: 300px;
-  border-radius: 50% 50% 44% 44%;
-  background: radial-gradient(circle at 50% 40%, #ffd63f 0%, #f2c80a 68%, #eab907 100%);
-}
-
-.stage-food .propRight::after {
-  content: "";
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  top: 86px;
-  left: 35px;
-  transform: none;
-  color: inherit;
-  font-size: inherit;
-  background: radial-gradient(circle, #ff8400 0%, #f4312b 60%, #ef1f1f 100%);
-  opacity: 0.75;
+  right: -30px;
 }
 
 .stage-gifts .propCenter {
-  width: 300px;
-  height: 300px;
+  width: 330px;
   top: 250px;
-  left: calc(50% - 150px);
-  border-radius: 28px;
-  background: linear-gradient(145deg, #fff4d6, #ffd670 52%, #f8c13c);
-}
-
-.stage-gifts .propCenter::after {
-  content: "gift";
-  width: auto;
-  height: auto;
-  background: transparent;
-  top: 108px;
-  left: 110px;
-  color: #8f5f00;
-  font-size: 2.1rem;
+  left: calc(50% - 165px);
 }
 
 .stage-plan .propCenter {
-  width: 300px;
-  height: 300px;
-  top: 248px;
-  left: calc(50% - 150px);
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffe159 0%, #ffd50a 50%, #f1b503 100%);
-}
-
-.stage-plan .propCenter::after {
-  content: "";
-  width: 144px;
-  height: 144px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ff7b00 0%, #ff3044 80%);
-  top: 78px;
-  left: 78px;
+  width: 320px;
+  top: 250px;
+  left: calc(50% - 160px);
 }
 
 .stageAlert {
@@ -276,7 +173,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
@@ -319,6 +216,10 @@ textarea {
 .sceneEditor {
   width: min(980px, 100%);
   margin: 0 auto;
+}
+
+.sceneEditor:empty {
+  display: none;
 }
 
 .sectionCardCompact {
@@ -560,6 +461,27 @@ textarea {
   justify-items: center;
 }
 
+.authSectionWithLogoBg {
+  position: relative;
+  padding-top: 150px;
+}
+
+.authSectionWithLogoBg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(440px, 88vw);
+  height: 110px;
+  background-image: var(--auth-logo-url);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+  opacity: 0.96;
+}
+
 .authForm {
   width: 100%;
   display: grid;
@@ -674,45 +596,36 @@ textarea {
     min-height: 56vh;
   }
 
-  .heroWordmark {
-    font-size: clamp(3.6rem, 20vw, 7.4rem);
-    inset: 29% 0 auto;
+  .heroStage::before {
+    width: min(330px, 80vw);
+    top: 28%;
+    height: 120px;
   }
 
   .propLeft {
-    width: 160px;
-    height: 80px;
-    top: 250px;
+    width: 200px;
+    top: 280px;
     left: -44px;
   }
 
   .propCenter {
-    width: 120px;
-    height: 320px;
-    left: calc(50% - 60px);
-    top: 190px;
+    width: 160px;
+    left: calc(50% - 80px);
+    top: 240px;
   }
 
   .propRight {
-    width: 150px;
-    height: 150px;
+    width: 170px;
     right: -42px;
-    top: 270px;
+    top: 295px;
   }
 
   .stage-food .propCenter,
   .stage-gifts .propCenter,
   .stage-plan .propCenter {
     width: 220px;
-    height: 220px;
     left: calc(50% - 110px);
     top: 240px;
-  }
-
-  .stage-food .propCenter::after {
-    font-size: 2.5rem;
-    left: 48px;
-    top: 25px;
   }
 
   .stageAlert {
@@ -727,6 +640,15 @@ textarea {
   .sceneToolbar .muted {
     width: 100%;
     text-align: center;
+  }
+
+  .authSectionWithLogoBg {
+    padding-top: 110px;
+  }
+
+  .authSectionWithLogoBg::before {
+    width: min(320px, 84vw);
+    height: 84px;
   }
 
   .sceneNextButton {
