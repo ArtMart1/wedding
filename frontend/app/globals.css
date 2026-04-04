@@ -16,9 +16,15 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100%;
   font-family: var(--font-body);
   color: var(--ink);
   background:
@@ -34,7 +40,8 @@ textarea {
 }
 
 .shell {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,11 +49,17 @@ textarea {
 }
 
 .sceneShell {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   padding: 34px 30px 46px;
   display: grid;
   gap: 18px;
   align-content: start;
+  grid-template-rows: auto 1fr auto;
+}
+
+.sceneShellDetail {
+  padding: 22px 30px 28px;
 }
 
 .sceneHeader {
@@ -61,6 +74,7 @@ textarea {
 .heroStage {
   position: relative;
   min-height: min(64vh, 740px);
+  height: 100%;
   overflow: hidden;
   border-radius: 32px;
 }
@@ -82,19 +96,29 @@ textarea {
   z-index: 0;
 }
 
-.stageScrollerZone {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-}
-
-.stagePropImage {
+.stagePropButton {
   position: absolute;
   transition: transform 380ms ease, top 380ms ease, left 380ms ease, right 380ms ease, width 380ms ease, opacity 260ms ease;
   filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.18));
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.stagePropButton:focus-visible {
+  outline: 2px solid rgba(15, 104, 211, 0.45);
+  outline-offset: 4px;
+  border-radius: 16px;
+}
+
+.stagePropImage {
+  display: block;
+  width: 100%;
+  height: auto;
   pointer-events: none;
   user-select: none;
-  z-index: 1;
 }
 
 .propLeft {
@@ -177,27 +201,32 @@ textarea {
   flex-wrap: wrap;
 }
 
+.sceneToolbarStage {
+  justify-content: center;
+}
+
 .lookSwitch {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
-  background: rgba(228, 228, 228, 0.85);
-  padding: 6px;
-  border: 1px solid #dddddd;
+  border-radius: 44px;
+  background: #f0f0f0;
+  padding: 10px;
+  border: 1px solid #e4e4e4;
 }
 
 .lookButton {
   min-width: 90px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 32px;
   background: transparent;
   color: #7a7a7a;
-  padding: 8px 16px;
+  padding: 10px 20px;
   cursor: pointer;
+  font-weight: 400;
 }
 
 .lookButton.active {
-  background: #d9d9d9;
+  background: #e0e0e0;
   color: #111111;
 }
 
@@ -213,6 +242,67 @@ textarea {
   font-weight: 500;
 }
 
+.sceneHeaderDetail {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.closeButton {
+  width: 65px;
+  height: 65px;
+  border-radius: 999px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+}
+
+.detailHeaderControls {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.detailSectionPill {
+  padding: 14px 28px;
+  border-radius: 32px;
+  background: #e3e3e3;
+  color: #111111;
+  font-size: 1.2rem;
+  font-weight: 400;
+}
+
+.closeIcon {
+  width: 65px;
+  height: 65px;
+  display: block;
+}
+
+.detailContent {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  overflow: hidden;
+}
+
+.detailFooter {
+  display: flex;
+  justify-content: center;
+}
+
+.detailNextButton {
+  min-width: 88px;
+  min-height: 44px;
+  padding: 0 20px;
+  background: #000000;
+  color: #ffffff;
+  font-weight: 400;
+  text-transform: lowercase;
+}
+
 .sceneEditor {
   width: min(980px, 100%);
   margin: 0 auto;
@@ -220,6 +310,79 @@ textarea {
 
 .sceneEditor:empty {
   display: none;
+}
+
+.sectionDetail {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 24px;
+  align-content: center;
+}
+
+.sectionDetailLayout {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+}
+
+.sectionHero {
+  display: grid;
+  place-items: center;
+}
+
+.sectionHeroImage {
+  width: 100%;
+  height: auto;
+  max-height: 360px;
+  object-fit: contain;
+}
+
+.sectionGallery {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(200px, 240px);
+  gap: 24px;
+  overflow-x: auto;
+  padding: 6px 2px;
+  scroll-snap-type: x proximity;
+}
+
+.sectionGallery::-webkit-scrollbar {
+  height: 6px;
+}
+
+.sectionGallery::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+}
+
+.galleryCard {
+  height: 320px;
+  border-radius: 32px;
+  background: #e6e6e6;
+  box-shadow: inset 0 0 0 1px #d8d8d8;
+  scroll-snap-align: start;
+}
+
+.sectionDetailContent {
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: white;
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.sectionDetailContent h2 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.sectionDetailContent p {
+  margin: 0;
+  color: var(--muted);
 }
 
 .sectionCardCompact {
@@ -416,6 +579,10 @@ textarea {
   resize: vertical;
 }
 
+.sectionDetailContent .commentInput {
+  min-height: 120px;
+}
+
 .checklist {
   margin-top: 18px;
   border-top: 1px solid var(--line);
@@ -592,6 +759,10 @@ textarea {
     gap: 14px;
   }
 
+  .sceneShellDetail {
+    padding: 16px 14px 22px;
+  }
+
   .heroStage {
     min-height: 56vh;
   }
@@ -653,6 +824,52 @@ textarea {
 
   .sceneNextButton {
     width: 100%;
+  }
+
+  .sceneHeaderDetail {
+    justify-content: center;
+  }
+
+  .detailHeaderControls {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .closeButton {
+    width: 54px;
+    height: 54px;
+  }
+
+  .closeIcon {
+    width: 54px;
+    height: 54px;
+  }
+
+  .detailSectionPill {
+    padding: 12px 22px;
+    font-size: 1.05rem;
+  }
+
+  .sectionDetail {
+    gap: 16px;
+  }
+
+  .sectionDetailLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionHeroImage {
+    max-height: 260px;
+  }
+
+  .sectionGallery {
+    grid-auto-columns: minmax(160px, 200px);
+  }
+
+  .galleryCard {
+    height: 240px;
+    border-radius: 24px;
   }
 
   .panel {

@@ -1,10 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type WheelEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { FOOD_OPTIONS, GIFT_OPTIONS } from "@/config/options";
+import { AUTH_LOGO_URL, getStageImages, HERO_LOGO_URL } from "@/config/scene-assets";
+import { CrossIcon } from "@/components/icons/cross-icon";
+import { DresscodeSection } from "@/components/sections/dresscode";
+import { FoodSection } from "@/components/sections/food";
+import { GiftsSection } from "@/components/sections/gifts";
+import { PlanSection } from "@/components/sections/plan";
 import { loginInvite, submitInvite } from "@/lib/api";
 import type { FoodCategoryKey, InviteProfile, InviteResponses, SectionKey } from "@/lib/types";
 
@@ -20,15 +25,8 @@ const SECTION_LABELS: Record<SectionKey, string> = {
 const SECTION_TAB_LABELS: Record<SectionKey, string> = {
   dresscode: "dresscode",
   food: "food",
-  gifts: "Impact",
+  gifts: "gifts",
   plan: "plan"
-};
-
-const FOOD_CATEGORY_LABELS: Record<FoodCategoryKey, string> = {
-  salad: "Салаты",
-  appetizer: "Закуски",
-  hot: "Горячее",
-  drinks: "Напитки"
 };
 
 const EVENT_DETAILS = {
@@ -37,17 +35,6 @@ const EVENT_DETAILS = {
   time: "16:00",
   place: "Загородный клуб «Берег»"
 };
-
-const LOGO_IMAGE_URL = "https://pngimg.com/uploads/signature/signature_PNG58.png";
-
-const IMAGE_ASSETS = {
-  car: "https://pngimg.com/uploads/porsche/porsche_PNG10622.png",
-  model: "https://pngimg.com/uploads/girls/girls_PNG6433.png",
-  pasta: "https://pngimg.com/uploads/pasta/pasta_PNG86.png",
-  gift: "https://pngimg.com/uploads/gift/gift_PNG100387.png",
-  disco: "https://pngimg.com/uploads/disco_ball/disco_ball_PNG10.png",
-  plan: "https://pngimg.com/uploads/calendar_2023/Calendar_2023_PNG34.png"
-} as const;
 
 const authSchema = z.object({
   firstName: z.string().trim().min(1, "Введите имя").max(80, "Максимум 80 символов"),
@@ -106,8 +93,8 @@ export function InviteFlow() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [lookMode, setLookMode] = useState<"male" | "female">("male");
+  const [detailSection, setDetailSection] = useState<SectionKey | null>(null);
   const autoSubmitRef = useRef(false);
-  const wheelLockRef = useRef(0);
 
   const {
     register,
@@ -117,41 +104,7 @@ export function InviteFlow() {
     resolver: zodResolver(authSchema)
   });
 
-  const attentionSection = useMemo(
-    () => SECTION_ORDER.find((section) => !responses[section].acknowledged && needsAttention[section]),
-    [needsAttention, responses]
-  );
-  const stageImages = useMemo(() => {
-    if (activeSection === "food") {
-      return {
-        left: IMAGE_ASSETS.model,
-        center: IMAGE_ASSETS.pasta,
-        right: IMAGE_ASSETS.disco
-      };
-    }
-
-    if (activeSection === "gifts") {
-      return {
-        left: IMAGE_ASSETS.car,
-        center: IMAGE_ASSETS.gift,
-        right: IMAGE_ASSETS.disco
-      };
-    }
-
-    if (activeSection === "plan") {
-      return {
-        left: IMAGE_ASSETS.plan,
-        center: IMAGE_ASSETS.disco,
-        right: IMAGE_ASSETS.model
-      };
-    }
-
-    return {
-      left: IMAGE_ASSETS.car,
-      center: IMAGE_ASSETS.model,
-      right: IMAGE_ASSETS.pasta
-    };
-  }, [activeSection]);
+  const stageImages = useMemo(() => getStageImages(activeSection, SECTION_ORDER), [activeSection]);
 
   const onProfileSubmit = handleSubmit(async (values) => {
     try {
@@ -210,30 +163,20 @@ export function InviteFlow() {
     }
 
     setActiveSection(nextSection);
+    if (detailSection) {
+      setDetailSection(nextSection);
+    }
     setSubmitMessage(null);
     setSubmitError(null);
   }
 
-  function shiftSection(direction: 1 | -1) {
-    const currentIndex = SECTION_ORDER.indexOf(activeSection);
-    const nextIndex = (currentIndex + direction + SECTION_ORDER.length) % SECTION_ORDER.length;
-    navigateToSection(SECTION_ORDER[nextIndex]);
-  }
-
-  function handleStageWheel(event: WheelEvent<HTMLElement>) {
-    event.preventDefault();
-
-    const now = Date.now();
-    if (now - wheelLockRef.current < 320) {
+  function handleStageImageClick(section: SectionKey) {
+    if (section !== activeSection) {
+      setActiveSection(section);
       return;
     }
 
-    if (Math.abs(event.deltaY) < 5) {
-      return;
-    }
-
-    wheelLockRef.current = now;
-    shiftSection(event.deltaY > 0 ? 1 : -1);
+    openSectionDetails(section);
   }
 
   function toggleFoodSelection(category: FoodCategoryKey, key: string) {
@@ -322,6 +265,22 @@ export function InviteFlow() {
     setScreen("final");
   }
 
+  function openSectionDetails(section: SectionKey) {
+    setDetailSection(section);
+    setActiveSection(section);
+    setSubmitMessage(null);
+    setSubmitError(null);
+  }
+
+  function closeSectionDetails() {
+    setDetailSection(null);
+  }
+
+  function handleDetailNext() {
+    handleNext();
+    setDetailSection(null);
+  }
+
   const handleFinalSubmit = useCallback(async () => {
     if (readOnly || !isAllAcknowledged(responses)) {
       return;
@@ -400,7 +359,7 @@ export function InviteFlow() {
       <main className="shell">
         <section
           className="authSection authSectionWithLogoBg"
-          style={{ "--auth-logo-url": `url("${LOGO_IMAGE_URL}")` } as CSSProperties}
+          style={{ "--auth-logo-url": `url("${AUTH_LOGO_URL}")` } as CSSProperties}
         >
           <form className="authForm" onSubmit={onProfileSubmit}>
             <label className="fieldLabel">
@@ -467,6 +426,68 @@ export function InviteFlow() {
     );
   }
 
+  const showLookSwitch = activeSection === "dresscode" || activeSection === "plan";
+  const showLookSwitchDetail = detailSection === "dresscode" || detailSection === "plan";
+
+  if (detailSection) {
+    return (
+      <main className="sceneShell sceneShellDetail">
+        <header className="sceneHeader sceneHeaderDetail">
+          <div className="detailHeaderControls">
+            <button className="closeButton" type="button" onClick={closeSectionDetails} aria-label="Закрыть">
+              <CrossIcon className="closeIcon" />
+            </button>
+            <span className="detailSectionPill">{SECTION_TAB_LABELS[activeSection]}</span>
+            {showLookSwitchDetail ? (
+              <div className="lookSwitch" role="group" aria-label="Режим образа">
+                <button
+                  type="button"
+                  className={`lookButton ${lookMode === "male" ? "active" : ""}`}
+                  onClick={() => setLookMode("male")}
+                >
+                  male
+                </button>
+                <button
+                  type="button"
+                  className={`lookButton ${lookMode === "female" ? "active" : ""}`}
+                  onClick={() => setLookMode("female")}
+                >
+                  female
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </header>
+
+        <section className="detailContent">
+          <div className="sceneEditor">
+            {activeSection === "dresscode" ? (
+              <DresscodeSection lookMode={lookMode} onLookChange={setLookMode} />
+            ) : null}
+            {activeSection === "food" ? (
+              <FoodSection
+                readOnly={readOnly}
+                responses={responses}
+                onToggleSelection={toggleFoodSelection}
+                onCommentChange={updateFoodComment}
+              />
+            ) : null}
+            {activeSection === "gifts" ? (
+              <GiftsSection readOnly={readOnly} responses={responses} onToggleSelection={toggleGiftSelection} />
+            ) : null}
+            {activeSection === "plan" ? <PlanSection lookMode={lookMode} onLookChange={setLookMode} /> : null}
+          </div>
+        </section>
+
+        <div className="detailFooter">
+          <button className="nextButton detailNextButton" type="button" onClick={handleDetailNext} disabled={readOnly}>
+            next
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="sceneShell">
       <header className="sceneHeader">
@@ -491,123 +512,54 @@ export function InviteFlow() {
 
       <section
         className={`heroStage stage-${activeSection} look-${lookMode}`}
-        style={{ "--hero-logo-url": `url("${LOGO_IMAGE_URL}")` } as CSSProperties}
+        style={{ "--hero-logo-url": `url("${HERO_LOGO_URL}")` } as CSSProperties}
       >
-        <div className="stageScrollerZone" onWheel={handleStageWheel} />
-        <img className="stagePropImage propLeft" src={stageImages.left} alt="" />
-        <img className="stagePropImage propCenter" src={stageImages.center} alt="" />
-        <img className="stagePropImage propRight" src={stageImages.right} alt="" />
-        {attentionSection ? (
-          <div className="stageAlert" aria-label={`Требует заполнения: ${SECTION_LABELS[attentionSection]}`}>
-            !
+        <button
+          className="stagePropButton propLeft"
+          type="button"
+          onClick={() => handleStageImageClick(stageImages.left.section)}
+          aria-label={`Открыть раздел ${SECTION_LABELS[stageImages.left.section]}`}
+        >
+          <img className="stagePropImage" src={stageImages.left.src} alt="" />
+        </button>
+        <button
+          className="stagePropButton propCenter"
+          type="button"
+          onClick={() => handleStageImageClick(stageImages.center.section)}
+          aria-label={`Открыть раздел ${SECTION_LABELS[stageImages.center.section]}`}
+        >
+          <img className="stagePropImage" src={stageImages.center.src} alt="" />
+        </button>
+        <button
+          className="stagePropButton propRight"
+          type="button"
+          onClick={() => handleStageImageClick(stageImages.right.section)}
+          aria-label={`Открыть раздел ${SECTION_LABELS[stageImages.right.section]}`}
+        >
+          <img className="stagePropImage" src={stageImages.right.src} alt="" />
+        </button>
+      </section>
+
+      <div className="sceneToolbar sceneToolbarStage">
+        {showLookSwitch ? (
+          <div className="lookSwitch" role="group" aria-label="Режим образа">
+            <button
+              type="button"
+              className={`lookButton ${lookMode === "male" ? "active" : ""}`}
+              onClick={() => setLookMode("male")}
+            >
+              male
+            </button>
+            <button
+              type="button"
+              className={`lookButton ${lookMode === "female" ? "active" : ""}`}
+              onClick={() => setLookMode("female")}
+            >
+              female
+            </button>
           </div>
         ) : null}
-      </section>
-
-      <div className="sceneToolbar">
-        <div className="lookSwitch" role="group" aria-label="Режим образа">
-          <button
-            type="button"
-            className={`lookButton ${lookMode === "male" ? "active" : ""}`}
-            onClick={() => setLookMode("male")}
-          >
-            male
-          </button>
-          <button
-            type="button"
-            className={`lookButton ${lookMode === "female" ? "active" : ""}`}
-            onClick={() => setLookMode("female")}
-          >
-            female
-          </button>
-        </div>
-
-        <button className="nextButton sceneNextButton" type="button" onClick={handleNext} disabled={readOnly}>
-          Next
-        </button>
       </div>
-
-      {attentionSection ? (
-        <p className="sceneWarning">Вернитесь к разделу «{SECTION_LABELS[attentionSection]}» и нажмите Next.</p>
-      ) : null}
-
-      <section className="sceneEditor">
-
-        {activeSection === "food" ? (
-          <article className="sectionCard sectionCardCompact">
-            <h2>Еда</h2>
-            {Object.entries(FOOD_OPTIONS).map(([categoryKey, options]) => {
-              const typedCategory = categoryKey as FoodCategoryKey;
-              const selectedKeys = responses.food.selections?.[typedCategory] ?? [];
-              return (
-                <section key={categoryKey} className="foodCategory">
-                  <h3>{FOOD_CATEGORY_LABELS[typedCategory]}</h3>
-                  <div className="optionGrid">
-                    {options.map((option) => {
-                      const isSelected = selectedKeys.includes(option.key);
-                      return (
-                        <button
-                          key={option.key}
-                          type="button"
-                          className={`optionButton ${isSelected ? "selected" : ""}`}
-                          onClick={() => toggleFoodSelection(typedCategory, option.key)}
-                        >
-                          {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
-              );
-            })}
-
-            <label className="commentLabel" htmlFor="food-comment">Комментарий</label>
-            <textarea
-              id="food-comment"
-              className="commentInput"
-              value={responses.food.comment ?? ""}
-              onChange={(event) => updateFoodComment(event.target.value)}
-              maxLength={400}
-              placeholder="Укажите пожелания по еде"
-            />
-            <small className="muted">{(responses.food.comment ?? "").length}/400</small>
-          </article>
-        ) : null}
-
-        {activeSection === "gifts" ? (
-          <article className="sectionCard sectionCardCompact">
-            <h2>Подарки</h2>
-            <p>Можно выбрать несколько вариантов, можно не выбирать.</p>
-            <div className="optionGrid">
-              {GIFT_OPTIONS.map((option) => {
-                const selected = (responses.gifts.selections ?? []).includes(option.key);
-                return (
-                  <button
-                    key={option.key}
-                    type="button"
-                    className={`optionButton ${selected ? "selected" : ""}`}
-                    onClick={() => toggleGiftSelection(option.key)}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-          </article>
-        ) : null}
-
-        {activeSection === "plan" ? (
-          <article className="sectionCard sectionCardCompact">
-            <h2>План дня</h2>
-            <ul className="timeline">
-              <li>16:00 - Сбор гостей</li>
-              <li>17:00 - Церемония</li>
-              <li>18:00 - Ужин</li>
-              <li>20:00 - Танцы</li>
-            </ul>
-          </article>
-        ) : null}
-      </section>
     </main>
   );
 }
