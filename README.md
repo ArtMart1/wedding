@@ -125,6 +125,15 @@ npm install
 npm run dev
 ```
 
+Пример `backend/.env`:
+```env
+PORT=4000
+MONGODB_URI=mongodb://127.0.0.1:27017/wedding
+CORS_ORIGIN=http://localhost:3000
+```
+
+Если используешь MongoDB Atlas, подставь свой connection string в `MONGODB_URI`.
+
 ### 2. Frontend
 ```bash
 cd frontend

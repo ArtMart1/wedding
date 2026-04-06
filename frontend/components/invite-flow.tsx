@@ -4,9 +4,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { AUTH_LOGO_URL, getStageImages, HERO_LOGO_URL } from "@/config/scene-assets";
+import { AUTH_LOGO_URL, getSectionImage, HERO_LOGO_URL } from "@/config/scene-assets";
 import { CrossIcon } from "@/components/icons/cross-icon";
-import { DresscodeSection } from "@/components/sections/dresscode";
+import { DetailBackIcon } from "@/components/icons/detail-back-icon";
+import { DresscodeFemaleIcon, DresscodeMaleIcon } from "@/components/icons/dresscode-look-icons";
+import { FoodCommentIcon } from "@/components/icons/food-comment-icon";
+import { FOOD_OPTIONS, GIFT_OPTIONS } from "@/config/options";
+import {
+  DresscodeSection,
+  DRESSCODE_LAST_SLIDE_INDEX,
+  type DresscodeLookMode
+} from "@/components/sections/dresscode";
 import { FoodSection } from "@/components/sections/food";
 import { GiftsSection } from "@/components/sections/gifts";
 import { PlanSection } from "@/components/sections/plan";
@@ -42,6 +50,17 @@ const authSchema = z.object({
 });
 
 type AuthFormValues = z.infer<typeof authSchema>;
+type CarouselDirection = -1 | 1;
+type StageSlot = "far-left" | "left" | "center" | "right" | "far-right";
+
+const DRAG_ACTIVATION_PX = 12;
+const DRAG_COMMIT_RATIO = 0.34;
+const WHEEL_LOCK_MS = 360;
+const MAX_DRAG_STEPS = SECTION_ORDER.length * 3;
+const STAGE_RENDER_RADIUS = 3;
+const FOOD_CATEGORY_ORDER: FoodCategoryKey[] = ["salad", "hot", "drinks"];
+const FOOD_AUTO_ADVANCE_DELAY_MS = 800;
+const FOOD_CATEGORY_SWITCH_FADE_MS = 220;
 
 function createDefaultResponses(): InviteResponses {
   return {
@@ -59,6 +78,38 @@ function createDefaultResponses(): InviteResponses {
   };
 }
 
+function normalizeFoodSelections(
+  selections?: Partial<Record<FoodCategoryKey, string[]>>
+): Partial<Record<FoodCategoryKey, string[]>> {
+  if (!selections) {
+    return {};
+  }
+
+  return {
+    salad: selections.salad?.[0] ? [selections.salad[0]] : [],
+    hot: selections.hot?.[0] ? [selections.hot[0]] : [],
+    drinks: selections.drinks?.[0] ? [selections.drinks[0]] : []
+  };
+}
+
+function normalizeGiftSelections(selections?: string[]): string[] {
+  return selections?.[0] ? [selections[0]] : [];
+}
+
+function normalizeInviteResponses(responses: InviteResponses): InviteResponses {
+  return {
+    ...responses,
+    food: {
+      ...responses.food,
+      selections: normalizeFoodSelections(responses.food.selections)
+    },
+    gifts: {
+      ...responses.gifts,
+      selections: normalizeGiftSelections(responses.gifts.selections)
+    }
+  };
+}
+
 function isAllAcknowledged(responses: InviteResponses): boolean {
   return SECTION_ORDER.every((section) => responses[section].acknowledged);
 }
@@ -71,6 +122,111 @@ function getInitialSection(responses: InviteResponses): SectionKey {
   return SECTION_ORDER.find((section) => !responses[section].acknowledged) ?? "dresscode";
 }
 
+function normalizeTrackIndex(index: number): number {
+  return ((index % SECTION_ORDER.length) + SECTION_ORDER.length) % SECTION_ORDER.length;
+}
+
+function getSectionIndex(section: SectionKey): number {
+  return SECTION_ORDER.indexOf(section);
+}
+
+function getSectionByTrackIndex(trackIndex: number): SectionKey {
+  return SECTION_ORDER[normalizeTrackIndex(trackIndex)];
+}
+
+function getForwardDistance(from: SectionKey, to: SectionKey): number {
+  const fromIndex = SECTION_ORDER.indexOf(from);
+  const toIndex = SECTION_ORDER.indexOf(to);
+
+  return (toIndex - fromIndex + SECTION_ORDER.length) % SECTION_ORDER.length;
+}
+
+function getStageSlot(distance: number): StageSlot {
+  if (distance <= -1.5) {
+    return "far-left";
+  }
+
+  if (distance < -0.5) {
+    return "left";
+  }
+
+  if (distance < 0.5) {
+    return "center";
+  }
+
+  if (distance < 1.5) {
+    return "right";
+  }
+
+  return "far-right";
+}
+
+function getShortestTrackDistance(
+  fromTrackIndex: number,
+  toSection: SectionKey,
+  preferredDirection: CarouselDirection
+): number {
+  const fromSection = getSectionByTrackIndex(fromTrackIndex);
+  const forwardDistance = getForwardDistance(fromSection, toSection);
+
+  if (forwardDistance === 0) {
+    return 0;
+  }
+
+  const backwardDistance = forwardDistance - SECTION_ORDER.length;
+
+  if (Math.abs(forwardDistance) < Math.abs(backwardDistance)) {
+    return forwardDistance;
+  }
+
+  if (Math.abs(backwardDistance) < Math.abs(forwardDistance)) {
+    return backwardDistance;
+  }
+
+  return preferredDirection > 0 ? forwardDistance : backwardDistance;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function createDresscodeIndexMap(): Record<DresscodeLookMode, number> {
+  return {
+    male: 0,
+    female: 0
+  };
+}
+
+function createFoodIndexMap(): Record<FoodCategoryKey, number> {
+  return {
+    salad: Math.min(1, FOOD_OPTIONS.salad.length - 1),
+    hot: Math.min(1, FOOD_OPTIONS.hot.length - 1),
+    drinks: Math.min(1, FOOD_OPTIONS.drinks.length - 1)
+  };
+}
+
+function createGiftActiveIndex(): number {
+  return Math.min(1, GIFT_OPTIONS.length - 1);
+}
+
+function isFoodCategoryKey(value: unknown): value is FoodCategoryKey {
+  return value === "salad" || value === "hot" || value === "drinks";
+}
+
+function isFoodIndexMap(value: unknown): value is Record<FoodCategoryKey, number> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+
+  const candidate = value as Partial<Record<FoodCategoryKey, unknown>>;
+
+  return (
+    typeof candidate.salad === "number" &&
+    typeof candidate.hot === "number" &&
+    typeof candidate.drinks === "number"
+  );
+}
+
 export function InviteFlow() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [authRequired, setAuthRequired] = useState(true);
@@ -78,7 +234,7 @@ export function InviteFlow() {
   const [profile, setProfile] = useState<InviteProfile | null>(null);
   const [responses, setResponses] = useState<InviteResponses>(createDefaultResponses);
   const [screen, setScreen] = useState<"sections" | "final">("sections");
-  const [activeSection, setActiveSection] = useState<SectionKey>("dresscode");
+  const [activeTrackIndex, setActiveTrackIndex] = useState(0);
   const [needsAttention, setNeedsAttention] = useState<Record<SectionKey, boolean>>({
     dresscode: false,
     food: false,
@@ -92,9 +248,37 @@ export function InviteFlow() {
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [lookMode, setLookMode] = useState<"male" | "female">("male");
+  const [dresscodeLookMode, setDresscodeLookMode] = useState<DresscodeLookMode>("male");
+  const [dresscodeActiveIndexByMode, setDresscodeActiveIndexByMode] = useState<Record<DresscodeLookMode, number>>(createDresscodeIndexMap);
+  const [dresscodeMaxViewedIndexByMode, setDresscodeMaxViewedIndexByMode] =
+    useState<Record<DresscodeLookMode, number>>(createDresscodeIndexMap);
+  const [foodActiveCategory, setFoodActiveCategory] = useState<FoodCategoryKey>("salad");
+  const [foodActiveIndexByCategory, setFoodActiveIndexByCategory] = useState<Record<FoodCategoryKey, number>>(createFoodIndexMap);
+  const [foodDetailOpenKey, setFoodDetailOpenKey] = useState(0);
+  const [isFoodCategorySwitching, setIsFoodCategorySwitching] = useState(false);
+  const [isFoodCommentDialogOpen, setIsFoodCommentDialogOpen] = useState(false);
+  const [foodCommentDraft, setFoodCommentDraft] = useState("");
+  const [giftActiveIndex, setGiftActiveIndex] = useState(createGiftActiveIndex);
+  const [giftDetailOpenKey, setGiftDetailOpenKey] = useState(0);
   const [detailSection, setDetailSection] = useState<SectionKey | null>(null);
   const autoSubmitRef = useRef(false);
+  const foodAutoAdvanceTimeoutRef = useRef<number | null>(null);
+  const foodCategorySwitchTimeoutRef = useRef<number | null>(null);
+  const heroStageRef = useRef<HTMLElement | null>(null);
+  const dragStartTrackIndexRef = useRef(0);
+  const dragSessionRef = useRef({
+    pointerId: null as number | null,
+    startX: 0,
+    startY: 0,
+    dragging: false
+  });
+  const dragOffsetRef = useRef(0);
+  const suppressStageClickRef = useRef(false);
+  const suppressResetTimeoutRef = useRef<number | null>(null);
+  const lastIntentDirectionRef = useRef<CarouselDirection>(1);
+  const wheelLockUntilRef = useRef(0);
+  const [dragOffsetPx, setDragOffsetPx] = useState(0);
+  const [isDraggingStage, setIsDraggingStage] = useState(false);
 
   const {
     register,
@@ -104,7 +288,105 @@ export function InviteFlow() {
     resolver: zodResolver(authSchema)
   });
 
-  const stageImages = useMemo(() => getStageImages(activeSection, SECTION_ORDER), [activeSection]);
+  const activeSection = getSectionByTrackIndex(activeTrackIndex);
+  const isDresscodeDetail = detailSection === "dresscode";
+  const isFoodDetail = detailSection === "food";
+  const isGiftDetail = detailSection === "gifts";
+  const isDresscodeReviewComplete = dresscodeMaxViewedIndexByMode[dresscodeLookMode] >= DRESSCODE_LAST_SLIDE_INDEX;
+  const isFoodSelectionComplete = FOOD_CATEGORY_ORDER.every((category) =>
+    Boolean(responses.food.selections?.[category]?.[0])
+  );
+  const isGiftSelectionComplete = Boolean(responses.gifts.selections?.[0]);
+  const isDetailNextDisabled =
+    readOnly ||
+    (isDresscodeDetail && !isDresscodeReviewComplete) ||
+    (isFoodDetail && !isFoodSelectionComplete) ||
+    (isGiftDetail && !isGiftSelectionComplete);
+  const dragTravelPx = heroStageRef.current
+    ? clamp(heroStageRef.current.clientWidth * 0.16, 140, 240)
+    : 180;
+  const maxDragOffsetPx = dragTravelPx * MAX_DRAG_STEPS;
+  const visualTrackPosition = isDraggingStage ? dragStartTrackIndexRef.current - dragOffsetPx / dragTravelPx : activeTrackIndex;
+  const renderCenterTrackIndex = Math.round(visualTrackPosition);
+  const stageItems = useMemo(
+    () => {
+      const items: Array<{
+        absoluteIndex: number;
+        relativeStep: number;
+        section: SectionKey;
+        slot: StageSlot;
+        src: string;
+      }> = [];
+
+      for (
+        let absoluteIndex = renderCenterTrackIndex - STAGE_RENDER_RADIUS;
+        absoluteIndex <= renderCenterTrackIndex + STAGE_RENDER_RADIUS;
+        absoluteIndex += 1
+      ) {
+        const section = getSectionByTrackIndex(absoluteIndex);
+        const relativeStep = absoluteIndex - visualTrackPosition;
+
+        items.push({
+          absoluteIndex,
+          relativeStep,
+          section,
+          slot: getStageSlot(relativeStep),
+          src: getSectionImage(section)
+        });
+      }
+
+      return items;
+    },
+    [renderCenterTrackIndex, visualTrackPosition]
+  );
+
+  useEffect(() => {
+    dragOffsetRef.current = dragOffsetPx;
+  }, [dragOffsetPx]);
+
+  useEffect(() => {
+    if (!isFoodCategoryKey(foodActiveCategory)) {
+      setFoodActiveCategory("salad");
+    }
+  }, [foodActiveCategory]);
+
+  useEffect(() => {
+    if (!isFoodIndexMap(foodActiveIndexByCategory)) {
+      setFoodActiveIndexByCategory(createFoodIndexMap());
+    }
+  }, [foodActiveIndexByCategory]);
+
+  useEffect(() => {
+    if (detailSection === "food") {
+      return;
+    }
+
+    if (foodAutoAdvanceTimeoutRef.current !== null) {
+      window.clearTimeout(foodAutoAdvanceTimeoutRef.current);
+      foodAutoAdvanceTimeoutRef.current = null;
+    }
+
+    if (foodCategorySwitchTimeoutRef.current !== null) {
+      window.clearTimeout(foodCategorySwitchTimeoutRef.current);
+      foodCategorySwitchTimeoutRef.current = null;
+    }
+
+    setIsFoodCategorySwitching(false);
+  }, [detailSection]);
+
+  useEffect(() => {
+    return () => {
+      if (foodAutoAdvanceTimeoutRef.current !== null) {
+        window.clearTimeout(foodAutoAdvanceTimeoutRef.current);
+      }
+      if (foodCategorySwitchTimeoutRef.current !== null) {
+        window.clearTimeout(foodCategorySwitchTimeoutRef.current);
+      }
+      if (suppressResetTimeoutRef.current !== null) {
+        window.clearTimeout(suppressResetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const onProfileSubmit = handleSubmit(async (values) => {
     try {
@@ -117,11 +399,28 @@ export function InviteFlow() {
         throw new Error("Не удалось получить приглашение");
       }
 
+      const initialResponses = normalizeInviteResponses(payload.invite.responses ?? createDefaultResponses());
+
       setInviteId(payload.invite.id);
       setProfile(payload.invite.profile);
-      setResponses(payload.invite.responses ?? createDefaultResponses());
-      setScreen(getInitialScreen(payload.invite.responses ?? createDefaultResponses()));
-      setActiveSection(getInitialSection(payload.invite.responses ?? createDefaultResponses()));
+      setResponses(initialResponses);
+      setScreen(getInitialScreen(initialResponses));
+      {
+        const initialSection = getInitialSection(initialResponses);
+        const initialTrackIndex = getSectionIndex(initialSection);
+
+        dragStartTrackIndexRef.current = initialTrackIndex;
+        lastIntentDirectionRef.current = 1;
+        setActiveTrackIndex(initialTrackIndex);
+      }
+      setDresscodeLookMode("male");
+      setDresscodeActiveIndexByMode(createDresscodeIndexMap());
+      setDresscodeMaxViewedIndexByMode(createDresscodeIndexMap());
+      setFoodActiveCategory("salad");
+      setFoodActiveIndexByCategory(createFoodIndexMap());
+      setGiftActiveIndex(createGiftActiveIndex());
+      setIsFoodCategorySwitching(false);
+      setIsFoodCommentDialogOpen(false);
       setNeedsAttention({
         dresscode: false,
         food: false,
@@ -149,30 +448,95 @@ export function InviteFlow() {
     setResponses((current) => updater(current));
   }
 
+  function nudgeNeedsAttention() {
+    if (!responses[activeSection].acknowledged) {
+      setNeedsAttention((current) => ({ ...current, [activeSection]: true }));
+    }
+  }
+
+  function stepCarousel(direction: CarouselDirection) {
+    if (screen !== "sections" || detailSection || isDraggingStage) {
+      return;
+    }
+
+    nudgeNeedsAttention();
+    dragOffsetRef.current = 0;
+    setSubmitMessage(null);
+    setSubmitError(null);
+    lastIntentDirectionRef.current = direction;
+    setActiveTrackIndex((current) => current + direction);
+  }
+
+  function navigateToTrackIndex(nextTrackIndex: number, nextSection: SectionKey) {
+    if (screen !== "sections") {
+      return;
+    }
+
+    if (nextTrackIndex === activeTrackIndex) {
+      return;
+    }
+
+    nudgeNeedsAttention();
+
+    if (detailSection) {
+      setDetailSection(nextSection);
+    }
+
+    setSubmitMessage(null);
+    setSubmitError(null);
+    lastIntentDirectionRef.current = nextTrackIndex > activeTrackIndex ? 1 : -1;
+    setActiveTrackIndex(nextTrackIndex);
+  }
+
+  function handleDresscodeActiveIndexChange(lookMode: DresscodeLookMode, index: number) {
+    setDresscodeActiveIndexByMode((current) => {
+      if (current[lookMode] === index) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [lookMode]: index
+      };
+    });
+
+    setDresscodeMaxViewedIndexByMode((current) => {
+      if (index <= current[lookMode]) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [lookMode]: index
+      };
+    });
+  }
+
   function navigateToSection(nextSection: SectionKey) {
     if (screen !== "sections") {
       return;
+    }
+
+    if (detailSection) {
+      setDetailSection(nextSection);
     }
 
     if (activeSection === nextSection) {
       return;
     }
 
-    if (!responses[activeSection].acknowledged) {
-      setNeedsAttention((current) => ({ ...current, [activeSection]: true }));
-    }
-
-    setActiveSection(nextSection);
-    if (detailSection) {
-      setDetailSection(nextSection);
-    }
-    setSubmitMessage(null);
-    setSubmitError(null);
+    const delta = getShortestTrackDistance(activeTrackIndex, nextSection, lastIntentDirectionRef.current);
+    navigateToTrackIndex(activeTrackIndex + delta, nextSection);
   }
 
-  function handleStageImageClick(section: SectionKey) {
-    if (section !== activeSection) {
-      setActiveSection(section);
+  function handleStageImageClick(section: SectionKey, absoluteIndex: number) {
+    if (suppressStageClickRef.current) {
+      suppressStageClickRef.current = false;
+      return;
+    }
+
+    if (absoluteIndex !== activeTrackIndex) {
+      navigateToTrackIndex(absoluteIndex, section);
       return;
     }
 
@@ -184,12 +548,25 @@ export function InviteFlow() {
       return;
     }
 
+    if (foodAutoAdvanceTimeoutRef.current !== null) {
+      window.clearTimeout(foodAutoAdvanceTimeoutRef.current);
+      foodAutoAdvanceTimeoutRef.current = null;
+    }
+
+    if (foodCategorySwitchTimeoutRef.current !== null) {
+      window.clearTimeout(foodCategorySwitchTimeoutRef.current);
+      foodCategorySwitchTimeoutRef.current = null;
+    }
+
+    setIsFoodCategorySwitching(false);
     markUnsavedChanges();
+    const selectedKey = responses.food.selections?.[category]?.[0];
+    const nextSelectedKey = selectedKey === key ? null : key;
+
     updateResponses((current) => {
       const previousValues = current.food.selections?.[category] ?? [];
-      const nextValues = previousValues.includes(key)
-        ? previousValues.filter((optionKey) => optionKey !== key)
-        : [...previousValues, key];
+      const currentSelectedKey = previousValues[0];
+      const nextValues = currentSelectedKey === key ? [] : [key];
 
       return {
         ...current,
@@ -202,6 +579,29 @@ export function InviteFlow() {
         }
       };
     });
+
+    if (!nextSelectedKey) {
+      return;
+    }
+
+    const currentCategoryIndex = FOOD_CATEGORY_ORDER.indexOf(category);
+    const nextCategory = FOOD_CATEGORY_ORDER[currentCategoryIndex + 1];
+
+    if (!nextCategory) {
+      return;
+    }
+
+    foodAutoAdvanceTimeoutRef.current = window.setTimeout(() => {
+      setIsFoodCategorySwitching(true);
+
+      foodCategorySwitchTimeoutRef.current = window.setTimeout(() => {
+        setFoodActiveCategory(nextCategory);
+        setIsFoodCategorySwitching(false);
+        foodCategorySwitchTimeoutRef.current = null;
+      }, FOOD_CATEGORY_SWITCH_FADE_MS);
+
+      foodAutoAdvanceTimeoutRef.current = null;
+    }, FOOD_AUTO_ADVANCE_DELAY_MS);
   }
 
   function toggleGiftSelection(key: string) {
@@ -211,8 +611,8 @@ export function InviteFlow() {
 
     markUnsavedChanges();
     updateResponses((current) => {
-      const previous = current.gifts.selections ?? [];
-      const next = previous.includes(key) ? previous.filter((giftKey) => giftKey !== key) : [...previous, key];
+      const previousSelectedKey = current.gifts.selections?.[0];
+      const next = previousSelectedKey === key ? [] : [key];
 
       return {
         ...current,
@@ -222,6 +622,10 @@ export function InviteFlow() {
         }
       };
     });
+  }
+
+  function handleGiftActiveIndexChange(index: number) {
+    setGiftActiveIndex((current) => (current === index ? current : index));
   }
 
   function updateFoodComment(value: string) {
@@ -239,7 +643,254 @@ export function InviteFlow() {
     }));
   }
 
-  function handleNext() {
+  function openFoodCommentDialog() {
+    setFoodCommentDraft(responses.food.comment ?? "");
+    setIsFoodCommentDialogOpen(true);
+  }
+
+  function closeFoodCommentDialog() {
+    setIsFoodCommentDialogOpen(false);
+    setFoodCommentDraft(responses.food.comment ?? "");
+  }
+
+  function handleFoodCommentDraftChange(value: string) {
+    setFoodCommentDraft(value.slice(0, 400));
+  }
+
+  function submitFoodCommentDialog() {
+    if (!readOnly) {
+      updateFoodComment(foodCommentDraft);
+    }
+
+    setIsFoodCommentDialogOpen(false);
+  }
+
+  function handleFoodActiveIndexChange(index: number) {
+    setFoodActiveIndexByCategory((current) => {
+      if (current[foodActiveCategory] === index) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [foodActiveCategory]: index
+      };
+    });
+  }
+
+  function handleFoodCategoryChange(category: FoodCategoryKey) {
+    if (foodAutoAdvanceTimeoutRef.current !== null) {
+      window.clearTimeout(foodAutoAdvanceTimeoutRef.current);
+      foodAutoAdvanceTimeoutRef.current = null;
+    }
+
+    if (foodCategorySwitchTimeoutRef.current !== null) {
+      window.clearTimeout(foodCategorySwitchTimeoutRef.current);
+      foodCategorySwitchTimeoutRef.current = null;
+    }
+
+    setIsFoodCategorySwitching(false);
+    setFoodActiveCategory(category);
+  }
+
+  function getDetailTitle(section: SectionKey): string {
+    switch (section) {
+      case "dresscode":
+        return "Одежда";
+      case "food":
+        return "Еда";
+      case "gifts":
+        return "Подарки";
+      case "plan":
+        return SECTION_TAB_LABELS.plan;
+    }
+  }
+
+  function getDetailSubtitle(section: SectionKey): string | null {
+    switch (section) {
+      case "dresscode":
+        return "Просто посмотреть";
+      case "food":
+        return "Выберите позиции";
+      case "gifts":
+        return "Выберите подарок";
+      default:
+        return null;
+    }
+  }
+
+  function finishStageDrag(sectionElement?: HTMLElement) {
+    const dragSteps = clamp(-dragOffsetRef.current / dragTravelPx, -MAX_DRAG_STEPS, MAX_DRAG_STEPS);
+    const dragStepsMagnitude = Math.abs(dragSteps);
+    const snappedMagnitude =
+      dragStepsMagnitude < DRAG_COMMIT_RATIO
+        ? 0
+        : Math.min(MAX_DRAG_STEPS, Math.floor(dragStepsMagnitude + (1 - DRAG_COMMIT_RATIO)));
+    const snappedSteps = Math.sign(dragSteps) * snappedMagnitude;
+    const pointerId = dragSessionRef.current.pointerId;
+    const didDrag = dragSessionRef.current.dragging;
+    const dragStartTrackIndex = dragStartTrackIndexRef.current;
+
+    if (pointerId !== null && sectionElement?.hasPointerCapture(pointerId)) {
+      sectionElement.releasePointerCapture(pointerId);
+    }
+
+    dragSessionRef.current = {
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      dragging: false
+    };
+
+    dragOffsetRef.current = 0;
+    setIsDraggingStage(false);
+    setDragOffsetPx(0);
+
+    if (didDrag) {
+      if (suppressResetTimeoutRef.current !== null) {
+        window.clearTimeout(suppressResetTimeoutRef.current);
+      }
+
+      suppressResetTimeoutRef.current = window.setTimeout(() => {
+        suppressStageClickRef.current = false;
+        suppressResetTimeoutRef.current = null;
+      }, 0);
+    }
+
+    if (!didDrag) {
+      return;
+    }
+
+    if (snappedSteps === 0) {
+      return;
+    }
+
+    nudgeNeedsAttention();
+    setSubmitMessage(null);
+    setSubmitError(null);
+    lastIntentDirectionRef.current = snappedSteps > 0 ? 1 : -1;
+    setActiveTrackIndex(dragStartTrackIndex + snappedSteps);
+  }
+
+  function handleStagePointerDown(event: React.PointerEvent<HTMLElement>) {
+    if (detailSection) {
+      return;
+    }
+
+    if (event.pointerType === "mouse" && event.button !== 0) {
+      return;
+    }
+
+    if (suppressResetTimeoutRef.current !== null) {
+      window.clearTimeout(suppressResetTimeoutRef.current);
+      suppressResetTimeoutRef.current = null;
+    }
+
+    suppressStageClickRef.current = false;
+    dragStartTrackIndexRef.current = activeTrackIndex;
+    dragSessionRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      dragging: false
+    };
+  }
+
+  function handleStagePointerMove(event: React.PointerEvent<HTMLElement>) {
+    if (dragSessionRef.current.pointerId !== event.pointerId || detailSection) {
+      return;
+    }
+
+    const offsetX = event.clientX - dragSessionRef.current.startX;
+    const offsetY = event.clientY - dragSessionRef.current.startY;
+
+    if (!dragSessionRef.current.dragging) {
+      if (Math.abs(offsetX) < DRAG_ACTIVATION_PX || Math.abs(offsetX) <= Math.abs(offsetY)) {
+        return;
+      }
+
+      dragSessionRef.current.dragging = true;
+      suppressStageClickRef.current = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setIsDraggingStage(true);
+    }
+
+    event.preventDefault();
+    const nextOffset = clamp(offsetX, -maxDragOffsetPx, maxDragOffsetPx);
+    dragOffsetRef.current = nextOffset;
+    setDragOffsetPx(nextOffset);
+  }
+
+  function handleStagePointerUp(event: React.PointerEvent<HTMLElement>) {
+    if (dragSessionRef.current.pointerId !== event.pointerId) {
+      return;
+    }
+
+    finishStageDrag(event.currentTarget);
+  }
+
+  function handleStagePointerCancel(event: React.PointerEvent<HTMLElement>) {
+    if (dragSessionRef.current.pointerId !== event.pointerId) {
+      return;
+    }
+
+    finishStageDrag(event.currentTarget);
+  }
+
+  function handleStageWheel(event: React.WheelEvent<HTMLElement>) {
+    if (detailSection || isDraggingStage) {
+      return;
+    }
+
+    const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+
+    if (Math.abs(dominantDelta) < 18) {
+      return;
+    }
+
+    const now = Date.now();
+    if (now < wheelLockUntilRef.current) {
+      return;
+    }
+
+    wheelLockUntilRef.current = now + WHEEL_LOCK_MS;
+    event.preventDefault();
+    stepCarousel(dominantDelta > 0 ? 1 : -1);
+  }
+
+  function getStageItemStyle(relativeStep: number): CSSProperties {
+    const style: Record<string, string> = {
+      "--stage-drag-x": "0px"
+    };
+
+    const clampedRelativeStep = clamp(relativeStep, -2.6, 2.6);
+    const absRelativeStep = Math.abs(clampedRelativeStep);
+    const centerBlend = clamp(1 - absRelativeStep, 0, 1);
+    const scale = clamp(1 - 0.16 * Math.min(absRelativeStep, 1) - 0.12 * Math.max(absRelativeStep - 1, 0), 0.72, 1);
+    const opacity =
+      absRelativeStep <= 1
+        ? 1 - 0.04 * absRelativeStep
+        : clamp(0.96 - 0.96 * (absRelativeStep - 1), 0, 0.96);
+    const outerProgress = clamp(absRelativeStep - 1, 0, 1);
+    const signedX =
+      absRelativeStep <= 1
+        ? `calc(var(--stage-side-x) * ${clampedRelativeStep})`
+        : `calc((var(--stage-side-x) + (var(--stage-far-x) - var(--stage-side-x)) * ${outerProgress}) * ${
+            clampedRelativeStep < 0 ? "-1" : "1"
+          })`;
+
+    style["--stage-slot-x"] = signedX;
+    style["--stage-slot-scale"] = `${scale}`;
+    style["--stage-slot-opacity"] = `${opacity}`;
+    style["--stage-slot-visibility"] = absRelativeStep <= 2.15 ? "visible" : "hidden";
+    style["--stage-slot-z"] = `${Math.max(0, 5 - Math.round(absRelativeStep * 2))}`;
+    style.width = `calc(var(--stage-side-width) + (var(--stage-center-width) - var(--stage-side-width)) * ${centerBlend})`;
+    style.height = `calc(var(--stage-side-height) + (var(--stage-center-height) - var(--stage-side-height)) * ${centerBlend})`;
+
+    return style as CSSProperties;
+  }
+
+  function handleNext(options?: { openNextDetail?: boolean }) {
     if (readOnly) {
       return;
     }
@@ -258,27 +909,51 @@ export function InviteFlow() {
     const nextSection = SECTION_ORDER[currentIndex + 1];
 
     if (nextSection) {
-      setActiveSection(nextSection);
+      lastIntentDirectionRef.current = 1;
+      setActiveTrackIndex((current) => current + 1);
+
+      if (options?.openNextDetail) {
+        closeFoodCommentDialog();
+        setDetailSection(nextSection);
+        setSubmitMessage(null);
+        setSubmitError(null);
+      }
+
       return;
+    }
+
+    if (options?.openNextDetail) {
+      closeFoodCommentDialog();
+      setDetailSection(null);
     }
 
     setScreen("final");
   }
 
   function openSectionDetails(section: SectionKey) {
+    if (section === "food") {
+      setFoodActiveIndexByCategory(createFoodIndexMap());
+      setFoodDetailOpenKey((current) => current + 1);
+    }
+
+    if (section === "gifts") {
+      setGiftActiveIndex(createGiftActiveIndex());
+      setGiftDetailOpenKey((current) => current + 1);
+    }
+
     setDetailSection(section);
-    setActiveSection(section);
+    closeFoodCommentDialog();
     setSubmitMessage(null);
     setSubmitError(null);
   }
 
   function closeSectionDetails() {
+    closeFoodCommentDialog();
     setDetailSection(null);
   }
 
   function handleDetailNext() {
-    handleNext();
-    setDetailSection(null);
+    handleNext({ openNextDetail: true });
   }
 
   const handleFinalSubmit = useCallback(async () => {
@@ -301,7 +976,7 @@ export function InviteFlow() {
         throw new Error("Пустой ответ от сервера");
       }
 
-      setResponses(payload.invite.responses);
+      setResponses(normalizeInviteResponses(payload.invite.responses));
       setIsSubmitted(payload.invite.meta.isSubmitted);
       setEditableUntil(payload.invite.meta.editableUntil);
       setReadOnly(payload.readOnly);
@@ -426,64 +1101,142 @@ export function InviteFlow() {
     );
   }
 
-  const showLookSwitch = activeSection === "dresscode" || activeSection === "plan";
-  const showLookSwitchDetail = detailSection === "dresscode" || detailSection === "plan";
-
   if (detailSection) {
     return (
-      <main className="sceneShell sceneShellDetail">
+      <main
+        className={`sceneShell sceneShellDetail ${isDresscodeDetail ? "sceneShellDetailDresscode" : ""} ${
+          isFoodDetail || isGiftDetail ? "sceneShellDetailFood" : ""
+        }`}
+      >
         <header className="sceneHeader sceneHeaderDetail">
-          <div className="detailHeaderControls">
-            <button className="closeButton" type="button" onClick={closeSectionDetails} aria-label="Закрыть">
-              <CrossIcon className="closeIcon" />
-            </button>
-            <span className="detailSectionPill">{SECTION_TAB_LABELS[activeSection]}</span>
-            {showLookSwitchDetail ? (
-              <div className="lookSwitch" role="group" aria-label="Режим образа">
-                <button
-                  type="button"
-                  className={`lookButton ${lookMode === "male" ? "active" : ""}`}
-                  onClick={() => setLookMode("male")}
-                >
-                  male
-                </button>
-                <button
-                  type="button"
-                  className={`lookButton ${lookMode === "female" ? "active" : ""}`}
-                  onClick={() => setLookMode("female")}
-                >
-                  female
-                </button>
+          {isDresscodeDetail || isFoodDetail || isGiftDetail ? (
+            <div className={`detailHeaderPrimary ${isDresscodeDetail ? "detailHeaderDresscode" : "detailHeaderFood"}`}>
+              <button className="detailBackButton" type="button" onClick={closeSectionDetails} aria-label="Назад">
+                <DetailBackIcon className="detailBackIcon" />
+              </button>
+              <div className="detailHeaderText">
+                <h1 className="detailHeaderTitle">{getDetailTitle(detailSection)}</h1>
+                {getDetailSubtitle(detailSection) ? <p className="detailHeaderSubtitle">{getDetailSubtitle(detailSection)}</p> : null}
               </div>
-            ) : null}
-          </div>
+            </div>
+          ) : (
+            <div className="detailHeaderControls">
+              <button className="closeButton" type="button" onClick={closeSectionDetails} aria-label="Закрыть">
+                <CrossIcon className="closeIcon" />
+              </button>
+              <span className="detailSectionPill">{SECTION_TAB_LABELS[activeSection]}</span>
+            </div>
+          )}
         </header>
 
         <section className="detailContent">
-          <div className="sceneEditor">
+          <div className={`sceneEditor ${isDresscodeDetail ? "sceneEditorWide" : ""}`}>
             {activeSection === "dresscode" ? (
-              <DresscodeSection lookMode={lookMode} onLookChange={setLookMode} />
+              <DresscodeSection
+                lookMode={dresscodeLookMode}
+                activeIndexByMode={dresscodeActiveIndexByMode}
+                onActiveIndexChange={handleDresscodeActiveIndexChange}
+              />
             ) : null}
             {activeSection === "food" ? (
               <FoodSection
                 readOnly={readOnly}
                 responses={responses}
+                activeCategory={foodActiveCategory}
+                activeIndexByCategory={foodActiveIndexByCategory}
+                openKey={foodDetailOpenKey}
+                isCategorySwitching={isFoodCategorySwitching}
+                onCategoryChange={handleFoodCategoryChange}
+                onActiveIndexChange={handleFoodActiveIndexChange}
                 onToggleSelection={toggleFoodSelection}
-                onCommentChange={updateFoodComment}
+                onCommentClick={openFoodCommentDialog}
               />
             ) : null}
             {activeSection === "gifts" ? (
-              <GiftsSection readOnly={readOnly} responses={responses} onToggleSelection={toggleGiftSelection} />
+              <GiftsSection
+                readOnly={readOnly}
+                responses={responses}
+                activeIndex={giftActiveIndex}
+                openKey={giftDetailOpenKey}
+                onActiveIndexChange={handleGiftActiveIndexChange}
+                onToggleSelection={toggleGiftSelection}
+              />
             ) : null}
-            {activeSection === "plan" ? <PlanSection lookMode={lookMode} onLookChange={setLookMode} /> : null}
+            {activeSection === "plan" ? <PlanSection /> : null}
           </div>
         </section>
 
-        <div className="detailFooter">
-          <button className="nextButton detailNextButton" type="button" onClick={handleDetailNext} disabled={readOnly}>
-            next
+        <div
+          className={`detailFooter ${isDresscodeDetail ? "detailFooterSplit" : ""} ${
+            isFoodDetail || isGiftDetail ? "detailFooterFood" : ""
+          }`}
+        >
+          {isDresscodeDetail ? (
+            <div className="detailFooterInfo">
+              <div className="dresscodeLookPicker" role="group" aria-label="Режим dresscode">
+                <button
+                  type="button"
+                  className={`dresscodeLookButton ${dresscodeLookMode === "male" ? "active" : ""}`}
+                  onClick={() => setDresscodeLookMode("male")}
+                  aria-pressed={dresscodeLookMode === "male"}
+                  aria-label="male"
+                >
+                  <DresscodeMaleIcon className="dresscodeLookIcon" />
+                </button>
+                <button
+                  type="button"
+                  className={`dresscodeLookButton ${dresscodeLookMode === "female" ? "active" : ""}`}
+                  onClick={() => setDresscodeLookMode("female")}
+                  aria-pressed={dresscodeLookMode === "female"}
+                  aria-label="female"
+                >
+                  <DresscodeFemaleIcon className="dresscodeLookIcon" />
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          <button className="detailNextButton" type="button" onClick={handleDetailNext} disabled={isDetailNextDisabled}>
+            Далее
           </button>
         </div>
+
+        {isFoodDetail && isFoodCommentDialogOpen ? (
+          <div className="detailModalOverlay" onClick={closeFoodCommentDialog}>
+            <div className="detailModal detailModalFoodComment" onClick={(event) => event.stopPropagation()}>
+              <div className="detailModalHeader">
+                <div className="detailModalLead">
+                  <FoodCommentIcon className="detailModalLeadIcon" />
+                  <div className="detailModalText">
+                    <h2 className="detailModalTitle">Комментарий</h2>
+                    <p className="detailModalSubtitle">Сообщите о предпочтениях</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="detailModalEditor">
+                <textarea
+                  className="detailModalTextarea"
+                  value={foodCommentDraft}
+                  onChange={(event) => handleFoodCommentDraftChange(event.target.value)}
+                  maxLength={400}
+                  placeholder="По аллергиям и тд"
+                  disabled={readOnly}
+                />
+                <div className="detailModalMeta">{foodCommentDraft.length}/400</div>
+              </div>
+
+              <button
+                className="detailModalSubmitButton"
+                type="button"
+                onClick={submitFoodCommentDialog}
+                disabled={readOnly}
+              >
+                Отправить
+              </button>
+            </div>
+          </div>
+        ) : null}
       </main>
     );
   }
@@ -511,55 +1264,37 @@ export function InviteFlow() {
       </header>
 
       <section
-        className={`heroStage stage-${activeSection} look-${lookMode}`}
+        ref={heroStageRef}
+        className={`heroStage stage-${activeSection} ${isDraggingStage ? "isDragging" : ""}`}
         style={{ "--hero-logo-url": `url("${HERO_LOGO_URL}")` } as CSSProperties}
+        onPointerDown={handleStagePointerDown}
+        onPointerMove={handleStagePointerMove}
+        onPointerUp={handleStagePointerUp}
+        onPointerCancel={handleStagePointerCancel}
+        onWheel={handleStageWheel}
       >
-        <button
-          className="stagePropButton propLeft"
-          type="button"
-          onClick={() => handleStageImageClick(stageImages.left.section)}
-          aria-label={`Открыть раздел ${SECTION_LABELS[stageImages.left.section]}`}
-        >
-          <img className="stagePropImage" src={stageImages.left.src} alt="" />
-        </button>
-        <button
-          className="stagePropButton propCenter"
-          type="button"
-          onClick={() => handleStageImageClick(stageImages.center.section)}
-          aria-label={`Открыть раздел ${SECTION_LABELS[stageImages.center.section]}`}
-        >
-          <img className="stagePropImage" src={stageImages.center.src} alt="" />
-        </button>
-        <button
-          className="stagePropButton propRight"
-          type="button"
-          onClick={() => handleStageImageClick(stageImages.right.section)}
-          aria-label={`Открыть раздел ${SECTION_LABELS[stageImages.right.section]}`}
-        >
-          <img className="stagePropImage" src={stageImages.right.src} alt="" />
-        </button>
-      </section>
+        {stageItems.map(({ absoluteIndex, relativeStep, section, slot, src }) => {
+          const isHidden = Math.abs(relativeStep) > 1.6;
+          const isActive = slot === "center";
 
-      <div className="sceneToolbar sceneToolbarStage">
-        {showLookSwitch ? (
-          <div className="lookSwitch" role="group" aria-label="Режим образа">
+          return (
             <button
+              key={absoluteIndex}
+              className="stagePropButton"
+              data-slot={slot}
+              data-active={isActive ? "true" : "false"}
               type="button"
-              className={`lookButton ${lookMode === "male" ? "active" : ""}`}
-              onClick={() => setLookMode("male")}
+              onClick={() => handleStageImageClick(section, absoluteIndex)}
+              style={getStageItemStyle(relativeStep)}
+              aria-hidden={isHidden ? true : undefined}
+              aria-label={isActive ? `Открыть раздел ${SECTION_LABELS[section]}` : `Перейти к разделу ${SECTION_LABELS[section]}`}
+              tabIndex={isHidden ? -1 : 0}
             >
-              male
+              <img className="stagePropImage" src={src} alt="" />
             </button>
-            <button
-              type="button"
-              className={`lookButton ${lookMode === "female" ? "active" : ""}`}
-              onClick={() => setLookMode("female")}
-            >
-              female
-            </button>
-          </div>
-        ) : null}
-      </div>
+          );
+        })}
+      </section>
     </main>
   );
 }

@@ -1,6 +1,6 @@
 export type SectionKey = "dresscode" | "food" | "gifts" | "plan";
 
-export type FoodCategoryKey = "salad" | "appetizer" | "hot" | "drinks";
+export type FoodCategoryKey = "salad" | "hot" | "drinks";
 
 export interface InviteProfile {
   firstName: string;

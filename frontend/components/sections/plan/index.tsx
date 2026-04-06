@@ -2,15 +2,11 @@ import { getSectionImage } from "@/config/scene-assets";
 
 const GALLERY_PLACEHOLDERS = ["one", "two", "three"];
 
-interface PlanSectionProps {
-  lookMode: "male" | "female";
-}
-
-export function PlanSection({ lookMode }: PlanSectionProps) {
+export function PlanSection() {
   return (
     <article className="sectionDetail">
       <div className="sectionDetailLayout">
-        <div className={`sectionHero look-${lookMode}`}>
+        <div className="sectionHero">
           <img className="sectionHeroImage" src={getSectionImage("plan")} alt="" />
         </div>
         <div className="sectionGallery">

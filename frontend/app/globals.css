@@ -49,17 +49,56 @@ textarea {
 }
 
 .sceneShell {
+  --scene-shell-inline-padding: 30px;
   height: 100vh;
   overflow: hidden;
-  padding: 34px 30px 46px;
+  padding: 34px var(--scene-shell-inline-padding) 46px;
   display: grid;
   gap: 18px;
-  align-content: start;
-  grid-template-rows: auto 1fr auto;
+  align-content: stretch;
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
 .sceneShellDetail {
+  --detail-bleed-inline: 30px;
+  overflow-x: visible;
+  overflow-y: hidden;
   padding: 22px 30px 28px;
+}
+
+.sceneShellDetailDresscode {
+  --detail-card-max-width: 702px;
+  --detail-card-ratio: 0.9059829;
+  --detail-inline-fit-padding: 60px;
+  --detail-vertical-fit-budget: 248px;
+  --detail-card-width: min(
+    var(--detail-card-max-width),
+    calc(100vw - var(--detail-inline-fit-padding)),
+    calc((100dvh - var(--detail-vertical-fit-budget)) * 1.1037736)
+  );
+  --detail-card-height: calc(var(--detail-card-width) * var(--detail-card-ratio));
+  --dresscode-card-width: var(--detail-card-width);
+  --dresscode-card-height: var(--detail-card-height);
+  --dresscode-gallery-gap: clamp(22px, 2vw, 34px);
+  --dresscode-shell-width: var(--dresscode-card-width);
+  --detail-gallery-gap: var(--dresscode-gallery-gap);
+  --detail-shell-width: var(--dresscode-shell-width);
+}
+
+.sceneShellDetailFood {
+  --detail-card-max-width: 386px;
+  --detail-card-max-height: 636px;
+  --food-shell-max-width: 702px;
+  --detail-inline-fit-padding: 60px;
+  --detail-vertical-fit-budget: 352px;
+  --detail-card-width: min(var(--detail-card-max-width), calc(100vw - var(--detail-inline-fit-padding)));
+  --detail-card-height: min(var(--detail-card-max-height), calc(100dvh - var(--detail-vertical-fit-budget)));
+  --food-card-width: var(--detail-card-width);
+  --food-card-height: var(--detail-card-height);
+  --food-gallery-gap: clamp(22px, 2vw, 34px);
+  --food-shell-width: min(var(--food-shell-max-width), calc(100vw - var(--detail-inline-fit-padding)));
+  --detail-gallery-gap: var(--food-gallery-gap);
+  --detail-shell-width: var(--food-shell-width);
 }
 
 .sceneHeader {
@@ -71,20 +110,102 @@ textarea {
   margin: 0 auto;
 }
 
+.hint {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(14px) scale(0.96);
+  transform-origin: center top;
+  transition:
+    opacity 320ms ease,
+    transform 460ms cubic-bezier(0.2, 0.82, 0.22, 1),
+    visibility 0ms linear 460ms;
+}
+
+.hint.isVisible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  transition-delay: 0ms;
+}
+
+.hintImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+}
+
+.hintAnchor {
+  position: relative;
+}
+
+.hintAnchor::before {
+  content: "";
+  position: absolute;
+  right: var(--hint-offset-right, -12px);
+  bottom: var(--hint-offset-bottom, calc(100% + 20px));
+  width: var(--hint-width, clamp(212px, 15vw, 308px));
+  aspect-ratio: var(--hint-aspect-ratio, 251 / 66);
+  background-image: var(--hint-image, none);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: var(--hint-shadow, drop-shadow(0 14px 22px rgba(251, 88, 183, 0.18)));
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(14px) scale(0.96);
+  transform-origin: center bottom;
+  animation: hintAnchorReveal var(--hint-cycle-duration, 3400ms) forwards;
+  z-index: var(--hint-z, 4);
+}
+
+@keyframes hintAnchorReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+
+  12%,
+  72% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    /* opacity: 0; */
+    /* transform: translateY(-4px) scale(0.98); */
+  }
+}
+
 .heroStage {
   position: relative;
+  width: calc(100% + (var(--scene-shell-inline-padding) * 2));
+  margin-inline: calc(var(--scene-shell-inline-padding) * -1);
   min-height: min(64vh, 740px);
   height: 100%;
   overflow: hidden;
   border-radius: 32px;
+  touch-action: pan-y;
+  --stage-snap-duration: 560ms;
+  --stage-snap-easing: cubic-bezier(0.2, 0.82, 0.22, 1);
+  --stage-side-width: clamp(200px, 18vw, 260px);
+  --stage-side-height: clamp(230px, 31vh, 330px);
+  --stage-center-width: clamp(320px, 28vw, 430px);
+  --stage-center-height: clamp(360px, 45vh, 520px);
+  --stage-side-x: calc(50vw - (var(--stage-side-width) * 0.16));
+  --stage-far-x: calc(50vw + (var(--stage-side-width) * 0.82));
+  --stage-slot-y: 0px;
 }
 
 .heroStage::before {
   content: "";
   position: absolute;
   left: 50%;
-  top: 24%;
-  transform: translate(-50%, 0);
+  top: 50%;
+  transform: translate(-50%, -62%);
   width: min(720px, 72vw);
   height: 260px;
   background-image: var(--hero-logo-url);
@@ -98,13 +219,34 @@ textarea {
 
 .stagePropButton {
   position: absolute;
-  transition: transform 380ms ease, top 380ms ease, left 380ms ease, right 380ms ease, width 380ms ease, opacity 260ms ease;
+  left: 50%;
+  top: 50%;
+  width: var(--stage-side-width);
+  height: var(--stage-side-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform var(--stage-snap-duration) var(--stage-snap-easing),
+    width var(--stage-snap-duration) var(--stage-snap-easing),
+    height var(--stage-snap-duration) var(--stage-snap-easing),
+    opacity 420ms ease,
+    filter var(--stage-snap-duration) var(--stage-snap-easing);
+  transform: translate(calc(-50% + var(--stage-slot-x, 0px) + var(--stage-drag-x, 0px)), calc(-50% + var(--stage-slot-y))) scale(calc(var(--stage-slot-scale, 1) + var(--stage-slot-scale-adjust, 0)));
+  transform-origin: center center;
+  will-change: transform;
   filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.18));
   border: 0;
   background: transparent;
   padding: 0;
   cursor: pointer;
-  z-index: 1;
+  opacity: calc(var(--stage-slot-opacity, 1) + var(--stage-slot-opacity-adjust, 0));
+  visibility: var(--stage-slot-visibility, visible);
+  z-index: var(--stage-slot-z, 1);
+}
+
+.heroStage.isDragging .stagePropButton {
+  transition: none;
 }
 
 .stagePropButton:focus-visible {
@@ -113,68 +255,56 @@ textarea {
   border-radius: 16px;
 }
 
+.stagePropButton[data-slot="left"] {
+  --stage-slot-x: calc(var(--stage-side-x) * -1);
+  --stage-slot-scale: 0.84;
+  --stage-slot-opacity: 0.96;
+  --stage-slot-z: 1;
+}
+
+.stagePropButton[data-slot="center"] {
+  width: var(--stage-center-width);
+  height: var(--stage-center-height);
+  --stage-slot-x: 0px;
+  --stage-slot-scale: 1;
+  --stage-slot-opacity: 1;
+  --stage-slot-z: 3;
+  filter: drop-shadow(0 28px 38px rgba(0, 0, 0, 0.18));
+}
+
+.stagePropButton[data-slot="right"] {
+  --stage-slot-x: var(--stage-side-x);
+  --stage-slot-scale: 0.84;
+  --stage-slot-opacity: 0.96;
+  --stage-slot-z: 1;
+}
+
+.stagePropButton[data-slot="far-left"] {
+  --stage-slot-x: calc(var(--stage-far-x) * -1);
+  --stage-slot-scale: 0.72;
+  --stage-slot-opacity: 0;
+  --stage-slot-visibility: hidden;
+  --stage-slot-z: 0;
+  pointer-events: none;
+}
+
+.stagePropButton[data-slot="far-right"] {
+  --stage-slot-x: var(--stage-far-x);
+  --stage-slot-scale: 0.72;
+  --stage-slot-opacity: 0;
+  --stage-slot-visibility: hidden;
+  --stage-slot-z: 0;
+  pointer-events: none;
+}
+
 .stagePropImage {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
   pointer-events: none;
   user-select: none;
-}
-
-.propLeft {
-  width: 350px;
-  left: -90px;
-  top: 320px;
-  transform: translateZ(0);
-}
-
-.propCenter {
-  width: 260px;
-  left: calc(50% - 130px);
-  top: 210px;
-}
-
-.propRight {
-  width: 300px;
-  right: -70px;
-  top: 300px;
-}
-
-.look-female .propCenter,
-.look-female .propLeft,
-.look-female .propRight {
-  transform: scale(1.03);
-}
-
-.stage-food .propCenter {
-  width: 420px;
-  top: 240px;
-  left: calc(50% - 210px);
-  z-index: 2;
-}
-
-.stage-food .propLeft {
-  width: 130px;
-  top: 300px;
-  left: -10px;
-}
-
-.stage-food .propRight {
-  width: 220px;
-  top: 300px;
-  right: -30px;
-}
-
-.stage-gifts .propCenter {
-  width: 330px;
-  top: 250px;
-  left: calc(50% - 165px);
-}
-
-.stage-plan .propCenter {
-  width: 320px;
-  top: 250px;
-  left: calc(50% - 160px);
 }
 
 .stageAlert {
@@ -285,7 +415,7 @@ textarea {
   display: grid;
   place-items: center;
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .detailFooter {
@@ -293,19 +423,61 @@ textarea {
   justify-content: center;
 }
 
+.detailFooterSplit {
+  width: min(var(--detail-shell-width), 100%);
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 92px;
+  gap: 28px;
+}
+
+.detailFooterFood {
+  width: min(var(--detail-shell-width), 100%);
+  margin: 0 auto;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 92px;
+}
+
+.detailFooterInfo {
+  display: flex;
+  align-items: center;
+}
+
 .detailNextButton {
-  min-width: 88px;
-  min-height: 44px;
-  padding: 0 20px;
+  width: 168px;
+  min-width: 168px;
+  height: 68px;
+  min-height: 68px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
   background: #000000;
   color: #ffffff;
-  font-weight: 400;
-  text-transform: lowercase;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.detailNextButton:disabled {
+  cursor: not-allowed;
+  background: #d5d9df;
+  color: #7b838d;
+  box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.06);
 }
 
 .sceneEditor {
   width: min(980px, 100%);
   margin: 0 auto;
+  overflow: visible;
+}
+
+.sceneEditorWide {
+  width: min(1440px, 100%);
+  overflow: visible;
 }
 
 .sceneEditor:empty {
@@ -318,6 +490,563 @@ textarea {
   display: grid;
   gap: 24px;
   align-content: center;
+  overflow: visible;
+}
+
+.dresscodeDetail {
+  width: min(100%, 100vw);
+  gap: 0;
+}
+
+.foodDetail {
+  width: min(100%, 100vw);
+  gap: 0;
+}
+
+.dresscodeViewer,
+.foodViewer {
+  display: grid;
+  align-items: center;
+  min-height: var(--detail-card-height);
+  overflow: visible;
+}
+
+.dresscodeGallery,
+.foodGallery {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--detail-card-width);
+  gap: var(--detail-gallery-gap);
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 12px max(var(--detail-bleed-inline), calc((100vw - var(--detail-card-width)) / 2)) 20px;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: max(var(--detail-bleed-inline), calc((100vw - var(--detail-card-width)) / 2));
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.dresscodeGallery::-webkit-scrollbar,
+.foodGallery::-webkit-scrollbar {
+  display: none;
+}
+
+.dresscodeSlide,
+.foodSlide {
+  width: var(--detail-card-width);
+  height: var(--detail-card-height);
+  border-radius: 56px;
+  background: rgba(235, 240, 244, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.04);
+  scroll-snap-align: center;
+  transition:
+    transform 320ms cubic-bezier(0.2, 0.82, 0.22, 1),
+    opacity 240ms ease,
+    background-color 240ms ease,
+    box-shadow 240ms ease;
+  transform: scale(0.965);
+  opacity: 0.8;
+}
+
+.foodSlide {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  overflow: visible;
+  opacity: 1;
+}
+
+.dresscodeSlide.isActive {
+  background: #ebf0f4;
+  box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.05);
+  transform: scale(1);
+  opacity: 1;
+}
+
+.foodSlide.isActive {
+  background: transparent;
+  box-shadow: none;
+  transform: scale(1);
+  opacity: 1;
+}
+
+.foodSlide.isDimmed {
+  opacity: 0.44;
+}
+
+.foodSlide:disabled {
+  cursor: default;
+}
+
+.foodSlideInner {
+  width: min(100%, 386px);
+  min-height: 100%;
+  margin: 0 auto;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 56px;
+}
+
+.foodSlideArtworkWrap {
+  display: grid;
+  place-items: center;
+}
+
+.foodSlideArtwork {
+  width: 156px;
+  height: 156px;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+.foodSlideBody {
+  width: min(100%, 386px);
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 0;
+}
+
+.foodSlideCopy {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.foodSlideLabel {
+  color: #333333;
+  font-size: 48px;
+  line-height: 0.98;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+.foodSlideDescription {
+  color: #333333;
+  font-size: 24px;
+  line-height: 1.12;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.foodSlideSelection {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  margin-top: 2px;
+  display: grid;
+  place-items: center;
+}
+
+.foodSlideSelectionIcon {
+  width: 46px;
+  height: 46px;
+  display: block;
+}
+
+.foodToolbar {
+  width: min(var(--detail-shell-width), 100%);
+  min-height: 70px;
+  margin: 0 auto 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.foodCategoryTabs {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.foodCategoryTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.foodCategoryTab {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #59606a;
+  padding: 0;
+  min-height: 36px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.foodCategoryTab.active {
+  background: #000000;
+  color: #ffffff;
+  padding-inline: 18px;
+}
+
+.foodCategoryTabMarker {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  display: block;
+}
+
+.foodCommentButton {
+  width: 143px;
+  height: 129px;
+  flex: 0 0 auto;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+}
+
+.foodCommentButton:focus-visible {
+  outline: 2px solid rgba(125, 64, 255, 0.26);
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+
+.foodCommentButtonIcon {
+  width: 143px;
+  height: 129px;
+  display: block;
+  object-fit: contain;
+}
+
+.foodCommentButtonAnchor {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: visible;
+  width: 143px;
+  height: 129px;
+  --hint-image: url("/hint-bubble.svg");
+  --hint-width: clamp(212px, 15vw, 308px);
+  --hint-offset-bottom: calc(100% - 24px);
+}
+
+.foodCommentButtonAnchor::before {
+  left: 57%;
+  right: auto;
+  animation-name: foodCommentButtonHintReveal;
+}
+
+@keyframes foodCommentButtonHintReveal {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(0.96);
+  }
+
+  12%,
+  72% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+    /* opacity: 0; */
+    /* transform: translate(-50%, -4px) scale(0.98); */
+  }
+}
+
+.foodGallery {
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.foodDetail.isCategorySwitching .foodGallery {
+  opacity: 0.56;
+  transform: translateY(8px);
+}
+
+.dresscodeLookPicker {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.dresscodeLookButton {
+  width: 92px;
+  height: 92px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease,
+    filter 220ms ease;
+}
+
+.dresscodeLookButton:not(.active) {
+  opacity: 0.44;
+  transform: translateY(5px) scale(0.7826);
+}
+
+.dresscodeLookButton.active {
+  opacity: 1;
+  filter: drop-shadow(0 10px 18px rgba(0, 16, 36, 0.08));
+}
+
+.dresscodeLookButton:focus-visible {
+  outline: 2px solid rgba(15, 104, 211, 0.35);
+  outline-offset: 8px;
+  border-radius: 999px;
+}
+
+.dresscodeLookIcon {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.detailHeaderPrimary {
+  width: min(var(--detail-shell-width), 100%);
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.detailHeaderDresscode {
+  justify-content: flex-start;
+}
+
+.detailHeaderFood {
+  justify-content: flex-start;
+}
+
+.detailBackButton {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background: rgba(0, 16, 36, 0.03);
+  cursor: pointer;
+}
+
+.detailBackButton:focus-visible {
+  outline: 2px solid rgba(15, 104, 211, 0.35);
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+
+.detailBackIcon {
+  width: 56px;
+  height: 56px;
+  display: block;
+}
+
+.detailHeaderText {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.detailHeaderTitle {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.detailHeaderSubtitle {
+  margin: 0;
+  color: #b8b8bc;
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 400;
+}
+
+.detailHeaderActionButton {
+  width: 71px;
+  height: 71px;
+  flex: 0 0 auto;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.detailHeaderActionButton:focus-visible {
+  outline: 2px solid rgba(125, 64, 255, 0.26);
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+
+.detailHeaderActionIcon {
+  width: 71px;
+  height: 71px;
+  display: block;
+}
+
+.detailModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(0, 16, 36, 0.16);
+  backdrop-filter: blur(10px);
+}
+
+.detailModal {
+  width: min(716px, calc(100vw - 56px));
+  height: min(1004px, calc(100dvh - 56px));
+  max-height: calc(100dvh - 56px);
+  border-radius: 62px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 16, 36, 0.18);
+  padding: 28px 27px;
+}
+
+.detailModalFoodComment {
+  width: min(var(--food-card-width, var(--detail-shell-width, 716px)), calc(100vw - 56px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 24px;
+}
+
+.detailModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.detailModalLead {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  min-width: 0;
+}
+
+.detailModalLeadIcon {
+  width: 71px;
+  height: 71px;
+  flex: 0 0 auto;
+  display: block;
+}
+
+.detailModalText {
+  display: grid;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.detailModalTitle {
+  margin: 0;
+  color: #333333;
+  font-size: 2.15rem;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.detailModalSubtitle {
+  margin: 0;
+  color: #9299a2;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.detailModalCloseButton {
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0, 16, 36, 0.04);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.detailModalCloseIcon {
+  width: 56px;
+  height: 56px;
+}
+
+.detailModalEditor {
+  min-height: 0;
+  border-radius: 46px;
+  background: rgba(0, 16, 36, 0.03);
+  padding: 34px 28px 22px;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+.detailModalTextarea {
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  border-radius: 0;
+  padding: 0;
+  resize: none;
+  font: inherit;
+  color: #333333;
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.detailModalTextarea::placeholder {
+  color: #9ea5ae;
+}
+
+.detailModalMeta {
+  justify-self: end;
+  color: #9299a2;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.detailModalSubmitButton {
+  width: 100%;
+  min-height: 68px;
+  border: 0;
+  border-radius: 999px;
+  background: #000000;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.detailModalSubmitButton:disabled {
+  cursor: not-allowed;
+  background: #d5d9df;
+  color: #7b838d;
+  box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.06);
 }
 
 .sectionDetailLayout {
@@ -687,6 +1416,13 @@ textarea {
   color: white;
 }
 
+.nextButton:disabled {
+  cursor: not-allowed;
+  background: #d5d9df;
+  color: #7b838d;
+  box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.06);
+}
+
 .primaryButton {
   background: var(--ink);
   color: white;
@@ -755,48 +1491,31 @@ textarea {
 
 @media (max-width: 900px) {
   .sceneShell {
-    padding: 20px 14px 30px;
+    --scene-shell-inline-padding: 14px;
+    padding: 20px var(--scene-shell-inline-padding) 30px;
     gap: 14px;
   }
 
   .sceneShellDetail {
+    --detail-bleed-inline: 14px;
     padding: 16px 14px 22px;
   }
 
   .heroStage {
     min-height: 56vh;
+    --stage-side-width: 150px;
+    --stage-side-height: 190px;
+    --stage-center-width: 228px;
+    --stage-center-height: 286px;
+    --stage-side-x: calc(50vw - (var(--stage-side-width) * 0.16));
+    --stage-far-x: calc(50vw + (var(--stage-side-width) * 0.82));
   }
 
   .heroStage::before {
     width: min(330px, 80vw);
-    top: 28%;
+    top: 50%;
+    transform: translate(-50%, -74%);
     height: 120px;
-  }
-
-  .propLeft {
-    width: 200px;
-    top: 280px;
-    left: -44px;
-  }
-
-  .propCenter {
-    width: 160px;
-    left: calc(50% - 80px);
-    top: 240px;
-  }
-
-  .propRight {
-    width: 170px;
-    right: -42px;
-    top: 295px;
-  }
-
-  .stage-food .propCenter,
-  .stage-gifts .propCenter,
-  .stage-plan .propCenter {
-    width: 220px;
-    left: calc(50% - 110px);
-    top: 240px;
   }
 
   .stageAlert {
@@ -851,8 +1570,115 @@ textarea {
     font-size: 1.05rem;
   }
 
+  .sceneShellDetailDresscode {
+    --detail-inline-fit-padding: 28px;
+    --detail-vertical-fit-budget: 214px;
+    --dresscode-gallery-gap: 16px;
+  }
+
+  .sceneShellDetailFood {
+    --detail-inline-fit-padding: 28px;
+    --detail-vertical-fit-budget: 294px;
+    --food-gallery-gap: 16px;
+    --food-shell-width: min(var(--food-shell-max-width), calc(100vw - var(--detail-inline-fit-padding)));
+  }
+
   .sectionDetail {
     gap: 16px;
+  }
+
+  .dresscodeViewer,
+  .foodViewer {
+    min-height: 58vh;
+  }
+
+  .dresscodeGallery,
+  .foodGallery {
+    padding-inline: max(var(--detail-bleed-inline), calc((100vw - var(--detail-card-width)) / 2));
+  }
+
+  .dresscodeSlide,
+  .foodSlide {
+    border-radius: 32px;
+  }
+
+  .foodSlideArtworkWrap {
+    width: 100%;
+  }
+
+  .foodSlideArtwork {
+    width: clamp(104px, 28vw, 132px);
+    height: clamp(104px, 28vw, 132px);
+  }
+
+  .foodSlideInner {
+    width: min(100%, 386px);
+    gap: 32px;
+  }
+
+  .foodSlideBody {
+    width: min(100%, 386px);
+    gap: 12px;
+  }
+
+  .foodSlideLabel {
+    font-size: clamp(2rem, 7vw, 2.6rem);
+  }
+
+  .foodSlideDescription {
+    font-size: clamp(1rem, 4vw, 1.2rem);
+  }
+
+  .foodToolbar {
+    min-height: 64px;
+    margin-bottom: 18px;
+    gap: 14px;
+  }
+
+  .foodCategoryTabs {
+    gap: 18px;
+  }
+
+  .foodCategoryTab {
+    font-size: 0.88rem;
+  }
+
+  .foodCategoryTab.active {
+    padding-inline: 16px;
+  }
+
+  .foodCommentButton,
+  .foodCommentButtonIcon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .foodCommentButtonAnchor {
+    --hint-width: min(272px, calc(100vw - 48px));
+    --hint-offset-bottom: calc(100% - 24px);
+  }
+
+  .detailFooterSplit {
+    align-items: center;
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .detailFooterFood {
+    width: min(var(--detail-shell-width), 100%);
+  }
+
+  .detailFooterInfo {
+    flex: 0 0 auto;
+  }
+
+  .dresscodeLookPicker {
+    justify-content: flex-start;
+  }
+
+  .dresscodeLookButton {
+    width: 78px;
+    height: 78px;
   }
 
   .sectionDetailLayout {
@@ -893,6 +1719,103 @@ textarea {
   .nextButton {
     justify-self: stretch;
     width: 100%;
+  }
+
+  .detailNextButton {
+    width: 168px;
+    min-width: 168px;
+    margin-left: auto;
+  }
+
+  .detailHeaderDresscode {
+    width: min(var(--detail-shell-width), 100%);
+  }
+
+  .detailHeaderFood {
+    width: min(var(--detail-shell-width), 100%);
+  }
+
+  .detailBackButton {
+    display: none;
+  }
+
+  .detailHeaderText {
+    width: 100%;
+  }
+
+  .detailHeaderTitle {
+    font-size: 30px;
+  }
+
+  .detailHeaderSubtitle {
+    font-size: 15px;
+  }
+
+  .detailHeaderActionButton,
+  .detailHeaderActionIcon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .detailModalOverlay {
+    padding: 12px;
+  }
+
+  .detailModal {
+    width: min(100%, calc(100vw - 24px));
+    height: min(1004px, calc(100dvh - 24px));
+    max-height: calc(100dvh - 24px);
+    border-radius: 34px;
+    padding: 20px 18px;
+  }
+
+  .detailModalFoodComment {
+    width: min(var(--detail-shell-width, calc(100vw - 24px)), calc(100vw - 24px));
+    gap: 18px;
+  }
+
+  .detailModalLead {
+    gap: 14px;
+  }
+
+  .detailModalLeadIcon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .detailModalText {
+    padding-top: 5px;
+  }
+
+  .detailModalTitle {
+    font-size: 1.55rem;
+  }
+
+  .detailModalSubtitle {
+    font-size: 0.92rem;
+  }
+
+  .detailModalCloseButton {
+    width: 48px;
+    height: 48px;
+  }
+
+  .detailModalCloseIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .detailModalEditor {
+    border-radius: 30px;
+    padding: 22px 18px 16px;
+  }
+
+  .detailModalTextarea {
+    font-size: 0.95rem;
+  }
+
+  .detailModalSubmitButton {
+    min-height: 64px;
   }
 
   .panelFooter {

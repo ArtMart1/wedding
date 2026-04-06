@@ -1,75 +1,138 @@
+import { FoodCategoryTabIcon } from "@/components/icons/food-category-tab-icon";
 import { FOOD_OPTIONS } from "@/config/options";
-import { getSectionImage } from "@/config/scene-assets";
+import { FoodCommentIcon } from "@/components/icons/food-comment-icon";
 import type { FoodCategoryKey, InviteResponses } from "@/lib/types";
+import { useCenteredSnapGallery } from "@/components/sections/shared/use-centered-snap-gallery";
+import { FoodRadioOffIcon, FoodRadioOnIcon } from "@/components/icons/food-radio-icons";
 
 const FOOD_CATEGORY_LABELS: Record<FoodCategoryKey, string> = {
-  salad: "Салаты",
-  appetizer: "Закуски",
+  salad: "Салат",
   hot: "Горячее",
-  drinks: "Напитки"
+  drinks: "Напиток"
 };
+
+const FOOD_CATEGORY_ORDER: FoodCategoryKey[] = ["salad", "hot", "drinks"];
+const DEFAULT_FOOD_INDEX_MAP: Record<FoodCategoryKey, number> = {
+  salad: 0,
+  hot: 0,
+  drinks: 0
+};
+
+function isFoodCategoryKey(value: unknown): value is FoodCategoryKey {
+  return typeof value === "string" && FOOD_CATEGORY_ORDER.includes(value as FoodCategoryKey);
+}
 
 interface FoodSectionProps {
   readOnly: boolean;
   responses: InviteResponses;
+  activeCategory?: FoodCategoryKey;
+  activeIndexByCategory?: Record<FoodCategoryKey, number>;
+  openKey?: string | number;
+  isCategorySwitching?: boolean;
+  onCategoryChange: (category: FoodCategoryKey) => void;
+  onActiveIndexChange: (index: number) => void;
   onToggleSelection: (category: FoodCategoryKey, key: string) => void;
-  onCommentChange: (value: string) => void;
+  onCommentClick: () => void;
 }
 
-export function FoodSection({ readOnly, responses, onToggleSelection, onCommentChange }: FoodSectionProps) {
+export function FoodSection({
+  readOnly,
+  responses,
+  activeCategory,
+  activeIndexByCategory,
+  openKey = 0,
+  isCategorySwitching = false,
+  onCategoryChange,
+  onActiveIndexChange,
+  onToggleSelection,
+  onCommentClick
+}: FoodSectionProps) {
+  const safeCategory = isFoodCategoryKey(activeCategory) ? activeCategory : "salad";
+  const safeIndexByCategory =
+    activeIndexByCategory &&
+    typeof activeIndexByCategory === "object" &&
+    !Array.isArray(activeIndexByCategory)
+      ? { ...DEFAULT_FOOD_INDEX_MAP, ...activeIndexByCategory }
+      : DEFAULT_FOOD_INDEX_MAP;
+  const activeIndex = safeIndexByCategory[safeCategory] ?? 0;
+  const activeSlides = FOOD_OPTIONS[safeCategory].map((option) => ({
+    ...option,
+    category: safeCategory
+  }));
+  const { galleryRef, handleGalleryScroll } = useCenteredSnapGallery({
+    activeIndex,
+    onActiveIndexChange,
+    syncKey: `${safeCategory}-${openKey}`
+  });
+  const selectedKey = responses.food.selections?.[safeCategory]?.[0] ?? null;
+
   return (
-    <article className="sectionDetail">
-      <div className="sectionDetailLayout">
-        <div className="sectionHero">
-          <img className="sectionHeroImage" src={getSectionImage("food")} alt="" />
+    <article className={`sectionDetail foodDetail ${isCategorySwitching ? "isCategorySwitching" : ""}`}>
+      <div className="foodToolbar">
+        <div className="foodCategoryTabs" role="tablist" aria-label="Категории еды">
+          {FOOD_CATEGORY_ORDER.map((category) => (
+            <button
+              key={category}
+              type="button"
+              role="tab"
+              className={`foodCategoryTab ${safeCategory === category ? "active" : ""}`}
+              aria-selected={safeCategory === category}
+              onClick={() => onCategoryChange(category)}
+            >
+              {safeCategory !== category ? <FoodCategoryTabIcon className="foodCategoryTabMarker" aria-hidden="true" /> : null}
+              <span>{FOOD_CATEGORY_LABELS[category]}</span>
+            </button>
+          ))}
         </div>
-        <div className="sectionGallery">
-          <div className="galleryCard" aria-hidden="true" />
-          <div className="galleryCard" aria-hidden="true" />
-          <div className="galleryCard" aria-hidden="true" />
+
+        <div className="foodCommentButtonAnchor hintAnchor">
+          <button className="foodCommentButton" type="button" onClick={onCommentClick} aria-label="Открыть комментарий">
+            <FoodCommentIcon className="foodCommentButtonIcon" />
+          </button>
         </div>
       </div>
-      <div className="sectionDetailContent">
-        <h2>Еда</h2>
-        {Object.entries(FOOD_OPTIONS).map(([categoryKey, options]) => {
-          const typedCategory = categoryKey as FoodCategoryKey;
-          const selectedKeys = responses.food.selections?.[typedCategory] ?? [];
 
-          return (
-            <section key={categoryKey} className="foodCategory">
-              <h3>{FOOD_CATEGORY_LABELS[typedCategory]}</h3>
-              <div className="optionGrid">
-                {options.map((option) => {
-                  const isSelected = selectedKeys.includes(option.key);
+      <div className="foodViewer">
+        <div ref={galleryRef} className="foodGallery" onScroll={handleGalleryScroll}>
+          {activeSlides.map((slide, index) => {
+            const isSelected = selectedKey === slide.key;
+            const isActive = index === activeIndex;
+            const isDimmed = Boolean(selectedKey) && !isSelected;
 
-                  return (
-                    <button
-                      key={option.key}
-                      type="button"
-                      className={`optionButton ${isSelected ? "selected" : ""}`}
-                      onClick={() => onToggleSelection(typedCategory, option.key)}
-                      disabled={readOnly}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })}
+            return (
+              <button
+                key={slide.key}
+                type="button"
+                className={`foodSlide ${isActive ? "isActive" : ""} ${isSelected ? "isSelected" : ""} ${isDimmed ? "isDimmed" : ""}`}
+                data-slide-index={index}
+                onClick={() => onToggleSelection(slide.category, slide.key)}
+                disabled={readOnly}
+                aria-pressed={isSelected}
+                aria-label={slide.description ? `${slide.title}. ${slide.description}` : slide.title}
+              >
+                <div className="foodSlideInner">
+                  <div className="foodSlideArtworkWrap" aria-hidden="true">
+                    <img className="foodSlideArtwork" src={slide.iconSrc} alt="" draggable="false" />
+                  </div>
 
-        <label className="commentLabel" htmlFor="food-comment">Комментарий</label>
-        <textarea
-          id="food-comment"
-          className="commentInput"
-          value={responses.food.comment ?? ""}
-          onChange={(event) => onCommentChange(event.target.value)}
-          maxLength={400}
-          placeholder="Укажите пожелания по еде"
-          disabled={readOnly}
-        />
-        <small className="muted">{(responses.food.comment ?? "").length}/400</small>
+                  <div className="foodSlideBody">
+                    <span className="foodSlideSelection" aria-hidden="true">
+                      {isSelected ? (
+                        <FoodRadioOnIcon className="foodSlideSelectionIcon" />
+                      ) : (
+                        <FoodRadioOffIcon className="foodSlideSelectionIcon" />
+                      )}
+                    </span>
+                    <div className="foodSlideCopy">
+                      <strong className="foodSlideLabel">{slide.title}</strong>
+                      {slide.description ? <span className="foodSlideDescription">{slide.description}</span> : null}
+                    </div>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </article>
   );
