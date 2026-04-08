@@ -1,140 +1,88 @@
 # wedding
 
-Сайт-приглашение на свадьбу с общей ссылкой входа.
+Сайт-приглашение на свадьбу с единым Next.js приложением и встроенным API.
 
 ## Стек
-- `frontend/`: Next.js (App Router), React Hook Form, Zod, TypeScript
-- `backend/`: Express, Mongoose, Zod, TypeScript
+- `frontend/`: Next.js (App Router), Route Handlers, Mongoose, React Hook Form, Zod, TypeScript
 - База: MongoDB Atlas
+- `backend/`: legacy Express-реализация, оставлена как референс на время миграции
 
 ## Структура
-- `frontend` - UI и flow гостя
-- `backend` - API и работа с MongoDB
+- `frontend` - UI, API и работа с MongoDB
+- `backend` - старый отдельный backend, больше не обязателен для деплоя
 
 ## Пользовательский flow
 1. Гость открывает общую ссылку `/`.
 2. На экране авторизации вводит `Имя + Фамилия`.
-3. Backend находит или создает анкету по этой паре (дубликаты ФИО не закладываются).
+3. API находит или создает анкету по этой паре.
 4. Доступны разделы: `Дресс-код`, `Еда`, `Подарки`, `План дня`.
-5. Раздел считается завершенным только после `Next`.
-6. Индикаторы в табах:
-- зеленая точка: раздел подтвержден (`acknowledged = true`)
-- красная точка + `!`: пользователь покинул раздел без `Next`
-7. После подтверждения всех разделов показывается финальный экран приглашения.
-8. На финальном экране выполняется submit и доступна кнопка "поделиться" (общей ссылкой).
-9. После submit редактирование доступно 30 дней (`editableUntil`), затем режим read-only.
+5. Черновик анкеты сохраняется автоматически по debounce и при уходе со страницы.
+6. После заполнения всех разделов выполняется финальный submit.
+7. После submit редактирование доступно 30 дней (`editableUntil`), затем режим read-only.
 
 ## Модель данных MongoDB
 ```ts
 {
-  profileKey: string, // нормализованная пара firstName+lastName
+  profileKey: string,
   profile: {
     firstName: string,
     lastName: string
   },
   responses: {
-    dresscode: {
-      acknowledged: boolean
-    },
+    dresscode: {},
     food: {
-      acknowledged: boolean,
       selections?: {
         salad?: string[],
-        appetizer?: string[],
         hot?: string[],
         drinks?: string[]
       },
-      comment?: string // max 400
+      comment?: string
     },
     gifts: {
-      acknowledged: boolean,
       selections?: string[]
     },
+    plan: {}
+  },
+  progress: {
+    dresscode: {
+      viewedByMode: {
+        male: number,
+        female: number
+      },
+      completed: boolean
+    },
     plan: {
-      acknowledged: boolean
+      opened: boolean,
+      downloaded: boolean
     }
   },
   meta: {
     isSubmitted: boolean,
-    editableUntil: Date | null
+    editableUntil: Date | null,
+    draftUpdatedAt: Date | null,
+    submittedAt: Date | null
+  },
+  authSession: {
+    tokenHash: string | null,
+    expiresAt: Date | null
   }
 }
 ```
 
 ## API
 ### `POST /api/invites/login`
-Вход по `Имя + Фамилия` (поиск или создание анкеты).
+Вход по `Имя + Фамилия` с установкой `httpOnly` cookie.
 
-Body:
-```json
-{
-  "firstName": "Илья",
-  "lastName": "Сиднев"
-}
-```
+### `GET /api/invites/session`
+Восстановление сессии по cookie.
 
-Ответ:
-```json
-{
-  "invite": {
-    "id": "66f0c2d8a59b9c1a6c4f08c1",
-    "profile": { "firstName": "Илья", "lastName": "Сиднев" },
-    "responses": {
-      "dresscode": { "acknowledged": false },
-      "food": { "acknowledged": false },
-      "gifts": { "acknowledged": false },
-      "plan": { "acknowledged": false }
-    },
-    "meta": { "isSubmitted": false, "editableUntil": null }
-  },
-  "readOnly": false
-}
-```
+### `PATCH /api/invites/:inviteId/draft`
+Сохранение неполного черновика анкеты.
 
 ### `POST /api/invites/:inviteId/submit`
 Финальная отправка анкеты.
 
-Body:
-```json
-{
-  "responses": {
-    "dresscode": { "acknowledged": true },
-    "food": {
-      "acknowledged": true,
-      "selections": {
-        "salad": ["salad_caesar"],
-        "hot": ["hot_beef"]
-      },
-      "comment": "Без орехов"
-    },
-    "gifts": {
-      "acknowledged": true,
-      "selections": ["gift_cash"]
-    },
-    "plan": { "acknowledged": true }
-  }
-}
-```
-
 ## Локальный запуск
-### 1. Backend
-```bash
-cd backend
-cp .env.example .env
-npm install
-npm run dev
-```
-
-Пример `backend/.env`:
-```env
-PORT=4000
-MONGODB_URI=mongodb://127.0.0.1:27017/wedding
-CORS_ORIGIN=http://localhost:3000
-```
-
-Если используешь MongoDB Atlas, подставь свой connection string в `MONGODB_URI`.
-
-### 2. Frontend
 ```bash
 cd frontend
 cp .env.example .env.local
@@ -142,9 +90,17 @@ npm install
 npm run dev
 ```
 
+Пример `frontend/.env.local`:
+```env
+MONGODB_URI=mongodb://127.0.0.1:27017/wedding
+```
+
+Если используешь MongoDB Atlas, подставь свой connection string в `MONGODB_URI`.
+
 Открыть: `http://localhost:3000/`
 
-## Что можно быстро доработать дальше
-1. Подставить финальные массивы опций для еды/подарков.
-2. Добавить брендинг-ассеты (логотип, фото, декоративные элементы из макета).
-3. Добавить rate-limit для `/api/invites/login` и `/api/invites/:inviteId/submit`.
+## Деплой
+Текущая целевая схема:
+- один Vercel project с root directory = `frontend`
+- `MONGODB_URI` в environment variables
+- отдельный backend-проект больше не нужен
