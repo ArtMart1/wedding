@@ -69,7 +69,7 @@ textarea {
 .sceneShellDetail {
   --detail-bleed-inline: 30px;
   overflow-x: visible;
-  overflow-y: hidden;
+  overflow-y: visible;
   padding: 22px 30px 28px;
 }
 
@@ -639,6 +639,18 @@ textarea {
   scrollbar-width: none;
 }
 
+.foodGallery {
+  overflow-y: hidden;
+  padding-top: 32px;
+}
+
+@media (min-width: 681px) {
+  .giftsGallery {
+    overflow-y: visible;
+    padding-top: 32px;
+  }
+}
+
 .dresscodeGallery[data-syncing="true"],
 .foodGallery[data-syncing="true"] {
   scroll-snap-type: none;
@@ -676,29 +688,18 @@ textarea {
 }
 
 .foodSlide::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 1.5px solid rgba(16, 16, 16, 0.88);
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
 .foodSlide::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: #ffffff;
-  pointer-events: none;
-  z-index: 1;
+  display: none;
 }
 
 .foodSlide {
   display: grid;
   place-items: center;
   border: 0;
-  background: transparent;
+  background: #ffffff;
   box-shadow: none;
   padding: 0;
   text-align: left;
@@ -742,7 +743,7 @@ textarea {
 }
 
 .foodSlide.isActive {
-  background: transparent;
+  background: #ffffff;
   box-shadow: none;
   transform: scale(1);
   opacity: 1;
@@ -1653,400 +1654,38 @@ textarea {
   color: #166534;
 }
 
-@media (max-width: 900px) {
-  .authShell {
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 28px 18px 32px;
-  }
-
-  .sceneShell {
-    --scene-shell-inline-padding: 14px;
-    padding: 20px var(--scene-shell-inline-padding) 30px;
-    gap: 14px;
-  }
-
-  .sceneShellDetail {
-    --detail-bleed-inline: 14px;
-    padding: 16px 14px 22px;
-  }
-
-  .heroStage {
-    min-height: min(60vh, 520px);
-    border-radius: 24px;
-    --stage-center-width: min(330px, 84vw);
-    --stage-center-height: calc(var(--stage-center-width) * 646 / 910);
-    --stage-side-width: calc(var(--stage-center-width) * 0.604651);
-    --stage-side-height: calc(var(--stage-center-height) * 0.634615);
-    --stage-side-x: calc(50vw - (var(--stage-side-width) * 0.16));
-    --stage-far-x: calc(50vw + (var(--stage-side-width) * 0.82));
-    --hero-logo-width: min(330px, 84vw);
-    --hero-logo-max-width: calc(100vw - 28px);
-    --hero-logo-center-offset-y: clamp(38px, 7vh, 58px);
-  }
-
-  .heroStage::before {
-    width: min(var(--hero-logo-width), var(--hero-logo-max-width));
-  }
-
-  .stageAlert {
-    left: 0;
-    top: 250px;
-  }
-
-  .sceneToolbar {
-    justify-content: stretch;
-  }
-
-  .sceneToolbar .muted {
-    width: 100%;
-    text-align: center;
-  }
-
-  .authSection {
-    gap: 22px;
-  }
-
-  .authSectionLogin {
-    min-height: calc(100dvh - 60px);
-  }
-
-  .authSectionWithLogoBg {
-    padding-top: 124px;
-  }
-
-  .authSectionWithLogoBg::before {
-    width: min(320px, 84vw);
-    height: 84px;
-  }
-
-  .authForm {
-    gap: 16px;
-  }
-
-  .authFormFields {
-    gap: 16px;
-  }
-
-  .input {
-    min-height: 60px;
-  }
-
-  .sceneNextButton {
-    width: 100%;
-  }
-
-  .sceneHeaderDetail {
-    justify-content: center;
-  }
-
-  .detailHeaderControls {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  .closeButton {
-    width: 54px;
-    height: 54px;
-  }
-
-  .closeIcon {
-    width: 54px;
-    height: 54px;
-  }
-
-  .detailSectionPill {
-    padding: 12px 22px;
-    font-size: 1.05rem;
-  }
-
-  .sceneShellDetailDresscode {
-    --detail-inline-fit-padding: 28px;
-    --detail-vertical-fit-budget: 294px;
-    --dresscode-gallery-gap: 16px;
-  }
-
+@media (max-width: 1350px) and (min-width: 681px) {
   .sceneShellDetailFood {
-    --detail-inline-fit-padding: 28px;
-    --detail-vertical-fit-budget: 294px;
-    --food-gallery-gap: 16px;
-    --food-shell-width: min(var(--food-shell-max-width), calc(100vw - var(--detail-inline-fit-padding)));
-  }
-
-  .sectionDetail {
-    gap: 16px;
-  }
-
-  .dresscodeViewer,
-  .foodViewer {
-    min-height: 58vh;
-  }
-
-  .dresscodeGallery,
-  .foodGallery {
-    padding-inline: max(var(--detail-bleed-inline), calc((100vw - var(--detail-card-width)) / 2));
-  }
-
-  .dresscodeSlide,
-  .foodSlide {
-    border-radius: 32px;
-  }
-
-  .foodSlideArtworkWrap {
-    width: 100%;
-  }
-
-  .foodSlideArtwork {
-    width: clamp(104px, 28vw, 132px);
-    height: clamp(104px, 28vw, 132px);
-  }
-
-  .foodSlideInner {
-    width: min(100%, 386px);
-    gap: 32px;
-    padding: 34px 0;
-  }
-
-  .foodSlideBody {
-    width: min(100%, 386px);
-    gap: 12px;
-  }
-
-  .foodSlideLabel {
-    font-size: clamp(2rem, 7vw, 2.6rem);
-  }
-
-  .foodSlideDescription {
-    font-size: clamp(1rem, 4vw, 1.2rem);
-  }
-
-  .foodToolbar {
-    min-height: 64px;
-    margin-bottom: 18px;
-    gap: 14px;
-  }
-
-  .foodCategoryTabs {
-    gap: 18px;
-  }
-
-  .foodCategoryTab {
-    font-size: 0.88rem;
-  }
-
-  .foodCategoryTab.active {
-    padding-inline: 16px;
-  }
-
-  .foodCommentButton,
-  .foodCommentButtonIcon {
-    width: 64px;
-    height: 64px;
-  }
-
-  .foodCommentButtonAnchor {
-    --hint-width: min(272px, calc(100vw - 48px));
-    --hint-offset-bottom: calc(100% - 24px);
-  }
-
-  .detailFooterSplit {
-    align-items: center;
-    flex-direction: row;
-    gap: 16px;
-  }
-
-  .detailFooterFood {
-    width: min(var(--detail-shell-width), 100%);
-  }
-
-  .detailFooterInfo {
-    flex: 0 0 auto;
-  }
-
-  .dresscodeLookPicker {
-    justify-content: flex-start;
-  }
-
-  .dresscodeLookButton {
-    width: 78px;
-    height: 78px;
-  }
-
-  .sectionDetailLayout {
-    grid-template-columns: 1fr;
-  }
-
-  .sectionHeroImage {
-    max-height: 260px;
-  }
-
-  .sectionGallery {
-    grid-auto-columns: minmax(160px, 200px);
-  }
-
-  .galleryCard {
-    height: 240px;
-    border-radius: 24px;
-  }
-
-  .panel {
-    padding: 20px;
-  }
-
-  .foodLayout {
-    grid-template-columns: 1fr;
-  }
-
-  .sectionTabs {
-    width: min(100%, 320px);
-    border-radius: 16px;
-    padding: 6px;
-    gap: 6px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    margin-inline: auto;
-  }
-
-  .sectionTabs::-webkit-scrollbar {
-    display: none;
-  }
-
-  .tabButton {
-    flex: 1 0 auto;
-    justify-content: center;
-    padding: 10px 12px;
-    font-size: 0.9rem;
-  }
-
-  .panelHeader {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .nextButton {
-    justify-self: stretch;
-    width: 100%;
-  }
-
-  .detailNextButton.authNextButton {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .detailNextButton {
-    width: 168px;
-    min-width: 168px;
-    margin-left: auto;
-  }
-
-  .detailHeaderDresscode {
-    width: min(var(--detail-shell-width), 100%);
-  }
-
-  .detailHeaderFood {
-    width: min(var(--detail-shell-width), 100%);
-  }
-
-  .detailBackButton {
-    display: none;
-  }
-
-  .detailHeaderText {
-    width: 100%;
-  }
-
-  .detailHeaderTitle {
-    font-size: 30px;
-  }
-
-  .detailHeaderSubtitle {
-    font-size: 15px;
-  }
-
-  .detailHeaderActionButton,
-  .detailHeaderActionIcon {
-    width: 64px;
-    height: 64px;
-  }
-
-  .detailModalOverlay {
-    padding: 12px;
-  }
-
-  .detailModal {
-    width: min(100%, calc(100vw - 24px));
-    height: min(1004px, calc(100dvh - 24px));
-    max-height: calc(100dvh - 24px);
-    border-radius: 34px;
-    padding: 20px 18px;
-  }
-
-  .detailModalFoodComment {
-    width: min(var(--detail-shell-width, calc(100vw - 24px)), calc(100vw - 24px));
-    gap: 18px;
-  }
-
-  .detailModalLead {
-    gap: 14px;
-  }
-
-  .detailModalLeadIcon {
-    width: 60px;
-    height: 60px;
-  }
-
-  .detailModalText {
-    padding-top: 5px;
-  }
-
-  .detailModalTitle {
-    font-size: 1.55rem;
-  }
-
-  .detailModalSubtitle {
-    font-size: 0.92rem;
-  }
-
-  .detailModalCloseButton {
-    width: 48px;
-    height: 48px;
-  }
-
-  .detailModalCloseIcon {
-    width: 48px;
-    height: 48px;
-  }
-
-  .detailModalEditor {
-    border-radius: 30px;
-    padding: 22px 18px 16px;
-  }
-
-  .detailModalTextarea {
-    font-size: 0.95rem;
-  }
-
-  .detailModalSubmitButton {
-    min-height: 64px;
-  }
-
-  .panelFooter {
-    flex-direction: column;
-    align-items: stretch;
+    --food-shell-width: min(702px, calc(100vw - (var(--scene-shell-inline-padding) * 2)));
+    --detail-shell-width: var(--food-shell-width);
   }
 }
 
 @media (max-width: 680px) {
+  .shell,
+  .sceneShell {
+    height: 100svh;
+    min-height: 100svh;
+  }
+
+  .authShellLogin,
+  .sceneShellHome,
+  .sceneShellDetail {
+    --mobile-safe-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  }
+
   .entrySplash {
     display: block;
   }
 
   .sceneShellDetail {
-    padding: 34px 20px 24px;
+    padding: 34px 20px calc(24px + var(--mobile-safe-bottom)) 20px;
     gap: 18px;
     grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .sceneShellHome {
+    padding-bottom: calc(30px + var(--mobile-safe-bottom));
   }
 
   .sceneShellDetailDresscode,
@@ -2267,7 +1906,7 @@ textarea {
   }
 
   .detailFooterFood {
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 
   .detailFooterInfo {
@@ -2292,7 +1931,7 @@ textarea {
     width: 100%;
     align-items: stretch;
     justify-content: stretch;
-    padding: 22px 18px 28px;
+    padding: 22px 18px calc(28px + var(--mobile-safe-bottom));
   }
 
   .authSectionLogin {
@@ -2481,7 +2120,7 @@ textarea {
 
   .detailModalOverlay {
     place-items: end center;
-    padding: 0 5px 5px;
+    padding: 0 5px calc(5px + env(safe-area-inset-bottom, 0px));
     background: rgba(0, 0, 0, 0.12);
     backdrop-filter: none;
   }
