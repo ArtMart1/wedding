@@ -80,6 +80,8 @@ const FOOD_CATEGORY_SWITCH_FADE_MS = 220;
 const MOBILE_STAGE_BREAKPOINT_PX = 680;
 const ENTRY_SPLASH_HOLD_MS = 1000;
 const ENTRY_SPLASH_FADE_MS = 420;
+const INITIAL_RESTORE_SPLASH_MIN_MS = 3000;
+const INITIAL_RESTORE_SPLASH_SESSION_KEY = "wedding-initial-restore-splash-seen";
 
 function createDefaultResponses(): InviteResponses {
   return {
@@ -616,9 +618,30 @@ export function InviteFlow() {
     let isMounted = true;
 
     async function restoreInviteSession() {
+      let shouldHoldInitialSplash = false;
+
+      if (window.matchMedia(`(max-width: ${MOBILE_STAGE_BREAKPOINT_PX}px)`).matches) {
+        try {
+          shouldHoldInitialSplash = window.sessionStorage.getItem(INITIAL_RESTORE_SPLASH_SESSION_KEY) !== "true";
+
+          if (shouldHoldInitialSplash) {
+            window.sessionStorage.setItem(INITIAL_RESTORE_SPLASH_SESSION_KEY, "true");
+          }
+        } catch {
+          shouldHoldInitialSplash = true;
+        }
+      }
+
+      const minSplashDelay = shouldHoldInitialSplash
+        ? new Promise<void>((resolve) => {
+            window.setTimeout(resolve, INITIAL_RESTORE_SPLASH_MIN_MS);
+          })
+        : Promise.resolve();
+
       try {
         setFetchError(null);
         const payload = await getInviteSession();
+        await minSplashDelay;
 
         if (!isMounted) {
           return;
@@ -630,6 +653,8 @@ export function InviteFlow() {
           skipNextEntrySplashRef.current = true;
         }
       } catch (error) {
+        await minSplashDelay;
+
         if (!isMounted) {
           return;
         }

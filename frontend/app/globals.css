@@ -169,7 +169,7 @@ textarea {
   opacity: 0;
   transform: translate(-50%, 14px) scale(0.96);
   transform-origin: center bottom;
-  animation: hintAnchorReveal var(--hint-cycle-duration, 3400ms) forwards;
+  animation: hintAnchorReveal var(--hint-cycle-duration, 5840ms) forwards;
   z-index: var(--hint-z, 4);
 }
 
@@ -226,6 +226,10 @@ textarea {
   --hint-aspect-ratio: 276 / 66;
   --hint-left: 70%;
   --hint-offset-bottom: calc(100% + 0px);
+}
+
+.detailCardHintMobileOnly {
+  --hint-image: none;
 }
 
 .detailTopHint {
@@ -1664,14 +1668,15 @@ textarea {
 @media (max-width: 680px) {
   .shell,
   .sceneShell {
-    height: 100svh;
+    height: 100dvh;
     min-height: 100svh;
   }
 
   .authShellLogin,
   .sceneShellHome,
   .sceneShellDetail {
-    --mobile-safe-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    --mobile-safe-top: max(env(safe-area-inset-top, 0px), 4px);
+    --mobile-safe-bottom: max(env(safe-area-inset-bottom, 0px), 10px);
   }
 
   .entrySplash {
@@ -1679,23 +1684,25 @@ textarea {
   }
 
   .sceneShellDetail {
-    padding: 34px 20px calc(24px + var(--mobile-safe-bottom)) 20px;
+    padding: var(--mobile-safe-top) 20px calc(10px + var(--mobile-safe-bottom)) 20px;
     gap: 18px;
     grid-template-rows: auto minmax(0, 1fr) auto;
   }
 
   .sceneShellHome {
-    padding-bottom: calc(30px + var(--mobile-safe-bottom));
+    padding-bottom: calc(14px + var(--mobile-safe-bottom));
   }
 
   .sceneShellDetailDresscode,
   .sceneShellDetailFood {
-    --detail-card-ratio: 1.2987421384;
+    --detail-card-ratio: 1.3836477987;
+    --detail-mobile-leading-inset: 20px;
+    --detail-mobile-trailing-peek: 8px;
     --detail-inline-fit-padding: 40px;
-    --detail-vertical-fit-budget: 338px;
+    --detail-vertical-fit-budget: 280px;
     --detail-bleed-inline: 20px;
     --detail-card-width: min(
-      82.5974026vw,
+      calc(100vw - var(--detail-mobile-leading-inset) - var(--detail-mobile-trailing-peek)),
       calc((100dvh - var(--detail-vertical-fit-budget)) / var(--detail-card-ratio))
     );
     --detail-card-height: calc(var(--detail-card-width) * var(--detail-card-ratio));
@@ -1788,8 +1795,8 @@ textarea {
     margin-inline: 0;
     padding-top: 0;
     padding-bottom: 0;
-    padding-inline: 20px;
-    scroll-padding-inline: 20px;
+    padding-inline: var(--detail-mobile-leading-inset);
+    scroll-padding-inline: var(--detail-mobile-leading-inset);
   }
 
   .dresscodeSlide,
@@ -1800,12 +1807,12 @@ textarea {
   }
 
   .giftsGallery {
-    padding-inline: max(20px, calc((100vw - var(--detail-card-width)) / 2));
-    scroll-padding-inline: max(20px, calc((100vw - var(--detail-card-width)) / 2));
+    padding-inline: var(--detail-mobile-leading-inset);
+    scroll-padding-inline: var(--detail-mobile-leading-inset);
   }
 
   .giftSlide {
-    scroll-snap-align: center;
+    scroll-snap-align: start;
   }
 
   .foodSlide {
@@ -1824,36 +1831,47 @@ textarea {
   }
 
   .foodSlideInner {
-    width: calc(100% - 56px);
+    width: calc(100% - 40px);
     max-width: 100%;
     min-height: 100%;
-    gap: 42px;
-    padding: 44px 0;
+    gap: 30px;
+    padding: 34px 0 30px;
   }
 
   .foodSlideArtwork {
-    width: clamp(112px, 31vw, 156px);
-    height: clamp(112px, 31vw, 156px);
+    width: clamp(84px, 24vw, 112px);
+    height: clamp(84px, 24vw, 112px);
   }
 
   .foodSlideBody {
     width: 100%;
-    justify-content: center;
-    gap: 14px;
-  }
-
-  .foodSlideCopy {
+    justify-content: flex-start;
     gap: 12px;
   }
 
+  .foodSlideCopy {
+    gap: 10px;
+  }
+
   .foodSlideLabel {
-    font-size: clamp(2.2rem, 9vw, 3rem);
-    line-height: 0.95;
+    font-size: clamp(1.7rem, 7.2vw, 2.45rem);
+    line-height: 0.96;
   }
 
   .foodSlideDescription {
-    font-size: clamp(1.1rem, 4.6vw, 1.5rem);
-    line-height: 1.08;
+    font-size: clamp(0.95rem, 3.9vw, 1.2rem);
+    line-height: 1.12;
+  }
+
+  .foodSlideSelection {
+    width: 40px;
+    height: 40px;
+    margin-top: 1px;
+  }
+
+  .foodSlideSelectionIcon {
+    width: 40px;
+    height: 40px;
   }
 
   .foodToolbar {
@@ -1909,6 +1927,20 @@ textarea {
     justify-content: flex-end;
   }
 
+  .detailTopHint {
+    display: none;
+  }
+
+  .detailCardHintMobileOnly.detailCardHintDresscode {
+    --hint-image: url("/hint-dresscode-top.svg");
+    --hint-left: 50%;
+  }
+
+  .detailCardHintMobileOnly.detailCardHintPlan {
+    --hint-image: url("/hint-plan-top.svg");
+    --hint-left: 50%;
+  }
+
   .detailFooterInfo {
     flex: 0 0 auto;
   }
@@ -1931,7 +1963,7 @@ textarea {
     width: 100%;
     align-items: stretch;
     justify-content: stretch;
-    padding: 22px 18px calc(28px + var(--mobile-safe-bottom));
+    padding: 22px 18px calc(16px + var(--mobile-safe-bottom));
   }
 
   .authSectionLogin {
@@ -1960,7 +1992,7 @@ textarea {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center;
     background: rgba(245, 245, 245, 0.44);
-    padding: 4.82px 5.36px;
+    padding: 4.82px 10px;
     gap: 0;
     overflow: hidden;
   }
@@ -1995,7 +2027,7 @@ textarea {
   }
 
   .sceneShellHome .tabButton.active span {
-    padding-inline: 12px;
+    padding-inline: 10px;
     background: rgba(231, 231, 231, 0.44);
   }
 
@@ -2072,12 +2104,12 @@ textarea {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
   }
 
   .mobileStageIndicator {
-    width: 26px;
-    height: 26px;
+    width: 10px;
+    height: 10px;
     border: 0;
     padding: 0;
     background: transparent;
@@ -2120,18 +2152,18 @@ textarea {
 
   .detailModalOverlay {
     place-items: end center;
-    padding: 0 5px calc(5px + env(safe-area-inset-bottom, 0px));
+    padding: 0 16px calc(5px + env(safe-area-inset-bottom, 0px));
     background: rgba(0, 0, 0, 0.12);
     backdrop-filter: none;
   }
 
   .detailModal {
-    width: calc(100vw - 10px);
+    width: 100%;
     max-width: none;
     height: auto;
     max-height: min(329px, calc(100dvh - 10px));
     border-radius: 44px;
-    padding: 12px;
+    padding: 12px 16px;
     box-shadow: 0 18px 44px rgba(0, 16, 36, 0.16);
   }
 

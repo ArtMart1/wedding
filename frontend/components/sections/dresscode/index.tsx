@@ -42,7 +42,9 @@ export function DresscodeSection({ lookMode, activeIndexByMode, onActiveIndexCha
             return (
               <div
                 key={`${lookMode}-${label}`}
-                className={`dresscodeSlide ${isActive ? "isActive" : ""}`}
+                className={`dresscodeSlide ${isActive ? "isActive" : ""} ${
+                  index === 0 ? "hintAnchor detailCardHint detailCardHintDresscode detailCardHintMobileOnly" : ""
+                }`}
                 data-slide-index={index}
                 aria-label={`${lookMode} ${index + 1}`}
               />

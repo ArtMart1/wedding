@@ -8,7 +8,7 @@ export function PlanSection({ onDownload }: PlanSectionProps) {
       <div className="planViewer">
         <div className="detailTopHint hintAnchor detailCardHint detailCardHintPlan" aria-hidden="true" />
         <a
-          className="dresscodeSlide isActive planDownloadCard"
+          className="dresscodeSlide isActive planDownloadCard hintAnchor detailCardHint detailCardHintPlan detailCardHintMobileOnly"
           href="/plan-day-placeholder.pdf"
           download="plan-day.pdf"
           onClick={onDownload}
