@@ -1,13 +1,16 @@
 import type { SectionKey } from "@/lib/types";
 
 export const AUTH_LOGO_URL = "/assets/logo/logo-small.png";
+export const AUTH_LOGO_MOBILE_URL = "/assets/logo/logo-stacked.svg";
 export const HERO_LOGO_URL = "/assets/logo/logo-big.png";
+export const HERO_LOGO_MOBILE_URL = "/assets/logo/logo-stacked.svg";
+export const ENTRY_SPLASH_URL = "/assets/mobile/main1.svg";
 
 const SECTION_IMAGES: Record<SectionKey, string> = {
   dresscode: "/assets/scene/dresscode.png",
   food: "/assets/scene/food.png",
   gifts: "/assets/scene/gifts.png",
-  plan: "/assets/scene/plan.png"
+  plan: "/assets/scene/dresscode-couple.png"
 };
 
 export function getSectionImage(section: SectionKey): string {

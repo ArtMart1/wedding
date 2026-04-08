@@ -27,6 +27,8 @@ interface FoodSectionProps {
   responses: InviteResponses;
   activeCategory?: FoodCategoryKey;
   activeIndexByCategory?: Record<FoodCategoryKey, number>;
+  showCommentHint?: boolean;
+  showTopHint?: boolean;
   openKey?: string | number;
   isCategorySwitching?: boolean;
   onCategoryChange: (category: FoodCategoryKey) => void;
@@ -40,6 +42,8 @@ export function FoodSection({
   responses,
   activeCategory,
   activeIndexByCategory,
+  showCommentHint = false,
+  showTopHint = false,
   openKey = 0,
   isCategorySwitching = false,
   onCategoryChange,
@@ -59,10 +63,11 @@ export function FoodSection({
     ...option,
     category: safeCategory
   }));
-  const { galleryRef, handleGalleryScroll } = useCenteredSnapGallery({
+  const { galleryRef, handleGalleryScroll, markUserIntent } = useCenteredSnapGallery({
     activeIndex,
     onActiveIndexChange,
-    syncKey: `${safeCategory}-${openKey}`
+    syncKey: `${safeCategory}-${openKey}`,
+    syncIndex: 0
   });
   const selectedKey = responses.food.selections?.[safeCategory]?.[0] ?? null;
 
@@ -85,7 +90,7 @@ export function FoodSection({
           ))}
         </div>
 
-        <div className="foodCommentButtonAnchor hintAnchor">
+        <div className={`foodCommentButtonAnchor ${showCommentHint ? "hintAnchor" : ""}`}>
           <button className="foodCommentButton" type="button" onClick={onCommentClick} aria-label="Открыть комментарий">
             <FoodCommentIcon className="foodCommentButtonIcon" />
           </button>
@@ -93,7 +98,13 @@ export function FoodSection({
       </div>
 
       <div className="foodViewer">
-        <div ref={galleryRef} className="foodGallery" onScroll={handleGalleryScroll}>
+        <div
+          ref={galleryRef}
+          className="foodGallery"
+          onScroll={handleGalleryScroll}
+          onPointerDown={markUserIntent}
+          onWheel={markUserIntent}
+        >
           {activeSlides.map((slide, index) => {
             const isSelected = selectedKey === slide.key;
             const isActive = index === activeIndex;
@@ -111,7 +122,14 @@ export function FoodSection({
                 aria-label={slide.description ? `${slide.title}. ${slide.description}` : slide.title}
               >
                 <div className="foodSlideInner">
-                  <div className="foodSlideArtworkWrap" aria-hidden="true">
+                  <div
+                    className={`foodSlideArtworkWrap ${
+                      showTopHint && safeCategory === "salad" && index === 0
+                        ? "hintAnchor detailCardHint detailCardHintFood"
+                        : ""
+                    }`}
+                    aria-hidden="true"
+                  >
                     <img className="foodSlideArtwork" src={slide.iconSrc} alt="" draggable="false" />
                   </div>
 

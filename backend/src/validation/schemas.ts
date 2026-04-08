@@ -11,29 +11,45 @@ export const profileSchema = z.object({
 
 const optionalMultiSelectSchema = z.array(z.string().trim().min(1)).optional();
 
-export const submitSchema = z.object({
-  responses: z.object({
-    dresscode: z.object({
-      acknowledged: z.literal(true)
-    }),
-    food: z.object({
-      acknowledged: z.literal(true),
-      selections: z
-        .object({
-          salad: optionalMultiSelectSchema,
-          appetizer: optionalMultiSelectSchema,
-          hot: optionalMultiSelectSchema,
-          drinks: optionalMultiSelectSchema
-        })
-        .optional(),
-      comment: z.string().max(400).optional()
-    }),
-    gifts: z.object({
-      acknowledged: z.literal(true),
-      selections: optionalMultiSelectSchema
-    }),
-    plan: z.object({
-      acknowledged: z.literal(true)
-    })
-  })
+const dresscodeProgressSchema = z.object({
+  viewedByMode: z.object({
+    male: z.number().int().min(0),
+    female: z.number().int().min(0)
+  }),
+  completed: z.boolean()
 });
+
+const planProgressSchema = z.object({
+  opened: z.boolean(),
+  downloaded: z.boolean()
+});
+
+const responsesSchema = z.object({
+  dresscode: z.object({}).optional().default({}),
+  food: z.object({
+    selections: z
+      .object({
+        salad: optionalMultiSelectSchema,
+        hot: optionalMultiSelectSchema,
+        drinks: optionalMultiSelectSchema
+      })
+      .optional(),
+    comment: z.string().max(400).optional()
+  }),
+  gifts: z.object({
+    selections: optionalMultiSelectSchema
+  }),
+  plan: z.object({}).optional().default({})
+});
+
+const progressSchema = z.object({
+  dresscode: dresscodeProgressSchema,
+  plan: planProgressSchema
+});
+
+export const draftSchema = z.object({
+  responses: responsesSchema,
+  progress: progressSchema
+});
+
+export const submitSchema = draftSchema;

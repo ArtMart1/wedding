@@ -20,17 +20,24 @@ export function GiftsSection({
   onActiveIndexChange,
   onToggleSelection
 }: GiftsSectionProps) {
-  const { galleryRef, handleGalleryScroll } = useCenteredSnapGallery({
+  const { galleryRef, handleGalleryScroll, markUserIntent } = useCenteredSnapGallery({
     activeIndex,
     onActiveIndexChange,
-    syncKey: `gifts-${openKey}`
+    syncKey: `gifts-${openKey}`,
+    syncIndex: 0
   });
   const selectedKey = responses.gifts.selections?.[0] ?? null;
 
   return (
     <article className="sectionDetail foodDetail giftsDetail">
       <div className="foodViewer">
-        <div ref={galleryRef} className="foodGallery giftsGallery" onScroll={handleGalleryScroll}>
+        <div
+          ref={galleryRef}
+          className="foodGallery giftsGallery"
+          onScroll={handleGalleryScroll}
+          onPointerDown={markUserIntent}
+          onWheel={markUserIntent}
+        >
           {GIFT_OPTIONS.map((slide, index) => {
             const isSelected = selectedKey === slide.key;
             const isActive = index === activeIndex;
@@ -48,7 +55,10 @@ export function GiftsSection({
                 aria-label={slide.description ? `${slide.title}. ${slide.description}` : slide.title}
               >
                 <div className="foodSlideInner">
-                  <div className="foodSlideArtworkWrap" aria-hidden="true">
+                  <div
+                    className={`foodSlideArtworkWrap ${index === 0 ? "hintAnchor detailCardHint detailCardHintGifts" : ""}`}
+                    aria-hidden="true"
+                  >
                     <img className="foodSlideArtwork" src={slide.iconSrc} alt="" draggable="false" />
                   </div>
 

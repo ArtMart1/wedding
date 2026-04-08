@@ -1,6 +1,7 @@
 export type SectionKey = "dresscode" | "food" | "gifts" | "plan";
 
 export type FoodCategoryKey = "salad" | "hot" | "drinks";
+export type DresscodeLookMode = "male" | "female";
 
 export interface InviteProfile {
   firstName: string;
@@ -8,32 +9,40 @@ export interface InviteProfile {
 }
 
 export interface InviteResponses {
-  dresscode: {
-    acknowledged: boolean;
-  };
+  dresscode: Record<string, never>;
   food: {
-    acknowledged: boolean;
     selections?: Partial<Record<FoodCategoryKey, string[]>>;
     comment?: string;
   };
   gifts: {
-    acknowledged: boolean;
     selections?: string[];
   };
+  plan: Record<string, never>;
+}
+
+export interface InviteProgress {
+  dresscode: {
+    viewedByMode: Record<DresscodeLookMode, number>;
+    completed: boolean;
+  };
   plan: {
-    acknowledged: boolean;
+    opened: boolean;
+    downloaded: boolean;
   };
 }
 
 export interface InviteMeta {
   isSubmitted: boolean;
   editableUntil: string | null;
+  draftUpdatedAt: string | null;
+  submittedAt: string | null;
 }
 
 export interface InviteDocument {
   id: string;
   profile: InviteProfile;
   responses: InviteResponses;
+  progress: InviteProgress;
   meta: InviteMeta;
 }
 

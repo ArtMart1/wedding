@@ -1,0 +1,11 @@
+<svg width="386" height="66" viewBox="0 0 386 66" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="24" width="338" height="46" rx="23" fill="#FF0095" fill-opacity="0.64"/>
+<text x="193" y="32" fill="#F6F7F8" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="17" font-weight="400" letter-spacing="0" text-anchor="middle">Это строгое руководство по одежде</text>
+<path d="M196 46L186.5 46L176 46C179.157 46 182.139 47.4494 184.089 49.9316L188.873 56.0196C190.491 58.0797 193.589 58.1458 195.294 56.1566L200.746 49.7963C202.811 47.3867 205.826 46 209 46L196 46Z" fill="url(#paint0_linear_dresscode_hint)"/>
+<defs>
+<linearGradient id="paint0_linear_dresscode_hint" x1="185.9" y1="46" x2="185.9" y2="57.0833" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FB58B7"/>
+<stop offset="1" stop-color="white" stop-opacity="0.24"/>
+</linearGradient>
+</defs>
+</svg>

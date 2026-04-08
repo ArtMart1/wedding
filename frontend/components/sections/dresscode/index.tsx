@@ -19,7 +19,7 @@ interface DresscodeSectionProps {
 
 export function DresscodeSection({ lookMode, activeIndexByMode, onActiveIndexChange }: DresscodeSectionProps) {
   const activeIndex = activeIndexByMode[lookMode];
-  const { galleryRef, handleGalleryScroll } = useCenteredSnapGallery({
+  const { galleryRef, handleGalleryScroll, markUserIntent } = useCenteredSnapGallery({
     activeIndex,
     onActiveIndexChange: (index) => onActiveIndexChange(lookMode, index),
     syncKey: lookMode
@@ -28,7 +28,14 @@ export function DresscodeSection({ lookMode, activeIndexByMode, onActiveIndexCha
   return (
     <article className="sectionDetail dresscodeDetail">
       <div className="dresscodeViewer">
-        <div ref={galleryRef} className="dresscodeGallery" onScroll={handleGalleryScroll}>
+        <div className="detailTopHint hintAnchor detailCardHint detailCardHintDresscode" aria-hidden="true" />
+        <div
+          ref={galleryRef}
+          className="dresscodeGallery"
+          onScroll={handleGalleryScroll}
+          onPointerDown={markUserIntent}
+          onWheel={markUserIntent}
+        >
           {DRESSCODE_PLACEHOLDERS[lookMode].map((label, index) => {
             const isActive = index === activeIndex;
 

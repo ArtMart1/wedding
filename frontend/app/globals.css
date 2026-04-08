@@ -1,7 +1,7 @@
 :root {
   --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-logo: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --bg: #efefef;
+  --bg: #ffffff;
   --ink: #101010;
   --muted: #6b6b6b;
   --panel: #f7f7f7;
@@ -27,10 +27,7 @@ body {
   min-height: 100%;
   font-family: var(--font-body);
   color: var(--ink);
-  background:
-    radial-gradient(circle at 12% 20%, rgba(15, 104, 211, 0.08), transparent 38%),
-    radial-gradient(circle at 86% 32%, rgba(239, 68, 68, 0.08), transparent 30%),
-    var(--bg);
+  background: var(--bg);
 }
 
 button,
@@ -41,6 +38,7 @@ textarea {
 
 .shell {
   height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -48,15 +46,24 @@ textarea {
   padding: 24px;
 }
 
+.authShell {
+  padding: 32px 24px 40px;
+}
+
 .sceneShell {
   --scene-shell-inline-padding: 30px;
   height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
   padding: 34px var(--scene-shell-inline-padding) 46px;
   display: grid;
   gap: 18px;
   align-content: stretch;
   grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.sceneShellHome {
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .sceneShellDetail {
@@ -70,9 +77,10 @@ textarea {
   --detail-card-max-width: 702px;
   --detail-card-ratio: 0.9059829;
   --detail-inline-fit-padding: 60px;
-  --detail-vertical-fit-budget: 248px;
+  --detail-vertical-fit-budget: 352px;
   --detail-card-width: min(
     var(--detail-card-max-width),
+    max(320px, 36.5625vw),
     calc(100vw - var(--detail-inline-fit-padding)),
     calc((100dvh - var(--detail-vertical-fit-budget)) * 1.1037736)
   );
@@ -86,17 +94,22 @@ textarea {
 }
 
 .sceneShellDetailFood {
-  --detail-card-max-width: 386px;
-  --detail-card-max-height: 636px;
+  --detail-card-max-width: 702px;
+  --detail-card-ratio: 0.9059829;
   --food-shell-max-width: 702px;
   --detail-inline-fit-padding: 60px;
   --detail-vertical-fit-budget: 352px;
-  --detail-card-width: min(var(--detail-card-max-width), calc(100vw - var(--detail-inline-fit-padding)));
-  --detail-card-height: min(var(--detail-card-max-height), calc(100dvh - var(--detail-vertical-fit-budget)));
+  --detail-card-width: min(
+    var(--detail-card-max-width),
+    max(320px, 36.5625vw),
+    calc(100vw - var(--detail-inline-fit-padding)),
+    calc((100dvh - var(--detail-vertical-fit-budget)) * 1.1037736)
+  );
+  --detail-card-height: calc(var(--detail-card-width) * var(--detail-card-ratio));
   --food-card-width: var(--detail-card-width);
   --food-card-height: var(--detail-card-height);
   --food-gallery-gap: clamp(22px, 2vw, 34px);
-  --food-shell-width: min(var(--food-shell-max-width), calc(100vw - var(--detail-inline-fit-padding)));
+  --food-shell-width: var(--food-card-width);
   --detail-gallery-gap: var(--food-gallery-gap);
   --detail-shell-width: var(--food-shell-width);
 }
@@ -143,7 +156,7 @@ textarea {
 .hintAnchor::before {
   content: "";
   position: absolute;
-  right: var(--hint-offset-right, -12px);
+  left: var(--hint-left, 50%);
   bottom: var(--hint-offset-bottom, calc(100% + 20px));
   width: var(--hint-width, clamp(212px, 15vw, 308px));
   aspect-ratio: var(--hint-aspect-ratio, 251 / 66);
@@ -154,7 +167,7 @@ textarea {
   filter: var(--hint-shadow, drop-shadow(0 14px 22px rgba(251, 88, 183, 0.18)));
   pointer-events: none;
   opacity: 0;
-  transform: translateY(14px) scale(0.96);
+  transform: translate(-50%, 14px) scale(0.96);
   transform-origin: center bottom;
   animation: hintAnchorReveal var(--hint-cycle-duration, 3400ms) forwards;
   z-index: var(--hint-z, 4);
@@ -163,21 +176,70 @@ textarea {
 @keyframes hintAnchorReveal {
   0% {
     opacity: 0;
-    transform: translateY(14px) scale(0.96);
+    transform: translate(-50%, 14px) scale(0.96);
   }
 
   12%,
   72% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate(-50%, 0) scale(1);
   }
 
   100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    /* opacity: 0; */
-    /* transform: translateY(-4px) scale(0.98); */
+    opacity: 0;
+    transform: translate(-50%, -4px) scale(0.98);
   }
+}
+
+.detailCardHint {
+  position: relative;
+  overflow: visible;
+  --hint-left: 50%;
+  --hint-offset-bottom: calc(100% + -8px);
+  --hint-z: 6;
+}
+
+.detailCardHintDresscode {
+  --hint-image: url("/hint-dresscode-top.svg");
+  --hint-width: min(386px, calc(100vw - 48px));
+  --hint-aspect-ratio: 386 / 66;
+  --hint-left: 70%;
+}
+
+.detailCardHintFood {
+  --hint-image: url("/hint-food-top.svg");
+  --hint-width: min(394px, calc(100vw - 48px));
+  --hint-aspect-ratio: 394 / 66;
+  --hint-offset-bottom: calc(100% + 0px);
+}
+
+.detailCardHintGifts {
+  --hint-image: url("/hint-gifts-top.svg");
+  --hint-width: min(410px, calc(100vw - 48px));
+  --hint-aspect-ratio: 410 / 66;
+  --hint-offset-bottom: calc(100% + 0px);
+}
+
+.detailCardHintPlan {
+  --hint-image: url("/hint-plan-top.svg");
+  --hint-width: min(276px, calc(100vw - 48px));
+  --hint-aspect-ratio: 276 / 66;
+  --hint-left: 70%;
+  --hint-offset-bottom: calc(100% + 0px);
+}
+
+.detailTopHint {
+  position: absolute;
+  top: 0;
+  left: calc(50% - (var(--detail-card-width) / 2));
+  width: var(--detail-card-width);
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.detailTopHintFirstChoice {
+  left: calc(50% - (var(--detail-card-width) * 1.5) - var(--detail-gallery-gap));
 }
 
 .heroStage {
@@ -191,13 +253,17 @@ textarea {
   touch-action: pan-y;
   --stage-snap-duration: 560ms;
   --stage-snap-easing: cubic-bezier(0.2, 0.82, 0.22, 1);
-  --stage-side-width: clamp(200px, 18vw, 260px);
-  --stage-side-height: clamp(230px, 31vh, 330px);
-  --stage-center-width: clamp(320px, 28vw, 430px);
-  --stage-center-height: clamp(360px, 45vh, 520px);
+  --stage-center-width: min(910px, 47.395833vw, calc(59.814815vh * 1.408669));
+  --stage-center-height: calc(var(--stage-center-width) * 646 / 910);
+  --stage-side-width: calc(var(--stage-center-width) * 0.604651);
+  --stage-side-height: calc(var(--stage-center-height) * 0.634615);
   --stage-side-x: calc(50vw - (var(--stage-side-width) * 0.16));
   --stage-far-x: calc(50vw + (var(--stage-side-width) * 0.82));
   --stage-slot-y: 0px;
+  --hero-logo-width: min(1206px, 62.8125vw);
+  --hero-logo-max-width: calc(100vw - 120px);
+  --hero-logo-aspect-ratio: 1206 / 254;
+  --hero-logo-center-offset-y: clamp(72px, 12.5926vh, 136px);
 }
 
 .heroStage::before {
@@ -205,9 +271,10 @@ textarea {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -62%);
-  width: min(720px, 72vw);
-  height: 260px;
+  transform: translate(-50%, calc(-50% - var(--hero-logo-center-offset-y)));
+  width: min(var(--hero-logo-width), var(--hero-logo-max-width));
+  aspect-ratio: var(--hero-logo-aspect-ratio);
+  height: auto;
   background-image: var(--hero-logo-url);
   background-repeat: no-repeat;
   background-position: center;
@@ -215,6 +282,28 @@ textarea {
   user-select: none;
   pointer-events: none;
   z-index: 0;
+}
+
+.entrySplash {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: none;
+  background: #ffffff;
+  opacity: 1;
+  transition: opacity 420ms ease;
+}
+
+.entrySplash.isExiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.entrySplashImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .stagePropButton {
@@ -235,7 +324,7 @@ textarea {
   transform: translate(calc(-50% + var(--stage-slot-x, 0px) + var(--stage-drag-x, 0px)), calc(-50% + var(--stage-slot-y))) scale(calc(var(--stage-slot-scale, 1) + var(--stage-slot-scale-adjust, 0)));
   transform-origin: center center;
   will-change: transform;
-  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.18));
+  filter: drop-shadow(0 var(--stage-shadow-y, 16px) var(--stage-shadow-blur, 24px) rgba(0, 0, 0, 0.18));
   border: 0;
   background: transparent;
   padding: 0;
@@ -266,10 +355,10 @@ textarea {
   width: var(--stage-center-width);
   height: var(--stage-center-height);
   --stage-slot-x: 0px;
+  --stage-slot-y: 11.851852vh;
   --stage-slot-scale: 1;
   --stage-slot-opacity: 1;
   --stage-slot-z: 3;
-  filter: drop-shadow(0 28px 38px rgba(0, 0, 0, 0.18));
 }
 
 .stagePropButton[data-slot="right"] {
@@ -321,6 +410,10 @@ textarea {
   font-weight: 700;
   background: #ff4a4f;
   box-shadow: 0 10px 20px rgba(255, 74, 79, 0.35);
+}
+
+.mobileStage {
+  display: none;
 }
 
 .sceneToolbar {
@@ -469,6 +562,10 @@ textarea {
   box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.06);
 }
 
+.detailNextButton.authNextButton {
+  justify-self: end;
+}
+
 .sceneEditor {
   width: min(980px, 100%);
   margin: 0 auto;
@@ -498,6 +595,11 @@ textarea {
   gap: 0;
 }
 
+.planDetail {
+  width: min(100%, 100vw);
+  gap: 0;
+}
+
 .foodDetail {
   width: min(100%, 100vw);
   gap: 0;
@@ -505,8 +607,17 @@ textarea {
 
 .dresscodeViewer,
 .foodViewer {
+  position: relative;
   display: grid;
   align-items: center;
+  min-height: var(--detail-card-height);
+  overflow: visible;
+}
+
+.planViewer {
+  position: relative;
+  display: grid;
+  place-items: center;
   min-height: var(--detail-card-height);
   overflow: visible;
 }
@@ -528,6 +639,11 @@ textarea {
   scrollbar-width: none;
 }
 
+.dresscodeGallery[data-syncing="true"],
+.foodGallery[data-syncing="true"] {
+  scroll-snap-type: none;
+}
+
 .dresscodeGallery::-webkit-scrollbar,
 .foodGallery::-webkit-scrollbar {
   display: none;
@@ -538,8 +654,6 @@ textarea {
   width: var(--detail-card-width);
   height: var(--detail-card-height);
   border-radius: 56px;
-  background: rgba(235, 240, 244, 0.24);
-  box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.04);
   scroll-snap-align: center;
   transition:
     transform 320ms cubic-bezier(0.2, 0.82, 0.22, 1),
@@ -550,12 +664,40 @@ textarea {
   opacity: 0.8;
 }
 
+.dresscodeSlide {
+  position: relative;
+  background: rgba(235, 240, 244, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.04);
+}
+
 .foodSlide {
   position: relative;
+  isolation: isolate;
+}
+
+.foodSlide::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid rgba(16, 16, 16, 0.88);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.foodSlide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #ffffff;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.foodSlide {
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 0;
   background: transparent;
   box-shadow: none;
   padding: 0;
@@ -570,6 +712,33 @@ textarea {
   box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.05);
   transform: scale(1);
   opacity: 1;
+}
+
+.planDownloadCard {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: #b6bcc5;
+  background: #ebf0f4;
+  box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.05);
+}
+
+.planDownloadCard:hover {
+  color: #9ea5ae;
+}
+
+.planDownloadCard:focus-visible {
+  outline: 2px solid rgba(15, 104, 211, 0.3);
+  outline-offset: 8px;
+}
+
+.planDownloadLabel {
+  width: min(420px, calc(100% - 72px));
+  text-align: center;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.03em;
 }
 
 .foodSlide.isActive {
@@ -588,6 +757,8 @@ textarea {
 }
 
 .foodSlideInner {
+  position: relative;
+  z-index: 2;
   width: min(100%, 386px);
   min-height: 100%;
   margin: 0 auto;
@@ -595,9 +766,11 @@ textarea {
   align-content: center;
   justify-items: center;
   gap: 56px;
+  padding: 48px 0;
 }
 
 .foodSlideArtworkWrap {
+  width: 100%;
   display: grid;
   place-items: center;
 }
@@ -741,33 +914,8 @@ textarea {
   height: 129px;
   --hint-image: url("/hint-bubble.svg");
   --hint-width: clamp(212px, 15vw, 308px);
+  --hint-left: 57%;
   --hint-offset-bottom: calc(100% - 24px);
-}
-
-.foodCommentButtonAnchor::before {
-  left: 57%;
-  right: auto;
-  animation-name: foodCommentButtonHintReveal;
-}
-
-@keyframes foodCommentButtonHintReveal {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 14px) scale(0.96);
-  }
-
-  12%,
-  72% {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1);
-    /* opacity: 0; */
-    /* transform: translate(-50%, -4px) scale(0.98); */
-  }
 }
 
 .foodGallery {
@@ -1205,21 +1353,6 @@ textarea {
   font-size: 0.8rem;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  display: inline-block;
-}
-
-.dotOk {
-  background: var(--ok);
-}
-
-.dotWarn {
-  background: var(--warn);
-}
-
 .contentArea {
   min-height: 360px;
 }
@@ -1357,31 +1490,62 @@ textarea {
   justify-items: center;
 }
 
+.authSectionLogin {
+  min-height: auto;
+}
+
 .authSectionWithLogoBg {
   position: relative;
   padding-top: 150px;
+  --auth-logo-primary-opacity: 0.96;
+  --auth-logo-mobile-opacity: 0;
 }
 
-.authSectionWithLogoBg::before {
+.authSectionWithLogoBg::before,
+.authSectionWithLogoBg::after {
   content: "";
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: min(440px, 88vw);
-  height: 110px;
-  background-image: var(--auth-logo-url);
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
   pointer-events: none;
-  opacity: 0.96;
+  transition:
+    opacity 260ms ease,
+    transform 260ms ease;
+}
+
+.authSectionWithLogoBg::before {
+  width: min(440px, 88vw);
+  height: 110px;
+  background-image: var(--auth-logo-url);
+  opacity: var(--auth-logo-primary-opacity);
+}
+
+.authSectionWithLogoBg::after {
+  width: min(281px, 78vw);
+  aspect-ratio: 281 / 245;
+  background-image: var(--auth-logo-mobile-url, none);
+  opacity: var(--auth-logo-mobile-opacity);
 }
 
 .authForm {
   width: 100%;
   display: grid;
   gap: 14px;
+}
+
+.authFormLogin {
+  min-height: auto;
+  grid-template-rows: none;
+}
+
+.authFormFields {
+  display: grid;
+  gap: 14px;
+  align-content: normal;
 }
 
 .fieldLabel {
@@ -1490,6 +1654,12 @@ textarea {
 }
 
 @media (max-width: 900px) {
+  .authShell {
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 28px 18px 32px;
+  }
+
   .sceneShell {
     --scene-shell-inline-padding: 14px;
     padding: 20px var(--scene-shell-inline-padding) 30px;
@@ -1502,20 +1672,21 @@ textarea {
   }
 
   .heroStage {
-    min-height: 56vh;
-    --stage-side-width: 150px;
-    --stage-side-height: 190px;
-    --stage-center-width: 228px;
-    --stage-center-height: 286px;
+    min-height: min(60vh, 520px);
+    border-radius: 24px;
+    --stage-center-width: min(330px, 84vw);
+    --stage-center-height: calc(var(--stage-center-width) * 646 / 910);
+    --stage-side-width: calc(var(--stage-center-width) * 0.604651);
+    --stage-side-height: calc(var(--stage-center-height) * 0.634615);
     --stage-side-x: calc(50vw - (var(--stage-side-width) * 0.16));
     --stage-far-x: calc(50vw + (var(--stage-side-width) * 0.82));
+    --hero-logo-width: min(330px, 84vw);
+    --hero-logo-max-width: calc(100vw - 28px);
+    --hero-logo-center-offset-y: clamp(38px, 7vh, 58px);
   }
 
   .heroStage::before {
-    width: min(330px, 80vw);
-    top: 50%;
-    transform: translate(-50%, -74%);
-    height: 120px;
+    width: min(var(--hero-logo-width), var(--hero-logo-max-width));
   }
 
   .stageAlert {
@@ -1532,13 +1703,33 @@ textarea {
     text-align: center;
   }
 
+  .authSection {
+    gap: 22px;
+  }
+
+  .authSectionLogin {
+    min-height: calc(100dvh - 60px);
+  }
+
   .authSectionWithLogoBg {
-    padding-top: 110px;
+    padding-top: 124px;
   }
 
   .authSectionWithLogoBg::before {
     width: min(320px, 84vw);
     height: 84px;
+  }
+
+  .authForm {
+    gap: 16px;
+  }
+
+  .authFormFields {
+    gap: 16px;
+  }
+
+  .input {
+    min-height: 60px;
   }
 
   .sceneNextButton {
@@ -1572,7 +1763,7 @@ textarea {
 
   .sceneShellDetailDresscode {
     --detail-inline-fit-padding: 28px;
-    --detail-vertical-fit-budget: 214px;
+    --detail-vertical-fit-budget: 294px;
     --dresscode-gallery-gap: 16px;
   }
 
@@ -1614,6 +1805,7 @@ textarea {
   .foodSlideInner {
     width: min(100%, 386px);
     gap: 32px;
+    padding: 34px 0;
   }
 
   .foodSlideBody {
@@ -1707,8 +1899,25 @@ textarea {
   }
 
   .sectionTabs {
-    width: 100%;
+    width: min(100%, 320px);
     border-radius: 16px;
+    padding: 6px;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: auto;
+  }
+
+  .sectionTabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabButton {
+    flex: 1 0 auto;
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 0.9rem;
   }
 
   .panelHeader {
@@ -1719,6 +1928,11 @@ textarea {
   .nextButton {
     justify-self: stretch;
     width: 100%;
+  }
+
+  .detailNextButton.authNextButton {
+    width: 100%;
+    min-width: 0;
   }
 
   .detailNextButton {
@@ -1821,5 +2035,512 @@ textarea {
   .panelFooter {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+@media (max-width: 680px) {
+  .entrySplash {
+    display: block;
+  }
+
+  .sceneShellDetail {
+    padding: 34px 20px 24px;
+    gap: 18px;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .sceneShellDetailDresscode,
+  .sceneShellDetailFood {
+    --detail-card-ratio: 1.2987421384;
+    --detail-inline-fit-padding: 40px;
+    --detail-vertical-fit-budget: 338px;
+    --detail-bleed-inline: 20px;
+    --detail-card-width: min(
+      82.5974026vw,
+      calc((100dvh - var(--detail-vertical-fit-budget)) / var(--detail-card-ratio))
+    );
+    --detail-card-height: calc(var(--detail-card-width) * var(--detail-card-ratio));
+  }
+
+  .sceneHeaderDetail {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .detailHeaderPrimary {
+    width: 100%;
+    gap: 16px;
+    align-items: flex-start;
+    margin: 0;
+  }
+
+  .detailBackButton {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    background: rgba(0, 16, 36, 0.03);
+  }
+
+  .detailBackIcon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .detailHeaderText {
+    gap: 6px;
+  }
+
+  .detailHeaderTitle {
+    font-size: clamp(2.5rem, 10vw, 3.2rem);
+    line-height: 0.98;
+  }
+
+  .detailHeaderSubtitle {
+    font-size: 0.95rem;
+    line-height: 1.2;
+    color: #d2d2d6;
+  }
+
+  .sectionDetail {
+    width: 100%;
+    height: 100%;
+    gap: 16px;
+    align-content: stretch;
+  }
+
+  .foodDetail {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .giftsDetail,
+  .dresscodeDetail,
+  .planDetail {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .detailContent {
+    height: 100%;
+    min-height: 0;
+    place-items: stretch;
+    overflow: visible;
+  }
+
+  .sceneEditor {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+
+  .dresscodeViewer,
+  .foodViewer,
+  .planViewer {
+    width: calc(100% + (var(--detail-bleed-inline) * 2));
+    margin-inline: calc(var(--detail-bleed-inline) * -1);
+    min-height: 0;
+    height: 100%;
+    align-items: center;
+  }
+
+  .dresscodeGallery,
+  .foodGallery {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    margin-inline: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-inline: 20px;
+    scroll-padding-inline: 20px;
+  }
+
+  .dresscodeSlide,
+  .foodSlide {
+    border-radius: 56px;
+    scroll-snap-align: start;
+    min-height: 0;
+  }
+
+  .giftsGallery {
+    padding-inline: max(20px, calc((100vw - var(--detail-card-width)) / 2));
+    scroll-padding-inline: max(20px, calc((100vw - var(--detail-card-width)) / 2));
+  }
+
+  .giftSlide {
+    scroll-snap-align: center;
+  }
+
+  .foodSlide {
+    background: #ebf0f4;
+    box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.05);
+  }
+
+  .foodSlide.isActive {
+    background: #ebf0f4;
+    box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.05);
+  }
+
+  .foodSlide::before,
+  .foodSlide::after {
+    display: none;
+  }
+
+  .foodSlideInner {
+    width: calc(100% - 56px);
+    max-width: 100%;
+    min-height: 100%;
+    gap: 42px;
+    padding: 44px 0;
+  }
+
+  .foodSlideArtwork {
+    width: clamp(112px, 31vw, 156px);
+    height: clamp(112px, 31vw, 156px);
+  }
+
+  .foodSlideBody {
+    width: 100%;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .foodSlideCopy {
+    gap: 12px;
+  }
+
+  .foodSlideLabel {
+    font-size: clamp(2.2rem, 9vw, 3rem);
+    line-height: 0.95;
+  }
+
+  .foodSlideDescription {
+    font-size: clamp(1.1rem, 4.6vw, 1.5rem);
+    line-height: 1.08;
+  }
+
+  .foodToolbar {
+    width: 100%;
+    min-height: 40px;
+    margin: 0;
+    gap: 14px;
+  }
+
+  .foodCategoryTabs {
+    flex: 1 1 auto;
+    gap: 16px;
+  }
+
+  .foodCategoryTab {
+    min-height: 36px;
+    font-size: 0.95rem;
+  }
+
+  .foodCategoryTab.active {
+    padding-inline: 20px;
+  }
+
+  .foodCategoryTabMarker {
+    width: 14px;
+    height: 14px;
+  }
+
+  .foodCommentButton,
+  .foodCommentButtonIcon,
+  .foodCommentButtonAnchor {
+    width: 54px;
+    height: 54px;
+  }
+
+  .foodCommentButtonAnchor {
+    --hint-width: min(236px, calc(100vw - 64px));
+  }
+
+  .detailFooterSplit,
+  .detailFooterFood {
+    width: 100%;
+    min-height: 72px;
+    margin-inline: 0;
+    align-self: end;
+  }
+
+  .detailFooterSplit {
+    gap: 16px;
+  }
+
+  .detailFooterFood {
+    justify-content: space-between;
+  }
+
+  .detailFooterInfo {
+    flex: 0 0 auto;
+  }
+
+  .dresscodeLookPicker {
+    gap: 16px;
+  }
+
+  .dresscodeLookButton {
+    width: 72px;
+    height: 72px;
+  }
+
+  .sceneShellHome .sceneHeader {
+    width: min(calc(100vw - 72px), 100%);
+    margin-inline: auto;
+  }
+
+  .authShellLogin {
+    width: 100%;
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 22px 18px 28px;
+  }
+
+  .authSectionLogin {
+    min-height: 100%;
+  }
+
+  .authSectionWithLogoBg {
+    --auth-logo-primary-opacity: 0;
+    --auth-logo-mobile-opacity: 0.98;
+    padding-top: clamp(168px, 46vw, 238px);
+  }
+
+  .authSectionWithLogoBg::after {
+    top: 2px;
+    width: min(281px, 78vw);
+  }
+
+  .sceneHeader {
+    justify-content: center;
+  }
+
+  .sceneShellHome .sectionTabs {
+    width: 100%;
+    max-width: none;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+    background: rgba(245, 245, 245, 0.44);
+    padding: 4.82px 5.36px;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .sceneShellHome .tabButton {
+    width: 100%;
+    min-width: 0;
+    min-height: 33.2143px;
+    padding: 0;
+    font-size: 0.98rem;
+    line-height: 1;
+    white-space: nowrap;
+    justify-content: center;
+  }
+
+  .sceneShellHome .tabButton span {
+    width: 100%;
+    min-width: 0;
+    min-height: 33.2143px;
+    padding-inline: 8px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+
+  .sceneShellHome .tabButton.active {
+    background: transparent;
+  }
+
+  .sceneShellHome .tabButton.active span {
+    padding-inline: 12px;
+    background: rgba(231, 231, 231, 0.44);
+  }
+
+  .mobileStage {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: stretch;
+    min-height: 0;
+    height: 100%;
+    gap: 18px;
+    width: calc(100% + (var(--scene-shell-inline-padding) * 2));
+    margin-inline: calc(var(--scene-shell-inline-padding) * -1);
+  }
+
+  .mobileStageGallery {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    min-height: 0;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobileStageGallery::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobileStageSlide {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    overflow: hidden;
+  }
+
+  .mobileStageButton {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  .mobileStageImage {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    object-position: center center;
+    user-select: none;
+    pointer-events: none;
+    backface-visibility: hidden;
+    -webkit-user-drag: none;
+  }
+
+  .mobileStageIndicators {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .mobileStageIndicatorTrack {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .mobileStageIndicator {
+    width: 26px;
+    height: 26px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+
+  .mobileStageIndicator::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(0, 16, 36, 0.12);
+    transition:
+      background-color 120ms ease,
+      transform 120ms ease;
+  }
+
+  .mobileStageIndicator.isActive::before {
+    background: #000000;
+    transform: scale(1.4);
+  }
+
+  .authFormLogin {
+    height: 100%;
+  }
+
+  .authFormFields {
+    margin-block: auto;
+  }
+
+  .detailNextButton.authNextButton {
+    width: 100%;
+    min-width: 0;
+    margin-top: 20px;
+    justify-self: stretch;
+    align-self: end;
+  }
+
+  .detailModalOverlay {
+    place-items: end center;
+    padding: 0 5px 5px;
+    background: rgba(0, 0, 0, 0.12);
+    backdrop-filter: none;
+  }
+
+  .detailModal {
+    width: calc(100vw - 10px);
+    max-width: none;
+    height: auto;
+    max-height: min(329px, calc(100dvh - 10px));
+    border-radius: 44px;
+    padding: 12px;
+    box-shadow: 0 18px 44px rgba(0, 16, 36, 0.16);
+  }
+
+  .detailModalFoodComment {
+    width: 100%;
+    height: auto;
+    grid-template-rows: auto minmax(137px, 1fr) auto;
+    gap: 12px;
+  }
+
+  .detailModalLead {
+    gap: 12px;
+  }
+
+  .detailModalLeadIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .detailModalText {
+    gap: 2px;
+    padding-top: 3px;
+  }
+
+  .detailModalTitle {
+    font-size: 0.95rem;
+    line-height: 1.2;
+  }
+
+  .detailModalSubtitle {
+    font-size: 0.95rem;
+    line-height: 1.3;
+    color: #9299a2;
+  }
+
+  .detailModalEditor {
+    border-radius: 32px;
+    padding: 18px 16px 12px;
+    gap: 8px;
+  }
+
+  .detailModalTextarea {
+    font-size: 0.95rem;
+    line-height: 1.35;
+  }
+
+  .detailModalSubmitButton {
+    min-height: 48px;
+    font-size: 0.95rem;
   }
 }

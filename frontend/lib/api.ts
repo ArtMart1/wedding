@@ -1,10 +1,11 @@
-import type { InvitePayload, InviteProfile, InviteResponses } from "./types";
+import type { InvitePayload, InviteProfile, InviteProgress, InviteResponses } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers ?? {})
@@ -27,9 +28,26 @@ export function loginInvite(profile: InviteProfile): Promise<InvitePayload> {
   });
 }
 
-export function submitInvite(inviteId: string, responses: InviteResponses): Promise<InvitePayload> {
+export function getInviteSession(): Promise<InvitePayload> {
+  return request<InvitePayload>("/api/invites/session");
+}
+
+export function saveInviteDraft(
+  inviteId: string,
+  responses: InviteResponses,
+  progress: InviteProgress,
+  init?: Omit<RequestInit, "method" | "body">
+): Promise<InvitePayload> {
+  return request<InvitePayload>(`/api/invites/${inviteId}/draft`, {
+    ...init,
+    method: "PATCH",
+    body: JSON.stringify({ responses, progress })
+  });
+}
+
+export function submitInvite(inviteId: string, responses: InviteResponses, progress: InviteProgress): Promise<InvitePayload> {
   return request<InvitePayload>(`/api/invites/${inviteId}/submit`, {
     method: "POST",
-    body: JSON.stringify({ responses })
+    body: JSON.stringify({ responses, progress })
   });
 }

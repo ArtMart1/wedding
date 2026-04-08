@@ -1,35 +1,132 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 interface UseCenteredSnapGalleryOptions {
   activeIndex: number;
   onActiveIndexChange: (index: number) => void;
   syncKey: string | number;
+  syncIndex?: number;
+  syncTargetSelector?: string;
 }
 
 export function useCenteredSnapGallery({
   activeIndex,
   onActiveIndexChange,
-  syncKey
+  syncKey,
+  syncIndex,
+  syncTargetSelector
 }: UseCenteredSnapGalleryOptions) {
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const scrollFrameRef = useRef<number | null>(null);
+  const isSyncingRef = useRef(false);
+  const hasUserIntentRef = useRef(false);
+  const syncResetTimeoutRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    const gallery = galleryRef.current;
-    const slide = gallery?.querySelector<HTMLElement>(`[data-slide-index="${activeIndex}"]`);
+  useLayoutEffect(() => {
+    let frameId = 0;
+    let settleTimeoutId = 0;
+    let releaseTimeoutId = 0;
+    let resizeObserver: ResizeObserver | null = null;
 
-    if (!gallery || !slide) {
-      return;
+    function getTargetSlide(currentGallery: HTMLDivElement) {
+      const targetIndex = syncIndex ?? activeIndex;
+
+      if (syncTargetSelector) {
+        const anchoredTarget = currentGallery.querySelector<HTMLElement>(
+          `${syncTargetSelector}[data-slide-index="${targetIndex}"]`
+        );
+
+        if (anchoredTarget) {
+          return anchoredTarget;
+        }
+      }
+
+      return (
+        currentGallery.querySelector<HTMLElement>(`[data-slide-index="${targetIndex}"]`) ??
+        currentGallery.querySelector<HTMLElement>(`[data-slide-index="${activeIndex}"]`)
+      );
     }
 
-    const nextScrollLeft = slide.offsetLeft - (gallery.clientWidth - slide.clientWidth) / 2;
-    gallery.scrollTo({ left: nextScrollLeft, behavior: "auto" });
-  }, [syncKey]);
+    function getSlideStartInGallery(currentGallery: HTMLDivElement, slide: HTMLElement) {
+      const galleryRect = currentGallery.getBoundingClientRect();
+      const slideRect = slide.getBoundingClientRect();
+
+      return slideRect.left - galleryRect.left + currentGallery.scrollLeft;
+    }
+
+    function centerActiveSlide() {
+      const currentGallery = galleryRef.current;
+      const slide = currentGallery ? getTargetSlide(currentGallery) : null;
+
+      if (!currentGallery || !slide) {
+        return;
+      }
+
+      const slideRect = slide.getBoundingClientRect();
+      const slideLeftInGallery = getSlideStartInGallery(currentGallery, slide);
+      const nextScrollLeft = slideLeftInGallery - (currentGallery.clientWidth - slideRect.width) / 2;
+      currentGallery.dataset.syncing = "true";
+      currentGallery.scrollLeft = nextScrollLeft;
+    }
+
+    isSyncingRef.current = true;
+    hasUserIntentRef.current = false;
+    if (syncResetTimeoutRef.current !== null) {
+      window.clearTimeout(syncResetTimeoutRef.current);
+    }
+
+    centerActiveSlide();
+    frameId = window.requestAnimationFrame(centerActiveSlide);
+    settleTimeoutId = window.setTimeout(centerActiveSlide, 90);
+    if (galleryRef.current && typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        centerActiveSlide();
+      });
+      resizeObserver.observe(galleryRef.current);
+      const targetSlide = getTargetSlide(galleryRef.current);
+      if (targetSlide) {
+        resizeObserver.observe(targetSlide);
+      }
+    }
+    syncResetTimeoutRef.current = window.setTimeout(() => {
+      isSyncingRef.current = false;
+      syncResetTimeoutRef.current = null;
+    }, 220);
+    releaseTimeoutId = window.setTimeout(() => {
+      if (galleryRef.current) {
+        delete galleryRef.current.dataset.syncing;
+      }
+    }, 220);
+
+    return () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+
+      if (settleTimeoutId) {
+        window.clearTimeout(settleTimeoutId);
+      }
+      if (releaseTimeoutId) {
+        window.clearTimeout(releaseTimeoutId);
+      }
+      if (syncResetTimeoutRef.current !== null) {
+        window.clearTimeout(syncResetTimeoutRef.current);
+        syncResetTimeoutRef.current = null;
+      }
+      resizeObserver?.disconnect();
+      if (galleryRef.current) {
+        delete galleryRef.current.dataset.syncing;
+      }
+      isSyncingRef.current = false;
+    };
+  }, [syncKey, syncIndex]);
 
   useEffect(() => {
     return () => {
       if (scrollFrameRef.current !== null) {
         window.cancelAnimationFrame(scrollFrameRef.current);
+      }
+      if (syncResetTimeoutRef.current !== null) {
+        window.clearTimeout(syncResetTimeoutRef.current);
       }
     };
   }, []);
@@ -48,12 +145,15 @@ export function useCenteredSnapGallery({
     }
 
     const galleryCenter = gallery.scrollLeft + gallery.clientWidth / 2;
+    const galleryRect = gallery.getBoundingClientRect();
     let nearestIndex = activeIndex;
     let nearestDistance = Number.POSITIVE_INFINITY;
 
     slides.forEach((slide) => {
       const slideIndex = Number(slide.dataset.slideIndex);
-      const slideCenter = slide.offsetLeft + slide.clientWidth / 2;
+      const slideRect = slide.getBoundingClientRect();
+      const slideLeftInGallery = slideRect.left - galleryRect.left + gallery.scrollLeft;
+      const slideCenter = slideLeftInGallery + slideRect.width / 2;
       const distance = Math.abs(slideCenter - galleryCenter);
 
       if (distance < nearestDistance) {
@@ -68,6 +168,10 @@ export function useCenteredSnapGallery({
   }
 
   function handleGalleryScroll() {
+    if (isSyncingRef.current || !hasUserIntentRef.current) {
+      return;
+    }
+
     if (scrollFrameRef.current !== null) {
       window.cancelAnimationFrame(scrollFrameRef.current);
     }
@@ -80,6 +184,9 @@ export function useCenteredSnapGallery({
 
   return {
     galleryRef,
-    handleGalleryScroll
+    handleGalleryScroll,
+    markUserIntent() {
+      hasUserIntentRef.current = true;
+    }
   };
 }

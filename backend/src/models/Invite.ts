@@ -6,38 +6,54 @@ interface InviteProfile {
 }
 
 interface InviteResponses {
-  dresscode: {
-    acknowledged: boolean;
-  };
+  dresscode: Record<string, never>;
   food: {
-    acknowledged: boolean;
     selections?: {
       salad?: string[];
-      appetizer?: string[];
       hot?: string[];
       drinks?: string[];
     };
     comment?: string;
   };
   gifts: {
-    acknowledged: boolean;
     selections?: string[];
   };
+  plan: Record<string, never>;
+}
+
+interface InviteProgress {
+  dresscode: {
+    viewedByMode: {
+      male: number;
+      female: number;
+    };
+    completed: boolean;
+  };
   plan: {
-    acknowledged: boolean;
+    opened: boolean;
+    downloaded: boolean;
   };
 }
 
 interface InviteMeta {
   isSubmitted: boolean;
   editableUntil: Date | null;
+  draftUpdatedAt: Date | null;
+  submittedAt: Date | null;
+}
+
+interface InviteAuthSession {
+  tokenHash: string | null;
+  expiresAt: Date | null;
 }
 
 export interface Invite {
   profileKey: string;
   profile: InviteProfile;
   responses: InviteResponses;
+  progress: InviteProgress;
   meta: InviteMeta;
+  authSession: InviteAuthSession;
 }
 
 const inviteSchema = new Schema<Invite>(
@@ -48,30 +64,42 @@ const inviteSchema = new Schema<Invite>(
       lastName: { type: String, required: true }
     },
     responses: {
-      dresscode: {
-        acknowledged: { type: Boolean, default: false }
-      },
+      dresscode: { type: Object, default: {} },
       food: {
-        acknowledged: { type: Boolean, default: false },
         selections: {
           salad: { type: [String], default: undefined },
-          appetizer: { type: [String], default: undefined },
           hot: { type: [String], default: undefined },
           drinks: { type: [String], default: undefined }
         },
         comment: { type: String, maxlength: 400, default: "" }
       },
       gifts: {
-        acknowledged: { type: Boolean, default: false },
         selections: { type: [String], default: undefined }
       },
+      plan: { type: Object, default: {} }
+    },
+    progress: {
+      dresscode: {
+        viewedByMode: {
+          male: { type: Number, default: 0 },
+          female: { type: Number, default: 0 }
+        },
+        completed: { type: Boolean, default: false }
+      },
       plan: {
-        acknowledged: { type: Boolean, default: false }
+        opened: { type: Boolean, default: false },
+        downloaded: { type: Boolean, default: false }
       }
     },
     meta: {
       isSubmitted: { type: Boolean, default: false },
-      editableUntil: { type: Date, default: null }
+      editableUntil: { type: Date, default: null },
+      draftUpdatedAt: { type: Date, default: null },
+      submittedAt: { type: Date, default: null }
+    },
+    authSession: {
+      tokenHash: { type: String, default: null, index: true },
+      expiresAt: { type: Date, default: null }
     }
   },
   {
