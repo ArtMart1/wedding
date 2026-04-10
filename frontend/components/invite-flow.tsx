@@ -19,7 +19,8 @@ import { FoodCommentIcon } from "@/components/icons/food-comment-icon";
 import { FOOD_OPTIONS, GIFT_OPTIONS } from "@/config/options";
 import {
   DresscodeSection,
-  DRESSCODE_LAST_SLIDE_INDEX,
+  isDresscodeModeComplete,
+  isDresscodeProgressComplete,
   type DresscodeLookMode
 } from "@/components/sections/dresscode";
 import { FoodSection } from "@/components/sections/food";
@@ -144,19 +145,15 @@ function normalizeInviteResponses(responses: InviteResponses): InviteResponses {
 
 function normalizeInviteProgress(progress?: InviteProgress): InviteProgress {
   const defaults = createDefaultProgress();
+  const viewedByMode = {
+    male: progress?.dresscode?.viewedByMode?.male ?? defaults.dresscode.viewedByMode.male,
+    female: progress?.dresscode?.viewedByMode?.female ?? defaults.dresscode.viewedByMode.female
+  };
 
   return {
     dresscode: {
-      viewedByMode: {
-        male: progress?.dresscode?.viewedByMode?.male ?? defaults.dresscode.viewedByMode.male,
-        female: progress?.dresscode?.viewedByMode?.female ?? defaults.dresscode.viewedByMode.female
-      },
-      completed:
-        progress?.dresscode?.completed ??
-        Math.max(
-          progress?.dresscode?.viewedByMode?.male ?? 0,
-          progress?.dresscode?.viewedByMode?.female ?? 0
-        ) >= DRESSCODE_LAST_SLIDE_INDEX
+      viewedByMode,
+      completed: Boolean(progress?.dresscode?.completed) || isDresscodeProgressComplete(viewedByMode)
     },
     plan: {
       opened: progress?.plan?.opened ?? defaults.plan.opened,
@@ -402,7 +399,8 @@ export function InviteFlow() {
   const isFoodDetail = detailSection === "food";
   const isGiftDetail = detailSection === "gifts";
   const isPlanDetail = detailSection === "plan";
-  const isDresscodeReviewComplete = dresscodeMaxViewedIndexByMode[dresscodeLookMode] >= DRESSCODE_LAST_SLIDE_INDEX;
+  const isDresscodeReviewComplete =
+    progress.dresscode.completed || isDresscodeModeComplete(dresscodeLookMode, dresscodeMaxViewedIndexByMode[dresscodeLookMode]);
   const isFoodSelectionCompleteValue = isFoodSelectionComplete(responses);
   const isGiftSelectionCompleteValue = isGiftSelectionComplete(responses);
   const isAllSectionsCompleteValue = isAllSectionsComplete(responses, progress);
@@ -874,7 +872,7 @@ export function InviteFlow() {
   function handleDresscodeActiveIndexChange(lookMode: DresscodeLookMode, index: number) {
     const currentMaxViewedIndex = dresscodeMaxViewedIndexByMode[lookMode];
     const nextMaxViewedIndex = Math.max(currentMaxViewedIndex, index);
-    const nextCompleted = progress.dresscode.completed || nextMaxViewedIndex >= DRESSCODE_LAST_SLIDE_INDEX;
+    const nextCompleted = progress.dresscode.completed || isDresscodeModeComplete(lookMode, nextMaxViewedIndex);
 
     setDresscodeActiveIndexByMode((current) => {
       if (current[lookMode] === index) {
@@ -907,7 +905,9 @@ export function InviteFlow() {
             ...current.dresscode.viewedByMode,
             [lookMode]: Math.max(current.dresscode.viewedByMode[lookMode], index)
           },
-          completed: current.dresscode.completed || index >= DRESSCODE_LAST_SLIDE_INDEX
+          completed:
+            current.dresscode.completed ||
+            isDresscodeModeComplete(lookMode, Math.max(current.dresscode.viewedByMode[lookMode], index))
         }
       }));
     }
