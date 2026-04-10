@@ -30,6 +30,10 @@ export function DresscodeSection({ lookMode, activeIndexByMode, onActiveIndexCha
       <div className="dresscodeViewer">
         <div className="detailTopHint hintAnchor detailCardHint detailCardHintDresscode" aria-hidden="true" />
         <div
+          className="hintAnchor detailCardHint detailCardHintDresscode detailCardHintDresscodeMobileFloat"
+          aria-hidden="true"
+        />
+        <div
           ref={galleryRef}
           className="dresscodeGallery"
           onScroll={handleGalleryScroll}
