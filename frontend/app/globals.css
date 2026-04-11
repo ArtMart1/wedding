@@ -10,6 +10,13 @@
   --accent-soft: rgba(15, 104, 211, 0.14);
   --ok: #22c55e;
   --warn: #ef4444;
+  --radius-card-sm: clamp(14px, 3.6vw, 16px);
+  --radius-card: clamp(16px, 4vw, 24px);
+  --radius-card-panel: clamp(18px, 4.5vw, 28px);
+  --radius-card-lg: clamp(18px, 5vw, 32px);
+  --radius-card-xl: clamp(20px, 6vw, 56px);
+  --radius-modal: clamp(24px, 7vw, 62px);
+  --radius-modal-inner: clamp(18px, 5.5vw, 46px);
 }
 
 * {
@@ -78,9 +85,14 @@ textarea {
   --detail-card-ratio: 0.9059829;
   --detail-inline-fit-padding: 60px;
   --detail-vertical-fit-budget: 352px;
+  --detail-card-preferred-width: max(
+    320px,
+    36.5625vw,
+    calc((100dvh - var(--detail-vertical-fit-budget)) * 0.58)
+  );
   --detail-card-width: min(
     var(--detail-card-max-width),
-    max(320px, 36.5625vw),
+    var(--detail-card-preferred-width),
     calc(100vw - var(--detail-inline-fit-padding)),
     calc((100dvh - var(--detail-vertical-fit-budget)) * 1.1037736)
   );
@@ -99,10 +111,15 @@ textarea {
   --detail-card-ratio: 0.9059829;
   --food-shell-max-width: 702px;
   --detail-inline-fit-padding: 60px;
-  --detail-vertical-fit-budget: 352px;
+  --detail-vertical-fit-budget: clamp(460px, 46vh, 560px);
+  --detail-card-preferred-width: max(
+    320px,
+    36.5625vw,
+    calc((100dvh - var(--detail-vertical-fit-budget)) * 0.48)
+  );
   --detail-card-width: min(
     var(--detail-card-max-width),
-    max(320px, 36.5625vw),
+    var(--detail-card-preferred-width),
     calc(100vw - var(--detail-inline-fit-padding)),
     calc((100dvh - var(--detail-vertical-fit-budget)) * 1.1037736)
   );
@@ -267,7 +284,7 @@ textarea {
   height: 100%;
   overflow: hidden;
   overscroll-behavior-x: none;
-  border-radius: 32px;
+  border-radius: var(--radius-card-lg);
   touch-action: pan-y;
   --stage-snap-duration: 560ms;
   --stage-snap-easing: cubic-bezier(0.2, 0.82, 0.22, 1);
@@ -359,7 +376,7 @@ textarea {
 .stagePropButton:focus-visible {
   outline: 2px solid rgba(15, 104, 211, 0.45);
   outline-offset: 4px;
-  border-radius: 16px;
+  border-radius: var(--radius-card-sm);
 }
 
 .stagePropButton[data-slot="left"] {
@@ -691,7 +708,7 @@ textarea {
 .foodSlide {
   width: var(--detail-card-width);
   height: var(--detail-card-height);
-  border-radius: 56px;
+  border-radius: var(--radius-card-xl);
   scroll-snap-align: center;
   transition:
     transform 320ms cubic-bezier(0.2, 0.82, 0.22, 1),
@@ -804,14 +821,15 @@ textarea {
 .foodSlideInner {
   position: relative;
   z-index: 2;
-  width: min(100%, 386px);
+  width: min(calc(100% - 72px), 386px);
+  max-width: calc(100% - 72px);
   min-height: 100%;
   margin: 0 auto;
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 56px;
-  padding: 48px 0;
+  gap: clamp(28px, 3.4vh, 40px);
+  padding: clamp(28px, 4vh, 40px) 0;
 }
 
 .foodSlideArtworkWrap {
@@ -829,7 +847,7 @@ textarea {
 }
 
 .foodSlideBody {
-  width: min(100%, 386px);
+  width: 100%;
   margin: 0 auto;
   display: flex;
   align-items: flex-start;
@@ -877,11 +895,19 @@ textarea {
 .foodToolbar {
   width: min(var(--detail-shell-width), 100%);
   min-height: 70px;
-  margin: 0 auto 28px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+}
+
+.foodToolbarSpacer {
+  display: none;
+}
+
+.choiceToolbarSpacer {
+  display: none;
 }
 
 .foodCategoryTabs {
@@ -1113,7 +1139,7 @@ textarea {
   width: min(716px, calc(100vw - 56px));
   height: min(1004px, calc(100dvh - 56px));
   max-height: calc(100dvh - 56px);
-  border-radius: 62px;
+  border-radius: var(--radius-modal);
   background: #ffffff;
   box-shadow: 0 28px 80px rgba(0, 16, 36, 0.18);
   padding: 28px 27px;
@@ -1188,7 +1214,7 @@ textarea {
 
 .detailModalEditor {
   min-height: 0;
-  border-radius: 46px;
+  border-radius: var(--radius-modal-inner);
   background: rgba(0, 16, 36, 0.03);
   padding: 34px 28px 22px;
   display: grid;
@@ -1282,14 +1308,14 @@ textarea {
 
 .galleryCard {
   height: 320px;
-  border-radius: 32px;
+  border-radius: var(--radius-card-lg);
   background: #e6e6e6;
   box-shadow: inset 0 0 0 1px #d8d8d8;
   scroll-snap-align: start;
 }
 
 .sectionDetailContent {
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   border: 1px solid var(--line);
   background: white;
   padding: 20px;
@@ -1325,7 +1351,7 @@ textarea {
 
 .panel {
   width: min(1100px, 100%);
-  border-radius: 28px;
+  border-radius: var(--radius-card-panel);
   background: rgba(247, 247, 247, 0.9);
   border: 1px solid var(--line);
   box-shadow: 0 22px 50px rgba(0, 0, 0, 0.08);
@@ -1403,7 +1429,7 @@ textarea {
 }
 
 .sectionCard {
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   border: 1px solid var(--line);
   background: white;
   padding: 24px;
@@ -1431,7 +1457,7 @@ textarea {
 
 .foodMain,
 .foodSide {
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   border: 1px solid var(--line);
   background: white;
   padding: 22px;
@@ -1481,7 +1507,7 @@ textarea {
   width: 100%;
   min-height: 180px;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--radius-card-sm);
   padding: 14px;
   resize: vertical;
 }
@@ -1540,40 +1566,32 @@ textarea {
 }
 
 .authSectionWithLogoBg {
-  position: relative;
-  padding-top: 150px;
   --auth-logo-primary-opacity: 0.96;
   --auth-logo-mobile-opacity: 0;
 }
 
 .authSectionWithLogoBg::before,
 .authSectionWithLogoBg::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  pointer-events: none;
-  transition:
-    opacity 260ms ease,
-    transform 260ms ease;
+  display: none;
 }
 
-.authSectionWithLogoBg::before {
+.authIntro {
+  width: 100%;
+  display: grid;
+  gap: 32px;
+  align-self: center;
+  justify-items: center;
+}
+
+.authLogoFrame {
+  justify-self: center;
   width: min(440px, 88vw);
   height: 110px;
   background-image: var(--auth-logo-url);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
   opacity: var(--auth-logo-primary-opacity);
-}
-
-.authSectionWithLogoBg::after {
-  width: min(281px, 78vw);
-  aspect-ratio: 281 / 245;
-  background-image: var(--auth-logo-mobile-url, none);
-  opacity: var(--auth-logo-mobile-opacity);
 }
 
 .authForm {
@@ -1584,12 +1602,13 @@ textarea {
 
 .authFormLogin {
   min-height: auto;
-  grid-template-rows: none;
+  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .authFormFields {
+  width: 100%;
   display: grid;
-  gap: 14px;
+  gap: 32px;
   align-content: normal;
 }
 
@@ -1654,7 +1673,7 @@ textarea {
 }
 
 .inviteCard {
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   border: 1px solid var(--line);
   background: white;
   padding: 24px;
@@ -1696,6 +1715,52 @@ textarea {
 .successText {
   margin: 0;
   color: #166534;
+}
+
+@media (min-width: 681px) {
+  .sceneShellDetailFood .detailContent {
+    place-items: stretch;
+  }
+
+  .sceneShellDetailFood .sceneEditor {
+    width: 100%;
+    height: 100%;
+    display: grid;
+  }
+
+  .choiceDetail {
+    width: min(var(--detail-shell-width), 100%);
+    height: 100%;
+    margin: 0 auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: clamp(18px, 2.5vh, 28px);
+    align-content: stretch;
+  }
+
+  .choiceToolbar,
+  .choiceToolbarSpacer {
+    width: min(var(--detail-shell-width), 100%);
+    min-height: 129px;
+    margin: 0 auto;
+  }
+
+  .choiceToolbarSpacer {
+    display: block;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .choiceViewer {
+    width: min(var(--detail-shell-width), 100%);
+    min-height: 0;
+    height: 100%;
+    align-items: stretch;
+  }
+
+  .choiceGallery {
+    height: 100%;
+    align-items: center;
+  }
 }
 
 @media (max-width: 1350px) and (min-width: 681px) {
@@ -1845,7 +1910,7 @@ textarea {
 
   .dresscodeSlide,
   .foodSlide {
-    border-radius: 56px;
+    border-radius: var(--radius-card-xl);
     scroll-snap-align: start;
     min-height: 0;
   }
@@ -2017,7 +2082,14 @@ textarea {
   }
 
   .sceneShellHome .sceneHeader {
-    width: min(calc(100vw - 72px), 100%);
+    --home-tabs-frame-inset: clamp(12px, 4vw, 36px);
+    --home-tabs-shell-padding-y: clamp(4px, 1.1vw, 5px);
+    --home-tabs-shell-padding-x: clamp(8px, 2.2vw, 12px);
+    --home-tabs-gap: clamp(4px, 1.6vw, 12px);
+    --home-tabs-pill-min-height: clamp(31px, 8.5vw, 33.2143px);
+    --home-tabs-pill-padding-x: clamp(10px, 2.8vw, 14px);
+    --home-tabs-font-size: clamp(0.9rem, 2.45vw, 0.98rem);
+    width: min(calc(100vw - (var(--home-tabs-frame-inset) * 2)), 100%);
     margin-inline: auto;
   }
 
@@ -2035,12 +2107,6 @@ textarea {
   .authSectionWithLogoBg {
     --auth-logo-primary-opacity: 0;
     --auth-logo-mobile-opacity: 0.98;
-    padding-top: clamp(168px, 46vw, 238px);
-  }
-
-  .authSectionWithLogoBg::after {
-    top: 2px;
-    width: min(281px, 78vw);
   }
 
   .sceneHeader {
@@ -2050,31 +2116,33 @@ textarea {
   .sceneShellHome .sectionTabs {
     width: 100%;
     max-width: none;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
     align-items: center;
     background: rgba(245, 245, 245, 0.44);
-    padding: 4.82px 10px;
-    gap: 0;
+    padding: var(--home-tabs-shell-padding-y) var(--home-tabs-shell-padding-x);
+    gap: var(--home-tabs-gap);
     overflow: hidden;
   }
 
   .sceneShellHome .tabButton {
-    width: 100%;
+    width: auto;
     min-width: 0;
-    min-height: 33.2143px;
+    flex: 0 0 auto;
+    min-height: var(--home-tabs-pill-min-height);
     padding: 0;
-    font-size: 0.98rem;
+    font-size: var(--home-tabs-font-size);
     line-height: 1;
     white-space: nowrap;
     justify-content: center;
   }
 
   .sceneShellHome .tabButton span {
-    width: 100%;
+    width: auto;
     min-width: 0;
-    min-height: 33.2143px;
-    padding-inline: 8px;
+    min-height: var(--home-tabs-pill-min-height);
+    padding-inline: var(--home-tabs-pill-padding-x);
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
@@ -2089,7 +2157,6 @@ textarea {
   }
 
   .sceneShellHome .tabButton.active span {
-    padding-inline: 10px;
     background: rgba(231, 231, 231, 0.44);
   }
 
@@ -2200,8 +2267,20 @@ textarea {
     height: 100%;
   }
 
+  .authIntro {
+    gap: 44px;
+  }
+
+  .authLogoFrame {
+    width: min(281px, 78vw);
+    height: auto;
+    aspect-ratio: 281 / 245;
+    background-image: var(--auth-logo-mobile-url, var(--auth-logo-url));
+    opacity: var(--auth-logo-mobile-opacity);
+  }
+
   .authFormFields {
-    margin-block: auto;
+    margin-block: 0;
   }
 
   .detailNextButton.authNextButton {
@@ -2224,7 +2303,7 @@ textarea {
     max-width: none;
     height: auto;
     max-height: min(329px, calc(100dvh - 10px));
-    border-radius: 44px;
+    border-radius: var(--radius-modal);
     padding: 12px 16px;
     box-shadow: 0 18px 44px rgba(0, 16, 36, 0.16);
   }
@@ -2262,7 +2341,7 @@ textarea {
   }
 
   .detailModalEditor {
-    border-radius: 32px;
+    border-radius: var(--radius-modal-inner);
     padding: 18px 16px 12px;
     gap: 8px;
   }

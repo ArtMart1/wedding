@@ -29,11 +29,12 @@ export function GiftsSection({
   const selectedKey = responses.gifts.selections?.[0] ?? null;
 
   return (
-    <article className="sectionDetail foodDetail giftsDetail">
-      <div className="foodViewer">
+    <article className="sectionDetail choiceDetail foodDetail giftsDetail">
+      <div className="choiceToolbarSpacer foodToolbarSpacer" aria-hidden="true" />
+      <div className="choiceViewer foodViewer">
         <div
           ref={galleryRef}
-          className="foodGallery giftsGallery"
+          className="choiceGallery foodGallery giftsGallery"
           onScroll={handleGalleryScroll}
           onPointerDown={markUserIntent}
           onWheel={markUserIntent}
@@ -56,7 +57,9 @@ export function GiftsSection({
               >
                 <div className="foodSlideInner">
                   <div
-                    className={`foodSlideArtworkWrap ${index === 0 ? "hintAnchor detailCardHint detailCardHintGifts" : ""}`}
+                    className={`foodSlideArtworkWrap ${
+                      index === 0 ? "hintAnchor detailCardHint detailCardHintGifts" : ""
+                    }`}
                     aria-hidden="true"
                   >
                     <img className="foodSlideArtwork" src={slide.iconSrc} alt="" draggable="false" />

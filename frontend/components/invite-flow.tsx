@@ -1678,20 +1678,22 @@ export function InviteFlow() {
           }
         >
           <form className="authForm authFormLogin" onSubmit={onProfileSubmit}>
-            <div className="authFormFields">
-              <label className="fieldLabel">
-                <span>Имя</span>
-                <input className="input" placeholder="Имя" {...register("firstName")} />
-                {errors.firstName ? <small className="fieldError">{errors.firstName.message}</small> : null}
-              </label>
+            <div className="authIntro">
+              <div className="authLogoFrame" aria-hidden="true" />
 
-              <label className="fieldLabel">
-                <span>Фамилия</span>
-                <input className="input" placeholder="Фамилия" {...register("lastName")} />
-                {errors.lastName ? <small className="fieldError">{errors.lastName.message}</small> : null}
-              </label>
+              <div className="authFormFields">
+                <label className="fieldLabel">
+                  <input className="input" placeholder="Имя" aria-label="Имя" {...register("firstName")} />
+                  {errors.firstName ? <small className="fieldError">{errors.firstName.message}</small> : null}
+                </label>
 
-              {fetchError ? <p className="errorText">{fetchError}</p> : null}
+                <label className="fieldLabel">
+                  <input className="input" placeholder="Фамилия" aria-label="Фамилия" {...register("lastName")} />
+                  {errors.lastName ? <small className="fieldError">{errors.lastName.message}</small> : null}
+                </label>
+
+                {fetchError ? <p className="errorText">{fetchError}</p> : null}
+              </div>
             </div>
             <button className="detailNextButton authNextButton" type="submit" disabled={isAuthSubmitting}>
               {isAuthSubmitting ? "..." : "Далее"}

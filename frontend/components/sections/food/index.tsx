@@ -72,8 +72,8 @@ export function FoodSection({
   const selectedKey = responses.food.selections?.[safeCategory]?.[0] ?? null;
 
   return (
-    <article className={`sectionDetail foodDetail ${isCategorySwitching ? "isCategorySwitching" : ""}`}>
-      <div className="foodToolbar">
+    <article className={`sectionDetail choiceDetail foodDetail ${isCategorySwitching ? "isCategorySwitching" : ""}`}>
+      <div className="choiceToolbar foodToolbar">
         <div className="foodCategoryTabs" role="tablist" aria-label="Категории еды">
           {FOOD_CATEGORY_ORDER.map((category) => (
             <button
@@ -97,10 +97,10 @@ export function FoodSection({
         </div>
       </div>
 
-      <div className="foodViewer">
+      <div className="choiceViewer foodViewer">
         <div
           ref={galleryRef}
-          className="foodGallery"
+          className="choiceGallery foodGallery"
           onScroll={handleGalleryScroll}
           onPointerDown={markUserIntent}
           onWheel={markUserIntent}
