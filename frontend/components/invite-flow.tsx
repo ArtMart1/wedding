@@ -848,6 +848,56 @@ export function InviteFlow() {
     setActiveTrackIndex((current) => current + direction);
   }
 
+  const processStageWheel = useCallback(
+    (deltaX: number, deltaY: number, deltaMode: number): boolean => {
+      if (detailSection || isDraggingStage) {
+        return false;
+      }
+
+      const dominantIsHorizontal = Math.abs(deltaX) >= Math.abs(deltaY);
+      const dominantDelta = dominantIsHorizontal ? deltaX : deltaY;
+      const magnitude = Math.abs(dominantDelta);
+
+      if (magnitude === 0) {
+        return false;
+      }
+
+      const direction: CarouselDirection = dominantDelta > 0 ? 1 : -1;
+
+      if (magnitude < WHEEL_SETTLE_DELTA) {
+        wheelGestureSettledRef.current = true;
+        return dominantIsHorizontal;
+      }
+
+      if (deltaMode !== WheelEvent.DOM_DELTA_PIXEL) {
+        stepCarousel(direction);
+        return true;
+      }
+
+      const now = performance.now();
+      const timeSinceLastEvent = now - lastWheelEventTimeRef.current;
+      const isNewBurst = timeSinceLastEvent > WHEEL_BURST_GAP_MS;
+      const directionChanged = direction !== wheelGestureDirectionRef.current;
+      lastWheelEventTimeRef.current = now;
+
+      if (isNewBurst || directionChanged) {
+        wheelGestureSettledRef.current = true;
+        wheelGestureDirectionRef.current = direction;
+      }
+
+      if (magnitude < WHEEL_TRIGGER_DELTA || !wheelGestureSettledRef.current) {
+        return true;
+      }
+
+      wheelGestureSettledRef.current = false;
+      wheelGestureDirectionRef.current = direction;
+      stepCarousel(direction);
+
+      return true;
+    },
+    [detailSection, isDraggingStage, screen, stepCarousel]
+  );
+
   function navigateToTrackIndex(nextTrackIndex: number, nextSection: SectionKey) {
     if (screen !== "sections") {
       return;
@@ -1348,46 +1398,35 @@ export function InviteFlow() {
     finishStageDrag(event.currentTarget);
   }
 
-  function handleStageWheel(event: React.WheelEvent<HTMLElement>) {
-    if (detailSection || isDraggingStage) {
+  useEffect(() => {
+    if (isCompactMobile || detailSection) {
       return;
     }
 
-    const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-    const direction: CarouselDirection = dominantDelta > 0 ? 1 : -1;
-    const magnitude = Math.abs(dominantDelta);
+    const stage = heroStageRef.current;
 
-    if (magnitude < WHEEL_SETTLE_DELTA) {
-      wheelGestureSettledRef.current = true;
+    if (!stage) {
       return;
     }
 
-    event.preventDefault();
+    const handleNativeStageWheel = (event: WheelEvent) => {
+      if (event.ctrlKey) {
+        return;
+      }
 
-    if (event.deltaMode !== WheelEvent.DOM_DELTA_PIXEL) {
-      stepCarousel(direction);
-      return;
-    }
+      if (!processStageWheel(event.deltaX, event.deltaY, event.deltaMode)) {
+        return;
+      }
 
-    const now = performance.now();
-    const timeSinceLastEvent = now - lastWheelEventTimeRef.current;
-    const isNewBurst = timeSinceLastEvent > WHEEL_BURST_GAP_MS;
-    const directionChanged = direction !== wheelGestureDirectionRef.current;
-    lastWheelEventTimeRef.current = now;
+      event.preventDefault();
+    };
 
-    if (isNewBurst || directionChanged) {
-      wheelGestureSettledRef.current = true;
-      wheelGestureDirectionRef.current = direction;
-    }
+    stage.addEventListener("wheel", handleNativeStageWheel, { passive: false });
 
-    if (magnitude < WHEEL_TRIGGER_DELTA || !wheelGestureSettledRef.current) {
-      return;
-    }
-
-    wheelGestureSettledRef.current = false;
-    wheelGestureDirectionRef.current = direction;
-    stepCarousel(direction);
-  }
+    return () => {
+      stage.removeEventListener("wheel", handleNativeStageWheel);
+    };
+  }, [detailSection, isCompactMobile, processStageWheel]);
 
   function getStageItemStyle(relativeStep: number): CSSProperties {
     const style: Record<string, string> = {
@@ -1877,7 +1916,6 @@ export function InviteFlow() {
             onPointerMove={handleStagePointerMove}
             onPointerUp={handleStagePointerUp}
             onPointerCancel={handleStagePointerCancel}
-            onWheel={handleStageWheel}
           >
             {stageItems.map(({ absoluteIndex, relativeStep, section, slot, src }) => {
               const isHidden = Math.abs(relativeStep) > 1.6;

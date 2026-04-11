@@ -266,6 +266,7 @@ textarea {
   min-height: min(64vh, 740px);
   height: 100%;
   overflow: hidden;
+  overscroll-behavior-x: none;
   border-radius: 32px;
   touch-action: pan-y;
   --stage-snap-duration: 560ms;
