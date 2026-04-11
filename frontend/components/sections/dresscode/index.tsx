@@ -8,44 +8,44 @@ export const DRESSCODE_LOOK_MODES: DresscodeLookMode[] = ["male", "female"];
 interface DresscodeLook {
   src: string;
   alt: string;
+  focusPosition: string;
 }
 
 export const DRESSCODE_LOOKS: Record<DresscodeLookMode, DresscodeLook[]> = {
   male: [
-    { src: "/assets/dresscode/male/IMG_0749.jpg", alt: "Мужской образ 1" },
-    { src: "/assets/dresscode/male/IMG_0750.jpg", alt: "Мужской образ 2" },
-    { src: "/assets/dresscode/male/IMG_0762.jpg", alt: "Мужской образ 3" },
-    { src: "/assets/dresscode/male/IMG_0763.jpg", alt: "Мужской образ 4" },
-    { src: "/assets/dresscode/male/IMG_0764.jpg", alt: "Мужской образ 5" },
-    { src: "/assets/dresscode/male/IMG_0765.jpg", alt: "Мужской образ 6" },
-    { src: "/assets/dresscode/male/IMG_0766.jpg", alt: "Мужской образ 7" },
-    { src: "/assets/dresscode/male/IMG_2234.jpg", alt: "Мужской образ 8" },
-    { src: "/assets/dresscode/male/IMG_2236.jpg", alt: "Мужской образ 9" },
-    { src: "/assets/dresscode/male/IMG_2288.jpg", alt: "Мужской образ 10" },
-    { src: "/assets/dresscode/male/IMG_2289.jpg", alt: "Мужской образ 11" },
-    { src: "/assets/dresscode/male/IMG_2290.jpg", alt: "Мужской образ 12" },
-    { src: "/assets/dresscode/male/IMG_2292.jpg", alt: "Мужской образ 13" },
-    { src: "/assets/dresscode/male/IMG_2293.jpg", alt: "Мужской образ 14" }
+    { src: "/assets/dresscode/male/IMG_0749.jpg", alt: "Мужской образ 1", focusPosition: "50% 8%" },
+    { src: "/assets/dresscode/male/IMG_0750.jpg", alt: "Мужской образ 2", focusPosition: "50% 26%" },
+    { src: "/assets/dresscode/male/IMG_0762.jpg", alt: "Мужской образ 3", focusPosition: "52% 28%" },
+    { src: "/assets/dresscode/male/IMG_0763.jpg", alt: "Мужской образ 4", focusPosition: "50% 43%" },
+    { src: "/assets/dresscode/male/IMG_0764.jpg", alt: "Мужской образ 5", focusPosition: "50% 8%" },
+    { src: "/assets/dresscode/male/IMG_0765.jpg", alt: "Мужской образ 6", focusPosition: "60% 63%" },
+    { src: "/assets/dresscode/male/IMG_0766.jpg", alt: "Мужской образ 7", focusPosition: "50% 8%" },
+    { src: "/assets/dresscode/male/IMG_2234.jpg", alt: "Мужской образ 8", focusPosition: "50% 13%" },
+    { src: "/assets/dresscode/male/IMG_2236.jpg", alt: "Мужской образ 9", focusPosition: "50% 18%" },
+    { src: "/assets/dresscode/male/IMG_2288.jpg", alt: "Мужской образ 10", focusPosition: "47% 85%" },
+    { src: "/assets/dresscode/male/IMG_2290.jpg", alt: "Мужской образ 11", focusPosition: "50% 18%" },
+    { src: "/assets/dresscode/male/IMG_2292.jpg", alt: "Мужской образ 12", focusPosition: "50% 48%" },
+    { src: "/assets/dresscode/male/IMG_2293.jpg", alt: "Мужской образ 13", focusPosition: "50% 33%" }
   ],
   female: [
-    { src: "/assets/dresscode/female/IMG_0732.jpg", alt: "Женский образ 1" },
-    { src: "/assets/dresscode/female/IMG_0736.jpg", alt: "Женский образ 2" },
-    { src: "/assets/dresscode/female/IMG_0737.jpg", alt: "Женский образ 3" },
-    { src: "/assets/dresscode/female/IMG_0738.jpg", alt: "Женский образ 4" },
-    { src: "/assets/dresscode/female/IMG_0741.jpg", alt: "Женский образ 5" },
-    { src: "/assets/dresscode/female/IMG_0742.jpg", alt: "Женский образ 6" },
-    { src: "/assets/dresscode/female/IMG_0743.jpg", alt: "Женский образ 7" },
-    { src: "/assets/dresscode/female/IMG_2238.jpg", alt: "Женский образ 8" },
-    { src: "/assets/dresscode/female/IMG_2240.jpg", alt: "Женский образ 9" },
-    { src: "/assets/dresscode/female/IMG_2242.jpg", alt: "Женский образ 10" },
-    { src: "/assets/dresscode/female/IMG_2243.jpg", alt: "Женский образ 11" },
-    { src: "/assets/dresscode/female/IMG_2245.jpg", alt: "Женский образ 12" },
-    { src: "/assets/dresscode/female/IMG_2246.jpg", alt: "Женский образ 13" },
-    { src: "/assets/dresscode/female/IMG_2247.jpg", alt: "Женский образ 14" },
-    { src: "/assets/dresscode/female/IMG_2248.jpg", alt: "Женский образ 15" },
-    { src: "/assets/dresscode/female/IMG_2249.jpg", alt: "Женский образ 16" },
-    { src: "/assets/dresscode/female/IMG_2250.jpg", alt: "Женский образ 17" },
-    { src: "/assets/dresscode/female/IMG_9725.jpg", alt: "Женский образ 18" }
+    { src: "/assets/dresscode/female/IMG_0732.jpg", alt: "Женский образ 1", focusPosition: "38% 26%" },
+    { src: "/assets/dresscode/female/IMG_0736.jpg", alt: "Женский образ 2", focusPosition: "50% 85%" },
+    { src: "/assets/dresscode/female/IMG_0737.jpg", alt: "Женский образ 3", focusPosition: "62% 85%" },
+    { src: "/assets/dresscode/female/IMG_0738.jpg", alt: "Женский образ 4", focusPosition: "50% 34%" },
+    { src: "/assets/dresscode/female/IMG_0741.jpg", alt: "Женский образ 5", focusPosition: "52% 43%" },
+    { src: "/assets/dresscode/female/IMG_0742.jpg", alt: "Женский образ 6", focusPosition: "58% 65%" },
+    { src: "/assets/dresscode/female/IMG_0743.jpg", alt: "Женский образ 7", focusPosition: "45% 100%" },
+    { src: "/assets/dresscode/female/IMG_2238.jpg", alt: "Женский образ 8", focusPosition: "50% 50%" },
+    { src: "/assets/dresscode/female/IMG_2240.jpg", alt: "Женский образ 9", focusPosition: "70% 75%" },
+    { src: "/assets/dresscode/female/IMG_2242.jpg", alt: "Женский образ 10", focusPosition: "37% 28%" },
+    { src: "/assets/dresscode/female/IMG_2243.jpg", alt: "Женский образ 11", focusPosition: "52% 36%" },
+    { src: "/assets/dresscode/female/IMG_2245.jpg", alt: "Женский образ 12", focusPosition: "52% 85%" },
+    { src: "/assets/dresscode/female/IMG_2246.jpg", alt: "Женский образ 13", focusPosition: "38% 33%" },
+    { src: "/assets/dresscode/female/IMG_2247.jpg", alt: "Женский образ 14", focusPosition: "52% 22%" },
+    { src: "/assets/dresscode/female/IMG_2248.jpg", alt: "Женский образ 15", focusPosition: "50% 72%" },
+    { src: "/assets/dresscode/female/IMG_2249.jpg", alt: "Женский образ 16", focusPosition: "50% 57%" },
+    { src: "/assets/dresscode/female/IMG_2250.jpg", alt: "Женский образ 17", focusPosition: "50% 62%" },
+    { src: "/assets/dresscode/female/IMG_9725.jpg", alt: "Женский образ 18", focusPosition: "67% 68%" }
   ]
 };
 
@@ -108,8 +108,9 @@ export function DresscodeSection({ lookMode, activeIndexByMode, onActiveIndexCha
                     src={look.src}
                     alt={look.alt}
                     fill
-                    sizes="(max-width: 680px) 82vw, 540px"
+                    sizes="(max-width: 680px) 82vw, 702px"
                     className="dresscodeSlideImage"
+                    style={{ objectPosition: look.focusPosition }}
                     priority={index < 2}
                   />
                 </div>
