@@ -6,10 +6,8 @@ export function PlanSection({ onDownload }: PlanSectionProps) {
   return (
     <article className="sectionDetail planDetail">
       <div className="planViewer">
-        <div className="detailTopHint hintAnchor detailCardHint detailCardHintPlan" aria-hidden="true" />
-
         <a
-          className="planInvitationCard hintAnchor detailCardHint detailCardHintPlan detailCardHintMobileOnly"
+          className="planInvitationCard"
           href="/assets/plan/invitation-plan.png"
           download="plan-day.png"
           onClick={onDownload}

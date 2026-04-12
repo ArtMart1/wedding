@@ -35,17 +35,13 @@ export const DRESSCODE_LOOKS: Record<DresscodeLookMode, DresscodeLook[]> = {
     { src: "/assets/dresscode/female/IMG_0741.jpg", alt: "Женский образ 5", focusPosition: "52% 43%" },
     { src: "/assets/dresscode/female/IMG_0742.jpg", alt: "Женский образ 6", focusPosition: "58% 65%" },
     { src: "/assets/dresscode/female/IMG_0743.jpg", alt: "Женский образ 7", focusPosition: "45% 100%" },
-    { src: "/assets/dresscode/female/IMG_2238.jpg", alt: "Женский образ 8", focusPosition: "50% 50%" },
-    { src: "/assets/dresscode/female/IMG_2240.jpg", alt: "Женский образ 9", focusPosition: "70% 75%" },
-    { src: "/assets/dresscode/female/IMG_2242.jpg", alt: "Женский образ 10", focusPosition: "37% 28%" },
-    { src: "/assets/dresscode/female/IMG_2243.jpg", alt: "Женский образ 11", focusPosition: "52% 36%" },
-    { src: "/assets/dresscode/female/IMG_2245.jpg", alt: "Женский образ 12", focusPosition: "52% 85%" },
-    { src: "/assets/dresscode/female/IMG_2246.jpg", alt: "Женский образ 13", focusPosition: "38% 33%" },
-    { src: "/assets/dresscode/female/IMG_2247.jpg", alt: "Женский образ 14", focusPosition: "52% 22%" },
-    { src: "/assets/dresscode/female/IMG_2248.jpg", alt: "Женский образ 15", focusPosition: "50% 72%" },
-    { src: "/assets/dresscode/female/IMG_2249.jpg", alt: "Женский образ 16", focusPosition: "50% 57%" },
-    { src: "/assets/dresscode/female/IMG_2250.jpg", alt: "Женский образ 17", focusPosition: "50% 62%" },
-    { src: "/assets/dresscode/female/IMG_9725.jpg", alt: "Женский образ 18", focusPosition: "67% 68%" }
+    { src: "/assets/dresscode/female/IMG_2242.jpg", alt: "Женский образ 8", focusPosition: "37% 28%" },
+    { src: "/assets/dresscode/female/IMG_2243.jpg", alt: "Женский образ 9", focusPosition: "52% 36%" },
+    { src: "/assets/dresscode/female/IMG_2248.jpg", alt: "Женский образ 10", focusPosition: "50% 72%" },
+    { src: "/assets/dresscode/female/IMG_2249.jpg", alt: "Женский образ 11", focusPosition: "50% 57%" },
+    { src: "/assets/dresscode/female/IMG_2250.jpg", alt: "Женский образ 12", focusPosition: "50% 62%" },
+    { src: "/assets/dresscode/female/IMG_9725.jpg", alt: "Женский образ 13", focusPosition: "67% 68%" },
+    { src: "/assets/dresscode/female/IMG_2247.jpg", alt: "Женский образ 14", focusPosition: "52% 22%" }
   ]
 };
 

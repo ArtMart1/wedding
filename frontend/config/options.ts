@@ -16,7 +16,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "salad",
     title: "Салат с буратой",
     description: "авокадо и томаты, рукола и соус песто",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/salad/salad-burrata.png"
   },
   {
     key: "salad_nicoise",
@@ -24,7 +24,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "salad",
     title: "Нисуаз со спаржей",
     description: "картофелем и перепелиным яйцом",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/salad/salad-nicoise.png"
   },
   {
     key: "salad_olivier",
@@ -32,7 +32,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "salad",
     title: "Оливье с цыпленком",
     description: "Прикольно",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/salad/salad-olivier.png"
   },
   {
     key: "salad_crab",
@@ -40,7 +40,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "salad",
     title: "Зеленый салат с крабом",
     description: "и авокадо",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/salad/salad-crab.png"
   },
   {
     key: "salad_salmon",
@@ -48,7 +48,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "salad",
     title: "Салат с лососем",
     description: "или креветками, кус-кусом, шпинатом и авокадо в соевом соусе",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/salad/salad-salmon.png"
   },
   {
     key: "hot_chicken",
@@ -56,7 +56,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "hot",
     title: "Маринованная курица",
     description: "в азиатском соусе с рисом и корейскими огурчиками, подается с кисло-сладким соусом",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/hot/hot-chicken.png"
   },
   {
     key: "hot_veal_cheeks",
@@ -64,7 +64,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "hot",
     title: "Телячие щечки",
     description: "с картофельным пюре",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/hot/hot-veal-cheeks.png"
   },
   {
     key: "hot_beef_steak",
@@ -72,7 +72,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "hot",
     title: "Стейк из говядины",
     description: "с горчичным соусом",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/hot/hot-beef-steak.png"
   },
   {
     key: "hot_salmon_steak",
@@ -80,7 +80,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "hot",
     title: "Стейк лосось",
     description: "с бейби картофелем, спаржей, лабне и травами",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/hot/hot-salmon-steak.png"
   },
   {
     key: "hot_bacon_pasta",
@@ -88,7 +88,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "hot",
     title: "Паста с беконом",
     description: "вешенками и сливочным соусом с белым вином, подается с желтком",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/hot/hot-bacon-pasta.png"
   },
   {
     key: "hot_salmon_pasta",
@@ -96,7 +96,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "hot",
     title: "Паста с лососем",
     description: "шпинатом и красной икрой в сливочном соусе",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/hot/hot-salmon-pasta.png"
   },
   {
     key: "hot_burrata_pasta",
@@ -104,7 +104,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "hot",
     title: "Паста с буратой",
     description: "томатами и пармезаном",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/hot/hot-burrata-pasta.png"
   },
   {
     key: "drink_non_alcohol",
@@ -112,7 +112,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Я без алкоголя",
     description: "Буду пить кампот, чай, кофеек",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-non-alcohol.png"
   },
   {
     key: "drink_spring_punch",
@@ -120,7 +120,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Спринг Февер",
     description: "Джин, трипл сек, синий чай анчан, кордиал павлова, лимон Gin, triple sec, blue tea anchan, cordial pavlova, lemon",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-spring-fever.png"
   },
   {
     key: "drink_scarlet",
@@ -128,7 +128,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Скарлет",
     description: "Джин, красный вермут, лимончелло, черная смородина",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-scarlet.png"
   },
   {
     key: "drink_bellagio",
@@ -136,7 +136,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Беладжио",
     description: "Лимончелло, джин, савиньон бланк, ваниль, лаймовый сорбет",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-bellagio.png"
   },
   {
     key: "drink_la_avenue",
@@ -144,7 +144,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Ла Авеню",
     description: "Клубничный пунш, свежая клубника, Millky punch, strawberry",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-la-avenue.png"
   },
   {
     key: "drink_kiss_me",
@@ -152,7 +152,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Кисс ми",
     description: "Джин, лимон, малина, Gin, lemon, raspberry",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-kiss-me.png"
   },
   {
     key: "drink_peach_cloud",
@@ -160,7 +160,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Пич клауд",
     description: "Апероль, персик, сок лимона Gin, kiwi, apple, lemon juice",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-peach-cloud.png"
   },
   {
     key: "drink_green_sour",
@@ -168,7 +168,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Грин саур",
     description: "Джин, киви, яблоко, сок лимона",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-green-sour.png"
   },
   {
     key: "drink_red_wine",
@@ -176,7 +176,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Бокал красного Вина",
     description: "Итальянское заебумба",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-red-wine.png"
   },
   {
     key: "drink_white_wine",
@@ -184,7 +184,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Бокал белого Вина",
     description: "Итальянское класс ваще",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-white-wine.png"
   },
   {
     key: "gift_cash",

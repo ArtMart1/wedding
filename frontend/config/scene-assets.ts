@@ -5,6 +5,7 @@ export const AUTH_LOGO_MOBILE_URL = "/assets/logo/logo-script-ru-mobile.svg";
 export const HERO_LOGO_URL = "/assets/logo/logo-script-ru.svg";
 export const HERO_LOGO_MOBILE_URL = "/assets/logo/logo-script-ru-mobile.svg";
 export const ENTRY_SPLASH_URL = "/assets/mobile/preloader.png";
+export const HOME_DATE_BADGE_URL = "/assets/scene/home-date-30-maya.svg";
 
 const SECTION_IMAGES: Record<SectionKey, string> = {
   dresscode: "/assets/scene/dresscode-cat.png",

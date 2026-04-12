@@ -9,6 +9,7 @@ import {
   AUTH_LOGO_URL,
   ENTRY_SPLASH_URL,
   getSectionImage,
+  HOME_DATE_BADGE_URL,
   HERO_LOGO_MOBILE_URL,
   HERO_LOGO_URL
 } from "@/config/scene-assets";
@@ -36,7 +37,7 @@ import type {
   SectionKey
 } from "@/lib/types";
 
-const SECTION_ORDER: SectionKey[] = ["dresscode", "food", "gifts", "plan"];
+const SECTION_ORDER: SectionKey[] = ["plan", "food", "dresscode", "gifts"];
 
 const SECTION_LABELS: Record<SectionKey, string> = {
   dresscode: "Дресс-код",
@@ -193,7 +194,7 @@ function getInitialScreen(_responses: InviteResponses): "sections" {
 }
 
 function getInitialSection(responses: InviteResponses, progress: InviteProgress): SectionKey {
-  return SECTION_ORDER.find((section) => !isSectionComplete(section, responses, progress)) ?? "dresscode";
+  return SECTION_ORDER.find((section) => !isSectionComplete(section, responses, progress)) ?? SECTION_ORDER[0];
 }
 
 function normalizeTrackIndex(index: number): number {
@@ -1462,7 +1463,9 @@ export function InviteFlow() {
     const clampedRelativeStep = clamp(relativeStep, -2.6, 2.6);
     const absRelativeStep = Math.abs(clampedRelativeStep);
     const centerBlend = clamp(1 - absRelativeStep, 0, 1);
+    const stageWidthBlend = 0.604651 + 0.395349 * centerBlend;
     const scale = clamp(1 - 0.16 * Math.min(absRelativeStep, 1) - 0.12 * Math.max(absRelativeStep - 1, 0), 0.72, 1);
+    const totalScale = stageWidthBlend * scale;
     const opacity =
       absRelativeStep <= 1
         ? 1 - 0.04 * absRelativeStep
@@ -1476,15 +1479,12 @@ export function InviteFlow() {
           })`;
 
     style["--stage-slot-x"] = signedX;
-    style["--stage-slot-y"] = `calc(11.851852vh * ${centerBlend})`;
-    style["--stage-slot-scale"] = `${scale}`;
+    style["--stage-slot-scale"] = `${totalScale}`;
     style["--stage-slot-opacity"] = `${opacity}`;
     style["--stage-slot-visibility"] = absRelativeStep <= 2.15 ? "visible" : "hidden";
     style["--stage-slot-z"] = `${Math.max(0, 5 - Math.round(absRelativeStep * 2))}`;
     style["--stage-shadow-y"] = `calc(16px + 12px * ${centerBlend})`;
     style["--stage-shadow-blur"] = `calc(24px + 14px * ${centerBlend})`;
-    style.width = `calc(var(--stage-side-width) + (var(--stage-center-width) - var(--stage-side-width)) * ${centerBlend})`;
-    style.height = `calc(var(--stage-side-height) + (var(--stage-center-height) - var(--stage-side-height)) * ${centerBlend})`;
 
     return style as CSSProperties;
   }
@@ -1669,6 +1669,7 @@ export function InviteFlow() {
   ) : null;
   const mobileIndicatorIndex = mod(Math.round(mobileStageProgress), SECTION_ORDER.length);
   const mobileHomeActiveSection = SECTION_ORDER[mobileIndicatorIndex];
+  const showHomeDateBadge = activeSection === SECTION_ORDER[0];
 
   if (isRestoringSession) {
     return (
@@ -1742,13 +1743,16 @@ export function InviteFlow() {
           <header className="sceneHeader sceneHeaderDetail">
             {isDresscodeDetail || isFoodDetail || isGiftDetail || isPlanDetail ? (
               <div className={`detailHeaderPrimary ${isDresscodeDetail ? "detailHeaderDresscode" : "detailHeaderFood"}`}>
-                <button className="detailBackButton" type="button" onClick={closeSectionDetails} aria-label="Назад">
-                  <DetailBackIcon className="detailBackIcon" />
-                </button>
-                <div className="detailHeaderText">
-                  <h1 className="detailHeaderTitle">{getDetailTitle(detailSection)}</h1>
-                  {getDetailSubtitle(detailSection) ? <p className="detailHeaderSubtitle">{getDetailSubtitle(detailSection)}</p> : null}
+                <div className="detailHeaderLead">
+                  <button className="detailBackButton" type="button" onClick={closeSectionDetails} aria-label="Назад">
+                    <DetailBackIcon className="detailBackIcon" />
+                  </button>
+                  <div className="detailHeaderText">
+                    <h1 className="detailHeaderTitle">{getDetailTitle(detailSection)}</h1>
+                    {getDetailSubtitle(detailSection) ? <p className="detailHeaderSubtitle">{getDetailSubtitle(detailSection)}</p> : null}
+                  </div>
                 </div>
+                {isDresscodeDetail ? <div className="dresscodeHeaderPalette" aria-hidden="true" /> : null}
               </div>
             ) : (
               <div className="detailHeaderControls">
@@ -1800,42 +1804,40 @@ export function InviteFlow() {
             </div>
           </section>
 
-          {!isPlanDetail ? (
-            <div
-              className={`detailFooter ${isDresscodeDetail ? "detailFooterSplit" : ""} ${
-                isFoodDetail || isGiftDetail ? "detailFooterFood" : ""
-              }`}
-            >
-              {isDresscodeDetail ? (
-                <div className="detailFooterInfo">
-                  <div className="dresscodeLookPicker" role="group" aria-label="Режим dresscode">
-                    <button
-                      type="button"
-                      className={`dresscodeLookButton ${dresscodeLookMode === "male" ? "active" : ""}`}
-                      onClick={() => setDresscodeLookMode("male")}
-                      aria-pressed={dresscodeLookMode === "male"}
-                      aria-label="male"
-                    >
-                      <DresscodeMaleIcon className="dresscodeLookIcon" />
-                    </button>
-                    <button
-                      type="button"
-                      className={`dresscodeLookButton ${dresscodeLookMode === "female" ? "active" : ""}`}
-                      onClick={() => setDresscodeLookMode("female")}
-                      aria-pressed={dresscodeLookMode === "female"}
-                      aria-label="female"
-                    >
-                      <DresscodeFemaleIcon className="dresscodeLookIcon" />
-                    </button>
-                  </div>
+          <div
+            className={`detailFooter ${isDresscodeDetail ? "detailFooterSplit" : ""} ${
+              isFoodDetail || isGiftDetail || isPlanDetail ? "detailFooterFood" : ""
+            }`}
+          >
+            {isDresscodeDetail ? (
+              <div className="detailFooterInfo">
+                <div className="dresscodeLookPicker" role="group" aria-label="Режим dresscode">
+                  <button
+                    type="button"
+                    className={`dresscodeLookButton ${dresscodeLookMode === "male" ? "active" : ""}`}
+                    onClick={() => setDresscodeLookMode("male")}
+                    aria-pressed={dresscodeLookMode === "male"}
+                    aria-label="male"
+                  >
+                    <DresscodeMaleIcon className="dresscodeLookIcon" />
+                  </button>
+                  <button
+                    type="button"
+                    className={`dresscodeLookButton ${dresscodeLookMode === "female" ? "active" : ""}`}
+                    onClick={() => setDresscodeLookMode("female")}
+                    aria-pressed={dresscodeLookMode === "female"}
+                    aria-label="female"
+                  >
+                    <DresscodeFemaleIcon className="dresscodeLookIcon" />
+                  </button>
                 </div>
-              ) : null}
+              </div>
+            ) : null}
 
-              <button className="detailNextButton" type="button" onClick={handleDetailNext} disabled={isDetailNextDisabled}>
-                Далее
-              </button>
-            </div>
-          ) : null}
+            <button className="detailNextButton" type="button" onClick={handleDetailNext} disabled={isDetailNextDisabled}>
+              Далее
+            </button>
+          </div>
 
           {isFoodDetail && isFoodCommentDialogOpen ? (
             <div className="detailModalOverlay" onClick={closeFoodCommentDialog}>
@@ -1910,7 +1912,11 @@ export function InviteFlow() {
                     onClick={() => openSectionDetails(section)}
                     aria-label={`Открыть раздел ${SECTION_LABELS[section]}`}
                   >
-                    <img className="mobileStageImage" src={src} alt="" />
+                    <img
+                      className={`mobileStageImage ${section === "food" ? "mobileStageImageFood" : ""}`}
+                      src={src}
+                      alt=""
+                    />
                   </button>
                 </div>
               ))}
@@ -1946,6 +1952,12 @@ export function InviteFlow() {
             onPointerUp={handleStagePointerUp}
             onPointerCancel={handleStagePointerCancel}
           >
+            <img
+              className={`heroStageDateBadge ${showHomeDateBadge ? "isVisible" : ""}`}
+              src={HOME_DATE_BADGE_URL}
+              alt=""
+              aria-hidden="true"
+            />
             {stageItems.map(({ absoluteIndex, relativeStep, section, slot, src }) => {
               const isHidden = Math.abs(relativeStep) > 1.6;
               const isActive = slot === "center";
@@ -1963,7 +1975,7 @@ export function InviteFlow() {
                   aria-label={isActive ? `Открыть раздел ${SECTION_LABELS[section]}` : `Перейти к разделу ${SECTION_LABELS[section]}`}
                   tabIndex={isHidden ? -1 : 0}
                 >
-                  <img className="stagePropImage" src={src} alt="" />
+                  <img className={`stagePropImage ${section === "food" ? "stagePropImageFood" : ""}`} src={src} alt="" />
                 </button>
               );
             })}

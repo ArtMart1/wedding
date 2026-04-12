@@ -10,6 +10,10 @@
   --font-body: var(--font-onest, "Helvetica Neue"), Helvetica, Arial, sans-serif;
   --font-logo: var(--font-onest, "Helvetica Neue"), Helvetica, Arial, sans-serif;
   --font-plan-script: "Gogol", "Snell Roundhand", "Brush Script MT", cursive;
+  --site-bg-rotation: 90deg;
+  --site-bg-center-offset-x: 0px;
+  --home-tabs-surface: rgba(245, 245, 245, 0.44);
+  --home-tabs-active-surface: rgba(255, 255, 255, 0.64);
   --bg: #ffffff;
   --ink: #101010;
   --muted: #6b6b6b;
@@ -41,13 +45,28 @@ body {
 body {
   margin: 0;
   min-height: 100%;
+  position: relative;
+  isolation: isolate;
   font-family: var(--font-body);
   color: var(--ink);
   background-color: #f7f3eb;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  left: calc(50% + var(--site-bg-center-offset-x));
+  top: 50%;
+  width: calc(100dvh + 2px);
+  height: calc(100dvw + 2px);
+  transform: translate(-50%, -50%) rotate(var(--site-bg-rotation));
+  transform-origin: center;
   background-image: url("/assets/background/back.png");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
+  pointer-events: none;
+  z-index: -1;
 }
 
 button,
@@ -88,6 +107,7 @@ textarea {
 
 .sceneShellDetail {
   --detail-bleed-inline: 30px;
+  --detail-footer-width: min(760px, calc(100vw - (var(--scene-shell-inline-padding) * 2)));
   overflow-x: visible;
   overflow-y: visible;
   padding: 22px 30px 28px;
@@ -248,7 +268,7 @@ textarea {
   --hint-image: url("/hint-dresscode-top.svg");
   --hint-width: min(386px, calc(100vw - 48px));
   --hint-aspect-ratio: 386 / 66;
-  --hint-left: 70%;
+  --hint-left: 50%;
   --hint-z: 80;
 }
 
@@ -321,11 +341,12 @@ textarea {
   --stage-side-height: calc(var(--stage-center-height) * 0.634615);
   --stage-side-x: calc(50vw - (var(--stage-side-width) * 0.16));
   --stage-far-x: calc(50vw + (var(--stage-side-width) * 0.82));
-  --stage-slot-y: 0px;
+  --stage-center-offset-y: calc(11.851852vh - 100px);
+  --stage-slot-y: var(--stage-center-offset-y);
   --hero-logo-width: min(1530px, 71vw);
   --hero-logo-max-width: calc(100vw - 120px);
   --hero-logo-aspect-ratio: 1530 / 167;
-  --hero-logo-center-offset-y: clamp(88px, 14.5vh, 152px);
+  --hero-logo-center-offset-y: calc(clamp(88px, 14.5vh, 152px) + 100px);
 }
 
 .heroStage::before {
@@ -344,6 +365,32 @@ textarea {
   user-select: none;
   pointer-events: none;
   z-index: 0;
+}
+
+.heroStageDateBadge {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + var(--stage-center-offset-y) + clamp(142px, 12vh, 188px) + 150px);
+  width: clamp(184px, 13.5vw, 248px);
+  height: auto;
+  display: block;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  z-index: 2;
+  transition:
+    opacity 240ms ease,
+    transform 320ms cubic-bezier(0.2, 0.82, 0.22, 1),
+    visibility 0ms linear 240ms;
+}
+
+.heroStageDateBadge.isVisible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%);
+  transition-delay: 0ms;
 }
 
 .entrySplash {
@@ -372,15 +419,13 @@ textarea {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: var(--stage-side-width);
-  height: var(--stage-side-height);
+  width: var(--stage-center-width);
+  height: var(--stage-center-height);
   display: flex;
   align-items: center;
   justify-content: center;
   transition:
     transform var(--stage-snap-duration) var(--stage-snap-easing),
-    width var(--stage-snap-duration) var(--stage-snap-easing),
-    height var(--stage-snap-duration) var(--stage-snap-easing),
     opacity 420ms ease,
     filter var(--stage-snap-duration) var(--stage-snap-easing);
   transform: translate(calc(-50% + var(--stage-slot-x, 0px) + var(--stage-drag-x, 0px)), calc(-50% + var(--stage-slot-y))) scale(calc(var(--stage-slot-scale, 1) + var(--stage-slot-scale-adjust, 0)));
@@ -414,10 +459,8 @@ textarea {
 }
 
 .stagePropButton[data-slot="center"] {
-  width: var(--stage-center-width);
-  height: var(--stage-center-height);
   --stage-slot-x: 0px;
-  --stage-slot-y: 11.851852vh;
+  --stage-slot-y: var(--stage-center-offset-y);
   --stage-slot-scale: 1;
   --stage-slot-opacity: 1;
   --stage-slot-z: 3;
@@ -456,6 +499,11 @@ textarea {
   object-position: center center;
   pointer-events: none;
   user-select: none;
+}
+
+.stagePropImageFood {
+  transform: scale(0.8);
+  transform-origin: center center;
 }
 
 .stageAlert {
@@ -581,7 +629,7 @@ textarea {
 }
 
 .detailFooterSplit {
-  width: min(var(--detail-shell-width), 100%);
+  width: min(var(--detail-footer-width), 100%);
   margin: 0 auto;
   justify-content: space-between;
   align-items: center;
@@ -590,7 +638,7 @@ textarea {
 }
 
 .detailFooterFood {
-  width: min(var(--detail-shell-width), 100%);
+  width: min(var(--detail-footer-width), 100%);
   margin: 0 auto;
   justify-content: flex-end;
   align-items: center;
@@ -968,8 +1016,8 @@ textarea {
 }
 
 .giftSlide .foodSlideInner {
-  width: min(calc(100% - 72px), 386px);
-  max-width: calc(100% - 72px);
+  width: min(calc(100% - 48px), 464px);
+  max-width: calc(100% - 48px);
 }
 
 .foodSlideArtworkWrap {
@@ -987,8 +1035,8 @@ textarea {
 }
 
 .giftSlide .foodSlideArtwork {
-  width: 196px;
-  height: 196px;
+  width: 156px;
+  height: 156px;
 }
 
 .foodSlideBody {
@@ -1017,8 +1065,8 @@ textarea {
 
 .giftSlide .foodSlideLabel {
   font-family: var(--font-plan-script);
-  font-size: clamp(48px, calc(var(--detail-card-width) * 0.07), 60px);
-  line-height: 0.9;
+  font-size: clamp(46px, calc(var(--detail-card-width) * 0.068), 54px);
+  line-height: 0.88;
   letter-spacing: 0;
 }
 
@@ -1256,12 +1304,35 @@ textarea {
   gap: 16px;
 }
 
+.detailHeaderLead {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
 .detailHeaderDresscode {
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 24px;
 }
 
 .detailHeaderFood {
   justify-content: flex-start;
+}
+
+.dresscodeHeaderPalette {
+  width: clamp(212px, 17vw, 278px);
+  min-width: 212px;
+  flex: 0 0 auto;
+  aspect-ratio: 278 / 77;
+  background-image: url("/assets/dresscode/colors.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  align-self: flex-start;
+  margin-top: 4px;
+  pointer-events: none;
 }
 
 .detailBackButton {
@@ -1303,7 +1374,7 @@ textarea {
 
 .detailHeaderSubtitle {
   margin: 0;
-  color: #b8b8bc;
+  color: #595959;
   font-size: 15px;
   line-height: 1.25;
   font-weight: 400;
@@ -1601,6 +1672,10 @@ textarea {
   width: fit-content;
 }
 
+.sceneShellHome .sectionTabs {
+  background: var(--home-tabs-surface);
+}
+
 .tabButton {
   border: 0;
   border-radius: 999px;
@@ -1617,6 +1692,10 @@ textarea {
 .tabButton.active {
   color: var(--ink);
   background: #dcdcdc;
+}
+
+.sceneShellHome .tabButton.active {
+  background: var(--home-tabs-active-surface);
 }
 
 .alertMark {
@@ -2049,6 +2128,20 @@ textarea {
     margin: 0;
   }
 
+  .detailHeaderLead {
+    gap: 12px;
+  }
+
+  .detailHeaderDresscode {
+    gap: 10px;
+  }
+
+  .dresscodeHeaderPalette {
+    width: clamp(116px, 34vw, 152px);
+    min-width: 116px;
+    margin-top: 2px;
+  }
+
   .detailBackButton {
     display: grid;
     width: 44px;
@@ -2073,7 +2166,7 @@ textarea {
   .detailHeaderSubtitle {
     font-size: 0.95rem;
     line-height: 1.2;
-    color: #d2d2d6;
+    color: #595959;
   }
 
   .sectionDetail {
@@ -2087,10 +2180,13 @@ textarea {
     grid-template-rows: auto minmax(0, 1fr);
   }
 
-  .giftsDetail,
   .dresscodeDetail,
   .planDetail {
     grid-template-rows: minmax(0, 1fr);
+  }
+
+  .giftsDetail {
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .detailContent {
@@ -2183,8 +2279,8 @@ textarea {
   }
 
   .giftSlide .foodSlideArtwork {
-    width: clamp(124px, 31vw, 160px);
-    height: clamp(124px, 31vw, 160px);
+    width: clamp(84px, 24vw, 112px);
+    height: clamp(84px, 24vw, 112px);
   }
 
   .foodSlideBody {
@@ -2204,8 +2300,8 @@ textarea {
   }
 
   .giftSlide .foodSlideLabel {
-    font-size: clamp(2.2rem, 10vw, 3rem);
-    line-height: 0.88;
+    font-size: clamp(2.15rem, 9.8vw, 3rem);
+    line-height: 0.86;
   }
 
   .foodSlideDescription {
@@ -2381,7 +2477,7 @@ textarea {
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
-    background: rgba(245, 245, 245, 0.44);
+    background: var(--home-tabs-surface);
     padding: var(--home-tabs-shell-padding-y) var(--home-tabs-shell-padding-x);
     gap: var(--home-tabs-gap);
     overflow: hidden;
@@ -2418,7 +2514,7 @@ textarea {
   }
 
   .sceneShellHome .tabButton.active span {
-    background: rgba(231, 231, 231, 0.44);
+    background: var(--home-tabs-active-surface);
   }
 
   .mobileStage {
@@ -2482,6 +2578,11 @@ textarea {
     pointer-events: none;
     backface-visibility: hidden;
     -webkit-user-drag: none;
+  }
+
+  .mobileStageImageFood {
+    transform: scale(0.8);
+    transform-origin: center center;
   }
 
   .mobileStageIndicators {
