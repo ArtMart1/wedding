@@ -1,15 +1,15 @@
 import type { SectionKey } from "@/lib/types";
 
-export const AUTH_LOGO_URL = "/assets/logo/logo-small.png";
-export const AUTH_LOGO_MOBILE_URL = "/assets/logo/logo-stacked.svg";
-export const HERO_LOGO_URL = "/assets/logo/logo-big.png";
-export const HERO_LOGO_MOBILE_URL = "/assets/logo/logo-stacked.svg";
-export const ENTRY_SPLASH_URL = "/assets/mobile/main1.svg";
+export const AUTH_LOGO_URL = "/assets/logo/logo-script-ru.svg";
+export const AUTH_LOGO_MOBILE_URL = "/assets/logo/logo-script-ru-mobile.svg";
+export const HERO_LOGO_URL = "/assets/logo/logo-script-ru.svg";
+export const HERO_LOGO_MOBILE_URL = "/assets/logo/logo-script-ru-mobile.svg";
+export const ENTRY_SPLASH_URL = "/assets/mobile/preloader.png";
 
 const SECTION_IMAGES: Record<SectionKey, string> = {
-  dresscode: "/assets/scene/dresscode.png",
-  food: "/assets/scene/food.png",
-  gifts: "/assets/scene/gifts.png",
+  dresscode: "/assets/scene/dresscode-cat.png",
+  food: "/assets/scene/food-pepper.png",
+  gifts: "/assets/scene/gifts-dog.png",
   plan: "/assets/scene/dresscode-couple.png"
 };
 

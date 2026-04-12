@@ -1,6 +1,15 @@
+@font-face {
+  font-family: "Gogol";
+  src: url("/assets/fonts/gogol.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
-  --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-logo: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-body: var(--font-onest, "Helvetica Neue"), Helvetica, Arial, sans-serif;
+  --font-logo: var(--font-onest, "Helvetica Neue"), Helvetica, Arial, sans-serif;
+  --font-plan-script: "Gogol", "Snell Roundhand", "Brush Script MT", cursive;
   --bg: #ffffff;
   --ink: #101010;
   --muted: #6b6b6b;
@@ -34,7 +43,11 @@ body {
   min-height: 100%;
   font-family: var(--font-body);
   color: var(--ink);
-  background: var(--bg);
+  background-color: #f7f3eb;
+  background-image: url("/assets/background/back.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
 }
 
 button,
@@ -130,6 +143,20 @@ textarea {
   --food-shell-width: var(--food-card-width);
   --detail-gallery-gap: var(--food-gallery-gap);
   --detail-shell-width: var(--food-shell-width);
+}
+
+.sceneShellDetailPlan {
+  --detail-card-max-width: 760px;
+  --detail-card-ratio: 0.9511627907;
+  --detail-inline-fit-padding: 60px;
+  --detail-vertical-fit-budget: 238px;
+  --detail-card-width: min(
+    var(--detail-card-max-width),
+    calc(100vw - var(--detail-inline-fit-padding)),
+    calc((100dvh - var(--detail-vertical-fit-budget)) / var(--detail-card-ratio))
+  );
+  --detail-card-height: calc(var(--detail-card-width) * var(--detail-card-ratio));
+  --detail-shell-width: var(--detail-card-width);
 }
 
 .sceneHeader {
@@ -295,10 +322,10 @@ textarea {
   --stage-side-x: calc(50vw - (var(--stage-side-width) * 0.16));
   --stage-far-x: calc(50vw + (var(--stage-side-width) * 0.82));
   --stage-slot-y: 0px;
-  --hero-logo-width: min(1206px, 62.8125vw);
+  --hero-logo-width: min(1530px, 71vw);
   --hero-logo-max-width: calc(100vw - 120px);
-  --hero-logo-aspect-ratio: 1206 / 254;
-  --hero-logo-center-offset-y: clamp(72px, 12.5926vh, 136px);
+  --hero-logo-aspect-ratio: 1530 / 167;
+  --hero-logo-center-offset-y: clamp(88px, 14.5vh, 152px);
 }
 
 .heroStage::before {
@@ -600,7 +627,7 @@ textarea {
 }
 
 .detailNextButton.authNextButton {
-  justify-self: end;
+  justify-self: center;
 }
 
 .sceneEditor {
@@ -760,13 +787,19 @@ textarea {
   display: grid;
   place-items: center;
   border: 0;
-  background: #ffffff;
+  background: transparent;
   box-shadow: none;
   padding: 0;
   text-align: left;
   cursor: pointer;
   overflow: visible;
   opacity: 1;
+}
+
+.foodSlide.giftSlide,
+.foodSlide.giftSlide.isActive {
+  background: transparent;
+  box-shadow: none;
 }
 
 .dresscodeSlide.isActive {
@@ -776,35 +809,137 @@ textarea {
   opacity: 1;
 }
 
-.planDownloadCard {
-  display: grid;
-  place-items: center;
+.planInvitationCard {
+  position: relative;
+  display: block;
+  width: var(--detail-card-width);
+  height: var(--detail-card-height);
+  color: #130f0b;
   text-decoration: none;
-  color: #b6bcc5;
-  background: #ebf0f4;
-  box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.05);
+  transition: transform 220ms ease;
 }
 
-.planDownloadCard:hover {
-  color: #9ea5ae;
+.planInvitationCard:hover {
+  transform: translateY(-2px);
 }
 
-.planDownloadCard:focus-visible {
+.planInvitationCard:focus-visible {
   outline: 2px solid rgba(15, 104, 211, 0.3);
   outline-offset: 8px;
 }
 
-.planDownloadLabel {
-  width: min(420px, calc(100% - 72px));
+.planInvitationBackground {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.planInvitationContent {
+  position: absolute;
+  inset: 0;
+  --plan-hero-width: min(calc(var(--detail-card-width) * 0.743421), 565px);
+  --plan-copy-width: min(calc(var(--detail-card-width) * 0.660526), 502px);
+}
+
+.planInvitationHero {
+  position: absolute;
+  top: 17.8%;
+  left: 50%;
+  width: var(--plan-hero-width);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--detail-card-width) * 0.01);
   text-align: center;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 1.05;
+}
+
+.planInvitationNames,
+.planInvitationLead,
+.planInvitationDate,
+.planInvitationScheduleLine {
+  margin: 0;
+  font-family: var(--font-plan-script);
   font-weight: 400;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.01em;
+}
+
+.planInvitationNames {
+  width: 100%;
+  font-size: min(calc(var(--detail-card-width) * 0.073684), 56px);
+  line-height: 0.92;
+  letter-spacing: min(calc(var(--detail-card-width) * 0.001474), 1.12px);
+  white-space: nowrap;
+}
+
+.planInvitationLead {
+  width: 100%;
+  font-size: min(calc(var(--detail-card-width) * 0.047368), 36px);
+  line-height: 0.92;
+  letter-spacing: min(calc(var(--detail-card-width) * 0.000947), 0.72px);
+  white-space: nowrap;
+}
+
+.planInvitationDate {
+  position: absolute;
+  top: 39.5%;
+  left: 50%;
+  width: var(--plan-copy-width);
+  transform: translateX(-50%);
+  margin: 0;
+  color: #c90d10;
+  font-size: min(calc(var(--detail-card-width) * 0.073684), 56px);
+  line-height: 0.92;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.planInvitationSchedule {
+  position: absolute;
+  top: 61.15%;
+  left: 50%;
+  width: var(--plan-copy-width);
+  transform: translateX(-50%);
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: calc(var(--detail-card-width) * 0.0065);
+}
+
+.planInvitationScheduleLine {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  width: 100%;
+  gap: calc(var(--detail-card-width) * 0.012);
+  text-align: center;
+  line-height: 0.96;
+}
+
+.planInvitationScheduleLineStacked {
+  display: block;
+}
+
+.planInvitationTime {
+  flex: 0 0 auto;
+  font-size: min(calc(var(--detail-card-width) * 0.057895), 44px);
+}
+
+.planInvitationLocation {
+  min-width: 0;
+  font-size: min(calc(var(--detail-card-width) * 0.047368), 36px);
 }
 
 .foodSlide.isActive {
-  background: #ffffff;
+  background: transparent;
   box-shadow: none;
   transform: scale(1);
   opacity: 1;
@@ -821,8 +956,8 @@ textarea {
 .foodSlideInner {
   position: relative;
   z-index: 2;
-  width: min(calc(100% - 72px), 386px);
-  max-width: calc(100% - 72px);
+  width: min(calc(100% - 48px), 464px);
+  max-width: calc(100% - 48px);
   min-height: 100%;
   margin: 0 auto;
   display: grid;
@@ -830,6 +965,11 @@ textarea {
   justify-items: center;
   gap: clamp(28px, 3.4vh, 40px);
   padding: clamp(28px, 4vh, 40px) 0;
+}
+
+.giftSlide .foodSlideInner {
+  width: min(calc(100% - 72px), 386px);
+  max-width: calc(100% - 72px);
 }
 
 .foodSlideArtworkWrap {
@@ -844,6 +984,11 @@ textarea {
   object-fit: contain;
   object-position: center;
   display: block;
+}
+
+.giftSlide .foodSlideArtwork {
+  width: 196px;
+  height: 196px;
 }
 
 .foodSlideBody {
@@ -863,18 +1008,26 @@ textarea {
 
 .foodSlideLabel {
   color: #333333;
-  font-size: 48px;
-  line-height: 0.98;
+  font-family: var(--font-plan-script);
+  font-size: clamp(46px, calc(var(--detail-card-width) * 0.068), 54px);
+  line-height: 0.88;
   font-weight: 400;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
+}
+
+.giftSlide .foodSlideLabel {
+  font-family: var(--font-plan-script);
+  font-size: clamp(48px, calc(var(--detail-card-width) * 0.07), 60px);
+  line-height: 0.9;
+  letter-spacing: 0;
 }
 
 .foodSlideDescription {
   color: #333333;
   font-size: 24px;
-  line-height: 1.12;
+  line-height: 1.1;
   font-weight: 400;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .foodSlideSelection {
@@ -977,6 +1130,14 @@ textarea {
   object-fit: contain;
 }
 
+.foodCommentRail {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
 .foodCommentButtonAnchor {
   position: relative;
   flex: 0 0 auto;
@@ -987,6 +1148,52 @@ textarea {
   --hint-width: clamp(212px, 15vw, 308px);
   --hint-left: 57%;
   --hint-offset-bottom: calc(100% - 24px);
+}
+
+.foodCommentStatusBubble {
+  position: absolute;
+  left: var(--hint-left, 57%);
+  bottom: var(--hint-offset-bottom, calc(100% - 24px));
+  width: clamp(228px, 16vw, 308px);
+  aspect-ratio: 704 / 222;
+  padding: 0 26px 30px;
+  display: grid;
+  place-items: center;
+  background-image: url("/assets/bubbles/comment-sent-bubble.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transform: translate(-50%, 0);
+  pointer-events: none;
+  z-index: 12;
+  animation: foodCommentStatusReveal 4400ms forwards;
+}
+
+.foodCommentStatusBubbleText {
+  color: #ffffff;
+  font-size: clamp(0.82rem, 1vw, 0.96rem);
+  font-weight: 600;
+  line-height: 1.1;
+  text-align: center;
+  translate: 0 -10px;
+}
+
+@keyframes foodCommentStatusReveal {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(0.96);
+  }
+
+  10%,
+  82% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -4px) scale(0.98);
+  }
 }
 
 .foodGallery {
@@ -1555,7 +1762,7 @@ textarea {
 }
 
 .authSection {
-  width: min(560px, 100%);
+  width: min(1040px, 100%);
   display: grid;
   gap: 28px;
   justify-items: center;
@@ -1576,17 +1783,19 @@ textarea {
 }
 
 .authIntro {
-  width: 100%;
+  width: min(1040px, 100%);
   display: grid;
   gap: 32px;
   align-self: center;
   justify-items: center;
+  margin-inline: auto;
 }
 
 .authLogoFrame {
   justify-self: center;
-  width: min(440px, 88vw);
-  height: 110px;
+  width: min(760px, 92vw);
+  height: auto;
+  aspect-ratio: 1530 / 167;
   background-image: var(--auth-logo-url);
   background-position: center;
   background-repeat: no-repeat;
@@ -1601,15 +1810,18 @@ textarea {
 }
 
 .authFormLogin {
+  width: min(1040px, 100%);
   min-height: auto;
   grid-template-rows: minmax(0, 1fr) auto;
+  justify-items: center;
 }
 
 .authFormFields {
-  width: 100%;
+  width: min(1040px, 100%);
   display: grid;
   gap: 32px;
   align-content: normal;
+  justify-self: center;
 }
 
 .fieldLabel {
@@ -1813,6 +2025,18 @@ textarea {
     --detail-card-height: calc(var(--detail-card-width) * var(--detail-card-ratio));
   }
 
+  .sceneShellDetailPlan {
+    --detail-card-ratio: 0.9511627907;
+    --detail-inline-fit-padding: 40px;
+    --detail-vertical-fit-budget: 176px;
+    --detail-bleed-inline: 20px;
+    --detail-card-width: min(
+      calc(100vw - var(--detail-inline-fit-padding)),
+      calc((100dvh - var(--detail-vertical-fit-budget)) / var(--detail-card-ratio))
+    );
+    --detail-card-height: calc(var(--detail-card-width) * var(--detail-card-ratio));
+  }
+
   .sceneHeaderDetail {
     width: 100%;
     justify-content: stretch;
@@ -1924,14 +2148,20 @@ textarea {
     scroll-snap-align: start;
   }
 
+  .foodSlide.giftSlide,
+  .foodSlide.giftSlide.isActive {
+    background: transparent;
+    box-shadow: none;
+  }
+
   .foodSlide {
-    background: #ebf0f4;
-    box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.05);
+    background: transparent;
+    box-shadow: none;
   }
 
   .foodSlide.isActive {
-    background: #ebf0f4;
-    box-shadow: inset 0 0 0 1px rgba(0, 16, 36, 0.05);
+    background: transparent;
+    box-shadow: none;
   }
 
   .foodSlide::before,
@@ -1952,6 +2182,11 @@ textarea {
     height: clamp(84px, 24vw, 112px);
   }
 
+  .giftSlide .foodSlideArtwork {
+    width: clamp(124px, 31vw, 160px);
+    height: clamp(124px, 31vw, 160px);
+  }
+
   .foodSlideBody {
     width: 100%;
     justify-content: flex-start;
@@ -1963,13 +2198,20 @@ textarea {
   }
 
   .foodSlideLabel {
-    font-size: clamp(1.7rem, 7.2vw, 2.45rem);
-    line-height: 0.96;
+    font-size: clamp(2.15rem, 9.8vw, 3rem);
+    line-height: 0.86;
+    letter-spacing: 0;
+  }
+
+  .giftSlide .foodSlideLabel {
+    font-size: clamp(2.2rem, 10vw, 3rem);
+    line-height: 0.88;
   }
 
   .foodSlideDescription {
-    font-size: clamp(0.95rem, 3.9vw, 1.2rem);
-    line-height: 1.12;
+    font-size: clamp(1rem, 4.1vw, 1.2rem);
+    line-height: 1.08;
+    letter-spacing: 0;
   }
 
   .foodSlideSelection {
@@ -2016,8 +2258,23 @@ textarea {
     height: 54px;
   }
 
+  .foodCommentRail {
+    flex: 0 0 auto;
+    min-width: auto;
+  }
+
   .foodCommentButtonAnchor {
     --hint-width: min(236px, calc(100vw - 64px));
+  }
+
+  .foodCommentStatusBubble {
+    width: min(236px, calc(100vw - 64px));
+    padding: 0 18px 24px;
+  }
+
+  .foodCommentStatusBubbleText {
+    font-size: 0.76rem;
+    translate: 0 -8px;
   }
 
   .detailFooterSplit,
@@ -2066,6 +2323,10 @@ textarea {
     --hint-width: min(386px, calc(100vw - 48px));
     --hint-offset-bottom: calc(100% - 24px);
     --hint-z: 120;
+  }
+
+  .planInvitationCard:hover {
+    transform: none;
   }
 
   .detailFooterInfo {
@@ -2272,9 +2533,9 @@ textarea {
   }
 
   .authLogoFrame {
-    width: min(281px, 78vw);
+    width: min(334px, 78vw);
     height: auto;
-    aspect-ratio: 281 / 245;
+    aspect-ratio: 334 / 164;
     background-image: var(--auth-logo-mobile-url, var(--auth-logo-url));
     opacity: var(--auth-logo-mobile-opacity);
   }

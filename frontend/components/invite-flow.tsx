@@ -78,6 +78,7 @@ const STAGE_RENDER_RADIUS = 3;
 const FOOD_CATEGORY_ORDER: FoodCategoryKey[] = ["salad", "hot", "drinks"];
 const FOOD_AUTO_ADVANCE_DELAY_MS = 700;
 const FOOD_CATEGORY_SWITCH_FADE_MS = 220;
+const FOOD_COMMENT_SENT_BUBBLE_MS = 4400;
 const MOBILE_STAGE_BREAKPOINT_PX = 680;
 const ENTRY_SPLASH_HOLD_MS = 1000;
 const ENTRY_SPLASH_FADE_MS = 420;
@@ -338,6 +339,7 @@ export function InviteFlow() {
   const [isFoodCategorySwitching, setIsFoodCategorySwitching] = useState(false);
   const [isFoodCommentDialogOpen, setIsFoodCommentDialogOpen] = useState(false);
   const [foodCommentDraft, setFoodCommentDraft] = useState("");
+  const [showFoodCommentSentBubble, setShowFoodCommentSentBubble] = useState(false);
   const [giftActiveIndex, setGiftActiveIndex] = useState(createGiftActiveIndex);
   const [giftDetailOpenKey, setGiftDetailOpenKey] = useState(0);
   const [detailSection, setDetailSection] = useState<SectionKey | null>(null);
@@ -359,6 +361,7 @@ export function InviteFlow() {
   const entrySplashExitTimeoutRef = useRef<number | null>(null);
   const entrySplashCleanupTimeoutRef = useRef<number | null>(null);
   const foodCommentHintTimeoutRef = useRef<number | null>(null);
+  const foodCommentSentTimeoutRef = useRef<number | null>(null);
   const hasShownFoodTopHintRef = useRef(false);
   const hasShownFoodCommentHintRef = useRef(false);
   const hasPlayedEntrySplashRef = useRef(false);
@@ -526,6 +529,12 @@ export function InviteFlow() {
 
     setIsFoodCategorySwitching(false);
     setShowFoodCommentHint(false);
+    setShowFoodCommentSentBubble(false);
+
+    if (foodCommentSentTimeoutRef.current !== null) {
+      window.clearTimeout(foodCommentSentTimeoutRef.current);
+      foodCommentSentTimeoutRef.current = null;
+    }
   }, [detailSection]);
 
   useEffect(() => {
@@ -547,6 +556,9 @@ export function InviteFlow() {
       }
       if (foodCommentHintTimeoutRef.current !== null) {
         window.clearTimeout(foodCommentHintTimeoutRef.current);
+      }
+      if (foodCommentSentTimeoutRef.current !== null) {
+        window.clearTimeout(foodCommentSentTimeoutRef.current);
       }
       if (draftSaveTimeoutRef.current !== null) {
         window.clearTimeout(draftSaveTimeoutRef.current);
@@ -589,6 +601,7 @@ export function InviteFlow() {
     setShowFoodTopHint(false);
     hasShownFoodTopHintRef.current = false;
     setShowFoodCommentHint(false);
+    setShowFoodCommentSentBubble(false);
     hasShownFoodCommentHintRef.current = false;
     setIsFoodCategorySwitching(false);
     setIsFoodCommentDialogOpen(false);
@@ -1192,6 +1205,8 @@ export function InviteFlow() {
   }
 
   function openFoodCommentDialog() {
+    setShowFoodCommentHint(false);
+    setShowFoodCommentSentBubble(false);
     setFoodCommentDraft(responses.food.comment ?? "");
     setIsFoodCommentDialogOpen(true);
   }
@@ -1208,6 +1223,17 @@ export function InviteFlow() {
   function submitFoodCommentDialog() {
     if (!readOnly) {
       updateFoodComment(foodCommentDraft);
+      setShowFoodCommentHint(false);
+      setShowFoodCommentSentBubble(true);
+
+      if (foodCommentSentTimeoutRef.current !== null) {
+        window.clearTimeout(foodCommentSentTimeoutRef.current);
+      }
+
+      foodCommentSentTimeoutRef.current = window.setTimeout(() => {
+        setShowFoodCommentSentBubble(false);
+        foodCommentSentTimeoutRef.current = null;
+      }, FOOD_COMMENT_SENT_BUBBLE_MS);
     }
 
     setIsFoodCommentDialogOpen(false);
@@ -1709,9 +1735,9 @@ export function InviteFlow() {
       <>
         {entrySplashOverlay}
         <main
-          className={`sceneShell sceneShellDetail ${isDresscodeDetail || isPlanDetail ? "sceneShellDetailDresscode" : ""} ${
+          className={`sceneShell sceneShellDetail ${isDresscodeDetail ? "sceneShellDetailDresscode" : ""} ${
             isFoodDetail || isGiftDetail ? "sceneShellDetailFood" : ""
-          }`}
+          } ${isPlanDetail ? "sceneShellDetailPlan" : ""}`}
         >
           <header className="sceneHeader sceneHeaderDetail">
             {isDresscodeDetail || isFoodDetail || isGiftDetail || isPlanDetail ? (
@@ -1750,6 +1776,7 @@ export function InviteFlow() {
                   activeCategory={foodActiveCategory}
                   activeIndexByCategory={foodActiveIndexByCategory}
                   showCommentHint={showFoodCommentHint}
+                  showCommentSentBubble={showFoodCommentSentBubble}
                   showTopHint={showFoodTopHint}
                   openKey={foodDetailOpenKey}
                   isCategorySwitching={isFoodCategorySwitching}

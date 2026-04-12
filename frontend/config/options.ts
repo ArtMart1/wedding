@@ -11,35 +11,99 @@ export interface DetailFloatingItem {
 
 export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
   {
-    key: "salad_greek",
+    key: "salad_burrata",
     section: "food",
     category: "salad",
-    title: "Греческий салат",
-    description: "Свежие овощи, фета и оливки",
+    title: "Салат с буратой",
+    description: "авокадо и томаты, рукола и соус песто",
     iconSrc: "/food-option-heart.png"
   },
   {
-    key: "salad_caesar",
+    key: "salad_nicoise",
     section: "food",
     category: "salad",
-    title: "Цезарь",
-    description: "Романо, соус, пармезан и хрустящий салат",
+    title: "Нисуаз со спаржей",
+    description: "картофелем и перепелиным яйцом",
     iconSrc: "/food-option-heart.png"
   },
   {
-    key: "hot_fish",
+    key: "salad_olivier",
     section: "food",
-    category: "hot",
-    title: "Рыба",
-    description: "Нежная подача без лишней тяжести",
+    category: "salad",
+    title: "Оливье с цыпленком",
+    description: "Прикольно",
     iconSrc: "/food-option-heart.png"
   },
   {
-    key: "hot_beef",
+    key: "salad_crab",
+    section: "food",
+    category: "salad",
+    title: "Зеленый салат с крабом",
+    description: "и авокадо",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "salad_salmon",
+    section: "food",
+    category: "salad",
+    title: "Салат с лососем",
+    description: "или креветками, кус-кусом, шпинатом и авокадо в соевом соусе",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "hot_chicken",
     section: "food",
     category: "hot",
-    title: "Говядина",
-    description: "Более насыщенный и плотный вариант",
+    title: "Маринованная курица",
+    description: "в азиатском соусе с рисом и корейскими огурчиками, подается с кисло-сладким соусом",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "hot_veal_cheeks",
+    section: "food",
+    category: "hot",
+    title: "Телячие щечки",
+    description: "с картофельным пюре",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "hot_beef_steak",
+    section: "food",
+    category: "hot",
+    title: "Стейк из говядины",
+    description: "с горчичным соусом",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "hot_salmon_steak",
+    section: "food",
+    category: "hot",
+    title: "Стейк лосось",
+    description: "с бейби картофелем, спаржей, лабне и травами",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "hot_bacon_pasta",
+    section: "food",
+    category: "hot",
+    title: "Паста с беконом",
+    description: "вешенками и сливочным соусом с белым вином, подается с желтком",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "hot_salmon_pasta",
+    section: "food",
+    category: "hot",
+    title: "Паста с лососем",
+    description: "шпинатом и красной икрой в сливочном соусе",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "hot_burrata_pasta",
+    section: "food",
+    category: "hot",
+    title: "Паста с буратой",
+    description: "томатами и пармезаном",
     iconSrc: "/food-option-heart.png"
   },
   {
@@ -47,45 +111,101 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     section: "food",
     category: "drinks",
     title: "Я без алкоголя",
-    description: "Буду пить компот, чай, кофеек",
+    description: "Буду пить кампот, чай, кофеек",
     iconSrc: "/food-option-heart.png"
   },
   {
     key: "drink_spring_punch",
     section: "food",
     category: "drinks",
-    title: "Spring Punch",
-    description: "Джин, трипл сек, лимончелло, anchan, cordial mix",
+    title: "Спринг Февер",
+    description: "Джин, трипл сек, синий чай анчан, кордиал павлова, лимон Gin, triple sec, blue tea anchan, cordial pavlova, lemon",
     iconSrc: "/food-option-heart.png"
   },
   {
-    key: "drink_wine",
+    key: "drink_scarlet",
     section: "food",
     category: "drinks",
-    title: "Вино",
-    description: "Остановлюсь на классическом варианте",
+    title: "Скарлет",
+    description: "Джин, красный вермут, лимончелло, черная смородина",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "drink_bellagio",
+    section: "food",
+    category: "drinks",
+    title: "Беладжио",
+    description: "Лимончелло, джин, савиньон бланк, ваниль, лаймовый сорбет",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "drink_la_avenue",
+    section: "food",
+    category: "drinks",
+    title: "Ла Авеню",
+    description: "Клубничный пунш, свежая клубника, Millky punch, strawberry",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "drink_kiss_me",
+    section: "food",
+    category: "drinks",
+    title: "Кисс ми",
+    description: "Джин, лимон, малина, Gin, lemon, raspberry",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "drink_peach_cloud",
+    section: "food",
+    category: "drinks",
+    title: "Пич клауд",
+    description: "Апероль, персик, сок лимона Gin, kiwi, apple, lemon juice",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "drink_green_sour",
+    section: "food",
+    category: "drinks",
+    title: "Грин саур",
+    description: "Джин, киви, яблоко, сок лимона",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "drink_red_wine",
+    section: "food",
+    category: "drinks",
+    title: "Бокал красного Вина",
+    description: "Итальянское заебумба",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "drink_white_wine",
+    section: "food",
+    category: "drinks",
+    title: "Бокал белого Вина",
+    description: "Итальянское класс ваще",
     iconSrc: "/food-option-heart.png"
   },
   {
     key: "gift_cash",
     section: "gifts",
-    title: "Конверт",
-    description: "Самый удобный вариант для нас",
-    iconSrc: "/gift-option-tag.png"
+    title: "Юани",
+    description: "Подарю деняк молодым",
+    iconSrc: "/assets/gifts/gift-cash.png"
+  },
+  {
+    key: "gift_surprise",
+    section: "gifts",
+    title: "Свой вариант",
+    description: "Описание",
+    iconSrc: "/assets/gifts/gift-custom.png"
   },
   {
     key: "gift_certificate",
     section: "gifts",
     title: "Сертификат",
-    description: "Если хочется выбрать что-то более личное",
-    iconSrc: "/gift-option-tag.png"
-  },
-  {
-    key: "gift_surprise",
-    section: "gifts",
-    title: "Сюрприз",
-    description: "Доверимся вашему вкусу",
-    iconSrc: "/gift-option-tag.png"
+    description: "Куда-нибудь",
+    iconSrc: "/assets/gifts/gift-certificate.png"
   }
 ];
 

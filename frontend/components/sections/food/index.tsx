@@ -28,6 +28,7 @@ interface FoodSectionProps {
   activeCategory?: FoodCategoryKey;
   activeIndexByCategory?: Record<FoodCategoryKey, number>;
   showCommentHint?: boolean;
+  showCommentSentBubble?: boolean;
   showTopHint?: boolean;
   openKey?: string | number;
   isCategorySwitching?: boolean;
@@ -43,6 +44,7 @@ export function FoodSection({
   activeCategory,
   activeIndexByCategory,
   showCommentHint = false,
+  showCommentSentBubble = false,
   showTopHint = false,
   openKey = 0,
   isCategorySwitching = false,
@@ -90,10 +92,17 @@ export function FoodSection({
           ))}
         </div>
 
-        <div className={`foodCommentButtonAnchor ${showCommentHint ? "hintAnchor" : ""}`}>
-          <button className="foodCommentButton" type="button" onClick={onCommentClick} aria-label="Открыть комментарий">
-            <FoodCommentIcon className="foodCommentButtonIcon" />
-          </button>
+        <div className="foodCommentRail">
+          <div className={`foodCommentButtonAnchor ${showCommentHint ? "hintAnchor" : ""}`}>
+            <button className="foodCommentButton" type="button" onClick={onCommentClick} aria-label="Открыть комментарий">
+              <FoodCommentIcon className="foodCommentButtonIcon" />
+            </button>
+            {showCommentSentBubble ? (
+              <div className="foodCommentStatusBubble" role="status" aria-live="polite">
+                <span className="foodCommentStatusBubbleText">Комментарий отправлен</span>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -114,8 +123,9 @@ export function FoodSection({
               <button
                 key={slide.key}
                 type="button"
-                className={`foodSlide ${isActive ? "isActive" : ""} ${isSelected ? "isSelected" : ""} ${isDimmed ? "isDimmed" : ""}`}
+                className={`foodSlide ${slide.category === "drinks" ? "foodSlideDrinks" : ""} ${isActive ? "isActive" : ""} ${isSelected ? "isSelected" : ""} ${isDimmed ? "isDimmed" : ""}`}
                 data-slide-index={index}
+                data-food-category={slide.category}
                 onClick={() => onToggleSelection(slide.category, slide.key)}
                 disabled={readOnly}
                 aria-pressed={isSelected}

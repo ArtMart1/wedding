@@ -4,16 +4,49 @@ interface PlanSectionProps {
 
 export function PlanSection({ onDownload }: PlanSectionProps) {
   return (
-    <article className="sectionDetail dresscodeDetail planDetail">
+    <article className="sectionDetail planDetail">
       <div className="planViewer">
         <div className="detailTopHint hintAnchor detailCardHint detailCardHintPlan" aria-hidden="true" />
+
         <a
-          className="dresscodeSlide isActive planDownloadCard hintAnchor detailCardHint detailCardHintPlan detailCardHintMobileOnly"
-          href="/plan-day-placeholder.pdf"
-          download="plan-day.pdf"
+          className="planInvitationCard hintAnchor detailCardHint detailCardHintPlan detailCardHintMobileOnly"
+          href="/assets/plan/invitation-plan.png"
+          download="plan-day.png"
           onClick={onDownload}
+          aria-label="Скачать приглашение с планом дня"
         >
-          <span className="planDownloadLabel">Отсканированное приглашение</span>
+          <img
+            className="planInvitationBackground"
+            src="/assets/plan/invitation-plan.png"
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+          />
+
+          <div className="planInvitationContent">
+            <div className="planInvitationHero">
+              <p className="planInvitationNames">Илья и Ольга</p>
+              <p className="planInvitationLead">приглашают тебя на свадьбу</p>
+            </div>
+
+            <p className="planInvitationDate">30 мая 2026</p>
+
+            <div className="planInvitationSchedule">
+              <p className="planInvitationScheduleLine">
+                <span className="planInvitationTime">13:45</span>
+                <span className="planInvitationLocation">Читальня Пушкина</span>
+              </p>
+
+              <p className="planInvitationScheduleLine planInvitationScheduleLineStacked">
+                <span className="planInvitationTime">16:00</span>
+                <span className="planInvitationLocation">
+                  Гранде френдс форевер
+                  <br />
+                  Остоженка 7
+                </span>
+              </p>
+            </div>
+          </div>
         </a>
       </div>
     </article>
