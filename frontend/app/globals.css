@@ -12,6 +12,7 @@
   --font-plan-script: "Gogol", "Snell Roundhand", "Brush Script MT", cursive;
   --site-bg-rotation: 90deg;
   --site-bg-center-offset-x: 0px;
+  --viewport-fill: #e7e0d4;
   --home-tabs-surface: rgba(245, 245, 245, 0.44);
   --home-tabs-active-surface: rgba(255, 255, 255, 0.64);
   --bg: #ffffff;
@@ -40,6 +41,8 @@ html,
 body {
   height: 100%;
   overflow: hidden;
+  overflow: clip;
+  overscroll-behavior: none;
 }
 
 body {
@@ -47,9 +50,11 @@ body {
   min-height: 100%;
   position: relative;
   isolation: isolate;
+  overflow: hidden;
+  overflow: clip;
   font-family: var(--font-body);
   color: var(--ink);
-  background-color: #f7f3eb;
+  background-color: var(--viewport-fill);
 }
 
 body::before {
@@ -57,8 +62,8 @@ body::before {
   position: fixed;
   left: calc(50% + var(--site-bg-center-offset-x));
   top: 50%;
-  width: calc(100dvh + 2px);
-  height: calc(100dvw + 2px);
+  width: calc(max(100dvh, 100dvw) * 1.42);
+  height: calc(max(100dvh, 100dvw) * 1.42);
   transform: translate(-50%, -50%) rotate(var(--site-bg-rotation));
   transform-origin: center;
   background-image: url("/assets/background/back.png");
@@ -67,6 +72,8 @@ body::before {
   background-size: cover;
   pointer-events: none;
   z-index: -1;
+  contain: paint;
+  will-change: transform;
 }
 
 button,
@@ -94,7 +101,7 @@ textarea {
   height: 100vh;
   min-height: 100dvh;
   overflow: hidden;
-  padding: 34px var(--scene-shell-inline-padding) 46px;
+  padding: 34px var(--scene-shell-inline-padding) 42px;
   display: grid;
   gap: 18px;
   align-content: stretch;
@@ -107,7 +114,8 @@ textarea {
 
 .sceneShellDetail {
   --detail-bleed-inline: 30px;
-  --detail-footer-width: min(760px, calc(100vw - (var(--scene-shell-inline-padding) * 2)));
+  --detail-frame-width: min(702px, calc(100vw - (var(--scene-shell-inline-padding) * 2)));
+  --detail-footer-width: var(--detail-frame-width);
   overflow-x: visible;
   overflow-y: visible;
   padding: 22px 30px 28px;
@@ -391,28 +399,6 @@ textarea {
   visibility: visible;
   transform: translate(-50%, -50%);
   transition-delay: 0ms;
-}
-
-.entrySplash {
-  position: fixed;
-  inset: 0;
-  z-index: 120;
-  display: none;
-  background: #ffffff;
-  opacity: 1;
-  transition: opacity 420ms ease;
-}
-
-.entrySplash.isExiting {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.entrySplashImage {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
 }
 
 .stagePropButton {
@@ -863,17 +849,6 @@ textarea {
   width: var(--detail-card-width);
   height: var(--detail-card-height);
   color: #130f0b;
-  text-decoration: none;
-  transition: transform 220ms ease;
-}
-
-.planInvitationCard:hover {
-  transform: translateY(-2px);
-}
-
-.planInvitationCard:focus-visible {
-  outline: 2px solid rgba(15, 104, 211, 0.3);
-  outline-offset: 8px;
 }
 
 .planInvitationBackground {
@@ -1035,8 +1010,8 @@ textarea {
 }
 
 .giftSlide .foodSlideArtwork {
-  width: 156px;
-  height: 156px;
+  width: 328px;
+  height: 241px;
 }
 
 .foodSlideBody {
@@ -1094,7 +1069,7 @@ textarea {
 }
 
 .foodToolbar {
-  width: min(var(--detail-shell-width), 100%);
+  width: min(var(--detail-footer-width), 100%);
   min-height: 70px;
   margin: 0 auto;
   display: flex;
@@ -1255,14 +1230,18 @@ textarea {
 
 .dresscodeLookPicker {
   display: inline-flex;
-  align-items: flex-end;
-  gap: 20px;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  background: var(--home-tabs-surface);
+  padding: 8px;
 }
 
 .dresscodeLookButton {
   width: 92px;
   height: 92px;
   border: 0;
+  border-radius: 999px;
   padding: 0;
   background: transparent;
   display: grid;
@@ -1275,13 +1254,14 @@ textarea {
 }
 
 .dresscodeLookButton:not(.active) {
-  opacity: 0.44;
-  transform: translateY(5px) scale(0.7826);
+  opacity: 0.62;
+  transform: none;
 }
 
 .dresscodeLookButton.active {
   opacity: 1;
-  filter: drop-shadow(0 10px 18px rgba(0, 16, 36, 0.08));
+  background: var(--home-tabs-active-surface);
+  filter: none;
 }
 
 .dresscodeLookButton:focus-visible {
@@ -1862,9 +1842,9 @@ textarea {
 }
 
 .authIntro {
-  width: min(1040px, 100%);
+  width: min(702px, 100%);
   display: grid;
-  gap: 32px;
+  gap: 68px;
   align-self: center;
   justify-items: center;
   margin-inline: auto;
@@ -1872,7 +1852,7 @@ textarea {
 
 .authLogoFrame {
   justify-self: center;
-  width: min(760px, 92vw);
+  width: min(702px, 100%);
   height: auto;
   aspect-ratio: 1530 / 167;
   background-image: var(--auth-logo-url);
@@ -1896,9 +1876,9 @@ textarea {
 }
 
 .authFormFields {
-  width: min(1040px, 100%);
+  width: min(702px, 100%);
   display: grid;
-  gap: 32px;
+  gap: 12px;
   align-content: normal;
   justify-self: center;
 }
@@ -1913,7 +1893,7 @@ textarea {
   border: 1px solid #dddddd;
   background: #dedede;
   border-radius: 999px;
-  min-height: 56px;
+  min-height: 84px;
   padding: 0 20px;
 }
 
@@ -2013,6 +1993,17 @@ textarea {
     place-items: stretch;
   }
 
+  .sceneShellDetail .detailHeaderPrimary,
+  .sceneShellDetail .detailFooterSplit,
+  .sceneShellDetail .detailFooterFood,
+  .sceneShellDetail .choiceDetail,
+  .sceneShellDetail .choiceToolbar,
+  .sceneShellDetail .choiceToolbarSpacer,
+  .sceneShellDetail .foodToolbar {
+    width: var(--detail-frame-width);
+    max-width: var(--detail-frame-width);
+  }
+
   .sceneShellDetailFood .sceneEditor {
     width: 100%;
     height: 100%;
@@ -2020,7 +2011,6 @@ textarea {
   }
 
   .choiceDetail {
-    width: min(var(--detail-shell-width), 100%);
     height: 100%;
     margin: 0 auto;
     grid-template-rows: auto minmax(0, 1fr);
@@ -2030,7 +2020,6 @@ textarea {
 
   .choiceToolbar,
   .choiceToolbarSpacer {
-    width: min(var(--detail-shell-width), 100%);
     min-height: 129px;
     margin: 0 auto;
   }
@@ -2052,6 +2041,20 @@ textarea {
     height: 100%;
     align-items: center;
   }
+
+  .giftsDetail {
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .giftsDetail .choiceViewer {
+    align-items: center;
+  }
+
+  .giftsDetail .giftsGallery {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 }
 
 @media (max-width: 1350px) and (min-width: 681px) {
@@ -2068,6 +2071,11 @@ textarea {
     min-height: 100svh;
   }
 
+  html,
+  body {
+    background-color: var(--viewport-fill);
+  }
+
   .authShellLogin,
   .sceneShellHome,
   .sceneShellDetail {
@@ -2075,14 +2083,12 @@ textarea {
     --mobile-safe-bottom: max(env(safe-area-inset-bottom, 0px), 10px);
   }
 
-  .entrySplash {
-    display: block;
-  }
-
   .sceneShellDetail {
     padding: var(--mobile-safe-top) 20px calc(10px + var(--mobile-safe-bottom)) 20px;
     gap: 18px;
     grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow-y: hidden;
+    overflow-y: clip;
   }
 
   .sceneShellHome {
@@ -2186,7 +2192,7 @@ textarea {
   }
 
   .giftsDetail {
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
   }
 
   .detailContent {
@@ -2236,12 +2242,24 @@ textarea {
   }
 
   .giftsGallery {
-    padding-inline: var(--detail-mobile-leading-inset);
-    scroll-padding-inline: var(--detail-mobile-leading-inset);
+    height: 100%;
+    align-items: center;
+    padding-block: 0;
+    padding-inline: max(var(--detail-bleed-inline), calc((100vw - var(--detail-card-width)) / 2));
+    scroll-padding-inline: max(var(--detail-bleed-inline), calc((100vw - var(--detail-card-width)) / 2));
   }
 
   .giftSlide {
-    scroll-snap-align: start;
+    height: var(--detail-card-height);
+    min-height: var(--detail-card-height);
+    align-self: center;
+    scroll-snap-align: center;
+  }
+
+  .giftSlide .foodSlideInner {
+    min-height: 100%;
+    align-content: center;
+    padding-block: 0;
   }
 
   .foodSlide.giftSlide,
@@ -2273,20 +2291,52 @@ textarea {
     padding: 34px 0 30px;
   }
 
+  .foodSlide:not(.giftSlide) .foodSlideInner {
+    grid-template-rows: 1fr auto var(--food-mobile-body-height, auto) 1fr;
+    align-content: stretch;
+    gap: 0;
+    padding: 26px 0;
+  }
+
+  .foodSlide:not(.giftSlide) .foodSlideArtworkWrap {
+    grid-row: 2;
+    align-self: end;
+    margin-bottom: 22px;
+  }
+
   .foodSlideArtwork {
-    width: clamp(84px, 24vw, 112px);
-    height: clamp(84px, 24vw, 112px);
+    width: 156px;
+    height: 156px;
   }
 
   .giftSlide .foodSlideArtwork {
-    width: clamp(84px, 24vw, 112px);
-    height: clamp(84px, 24vw, 112px);
+    width: 156px;
+    height: 156px;
   }
 
   .foodSlideBody {
     width: 100%;
     justify-content: flex-start;
     gap: 12px;
+  }
+
+  .foodSlide:not(.giftSlide) .foodSlideBody {
+    grid-row: 3;
+    align-self: start;
+    width: min(calc(100% - 8px), 304px);
+    margin-inline: auto;
+  }
+
+  .giftSlide .foodSlideBody {
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    justify-content: center;
+  }
+
+  .giftSlide .foodSlideCopy {
+    justify-items: center;
+    text-align: center;
   }
 
   .foodSlideCopy {
@@ -2342,16 +2392,20 @@ textarea {
     padding-inline: 20px;
   }
 
-  .foodCategoryTabMarker {
-    width: 14px;
-    height: 14px;
-  }
-
   .foodCommentButton,
-  .foodCommentButtonIcon,
   .foodCommentButtonAnchor {
     width: 54px;
     height: 54px;
+  }
+
+  .foodCommentButton {
+    display: grid;
+    place-items: center;
+  }
+
+  .foodCommentButtonIcon {
+    width: calc(54px * 0.8);
+    height: calc(54px * 0.8);
   }
 
   .foodCommentRail {
@@ -2421,16 +2475,12 @@ textarea {
     --hint-z: 120;
   }
 
-  .planInvitationCard:hover {
-    transform: none;
-  }
-
   .detailFooterInfo {
     flex: 0 0 auto;
   }
 
   .dresscodeLookPicker {
-    gap: 16px;
+    gap: 10px;
   }
 
   .dresscodeLookButton {
@@ -2454,7 +2504,7 @@ textarea {
     width: 100%;
     align-items: stretch;
     justify-content: stretch;
-    padding: 22px 18px calc(16px + var(--mobile-safe-bottom));
+    padding: 32px 24px calc(40px + var(--mobile-safe-bottom));
   }
 
   .authSectionLogin {
@@ -2566,6 +2616,7 @@ textarea {
     display: grid;
     place-items: center;
     overflow: hidden;
+    position: relative;
   }
 
   .mobileStageImage {
@@ -2581,8 +2632,45 @@ textarea {
   }
 
   .mobileStageImageFood {
-    transform: scale(0.8);
+    transform: scale(0.64);
     transform-origin: center center;
+  }
+
+  .mobileStagePlanScene {
+    width: 100%;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 12px;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .mobileStagePlanFrame {
+    width: 100%;
+    aspect-ratio: 910 / 647;
+    display: block;
+    position: relative;
+  }
+
+  .mobileStageImagePlan {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+  }
+
+  .mobileStageDateBadge {
+    width: clamp(150px, 42vw, 210px);
+    height: auto;
+    aspect-ratio: 329 / 131;
+    display: block;
+    background-image: url("/assets/scene/home-date-30-maya.svg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    user-select: none;
   }
 
   .mobileStageIndicators {
@@ -2630,7 +2718,7 @@ textarea {
   }
 
   .authIntro {
-    gap: 44px;
+    gap: 68px;
   }
 
   .authLogoFrame {
@@ -2654,24 +2742,28 @@ textarea {
   }
 
   .detailModalOverlay {
-    place-items: end center;
-    padding: 0 16px calc(5px + env(safe-area-inset-bottom, 0px));
+    place-items: center;
+    padding:
+      max(env(safe-area-inset-top, 0px), 16px)
+      16px
+      max(env(safe-area-inset-bottom, 0px), 16px);
     background: rgba(0, 0, 0, 0.12);
     backdrop-filter: none;
   }
 
   .detailModal {
-    width: 100%;
-    max-width: none;
+    width: min(716px, calc(100vw - 32px));
+    max-width: min(716px, calc(100vw - 32px));
     height: auto;
-    max-height: min(329px, calc(100dvh - 10px));
+    max-height: min(360px, calc(100svh - var(--mobile-safe-top) - var(--mobile-safe-bottom) - 32px));
     border-radius: var(--radius-modal);
     padding: 12px 16px;
     box-shadow: 0 18px 44px rgba(0, 16, 36, 0.16);
+    overflow: auto;
   }
 
   .detailModalFoodComment {
-    width: 100%;
+    width: min(100%, 716px);
     height: auto;
     grid-template-rows: auto minmax(137px, 1fr) auto;
     gap: 12px;
@@ -2716,5 +2808,25 @@ textarea {
   .detailModalSubmitButton {
     min-height: 48px;
     font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 374px) {
+  .dresscodeLookPicker {
+    gap: 8px;
+    padding: 6px;
+  }
+
+  .dresscodeLookButton {
+    width: 58px;
+    height: 58px;
+  }
+
+  .detailNextButton {
+    width: 148px;
+    min-width: 148px;
+    height: 60px;
+    min-height: 60px;
+    font-size: 0.9rem;
   }
 }

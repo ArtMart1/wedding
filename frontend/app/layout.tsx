@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Onest } from "next/font/google";
 import "./globals.css";
 
@@ -12,6 +12,11 @@ const onest = Onest({
 export const metadata: Metadata = {
   title: "Wedding Invite",
   description: "Персональное приглашение на свадьбу"
+};
+
+export const viewport: Viewport = {
+  themeColor: "#e7e0d4",
+  viewportFit: "cover"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

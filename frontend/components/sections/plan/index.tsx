@@ -1,18 +1,8 @@
-interface PlanSectionProps {
-  onDownload?: () => void;
-}
-
-export function PlanSection({ onDownload }: PlanSectionProps) {
+export function PlanSection() {
   return (
     <article className="sectionDetail planDetail">
       <div className="planViewer">
-        <a
-          className="planInvitationCard"
-          href="/assets/plan/invitation-plan.png"
-          download="plan-day.png"
-          onClick={onDownload}
-          aria-label="Скачать приглашение с планом дня"
-        >
+        <div className="planInvitationCard" aria-label="План дня">
           <img
             className="planInvitationBackground"
             src="/assets/plan/invitation-plan.png"
@@ -45,7 +35,7 @@ export function PlanSection({ onDownload }: PlanSectionProps) {
               </p>
             </div>
           </div>
-        </a>
+        </div>
       </div>
     </article>
   );

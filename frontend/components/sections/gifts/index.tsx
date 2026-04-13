@@ -30,7 +30,6 @@ export function GiftsSection({
 
   return (
     <article className="sectionDetail choiceDetail foodDetail giftsDetail">
-      <div className="choiceToolbarSpacer foodToolbarSpacer" aria-hidden="true" />
       <div className="choiceViewer foodViewer">
         <div
           ref={galleryRef}

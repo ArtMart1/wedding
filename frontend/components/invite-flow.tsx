@@ -7,7 +7,6 @@ import { z } from "zod";
 import {
   AUTH_LOGO_MOBILE_URL,
   AUTH_LOGO_URL,
-  ENTRY_SPLASH_URL,
   getSectionImage,
   HOME_DATE_BADGE_URL,
   HERO_LOGO_MOBILE_URL,
@@ -81,10 +80,6 @@ const FOOD_AUTO_ADVANCE_DELAY_MS = 700;
 const FOOD_CATEGORY_SWITCH_FADE_MS = 220;
 const FOOD_COMMENT_SENT_BUBBLE_MS = 4400;
 const MOBILE_STAGE_BREAKPOINT_PX = 680;
-const ENTRY_SPLASH_HOLD_MS = 1000;
-const ENTRY_SPLASH_FADE_MS = 420;
-const INITIAL_RESTORE_SPLASH_MIN_MS = 3000;
-const INITIAL_RESTORE_SPLASH_SESSION_KEY = "wedding-initial-restore-splash-seen";
 
 function createDefaultResponses(): InviteResponses {
   return {
@@ -348,8 +343,6 @@ export function InviteFlow() {
   const [showFoodTopHint, setShowFoodTopHint] = useState(false);
   const [isCompactMobile, setIsCompactMobile] = useState(false);
   const [mobileStageProgress, setMobileStageProgress] = useState(0);
-  const [showEntrySplash, setShowEntrySplash] = useState(false);
-  const [isEntrySplashExiting, setIsEntrySplashExiting] = useState(false);
   const autoSubmitRef = useRef(false);
   const responsesRef = useRef<InviteResponses>(responses);
   const progressRef = useRef<InviteProgress>(progress);
@@ -359,14 +352,10 @@ export function InviteFlow() {
   const draftRevisionRef = useRef(0);
   const lastDraftSavedRevisionRef = useRef(0);
   const draftSaveTimeoutRef = useRef<number | null>(null);
-  const entrySplashExitTimeoutRef = useRef<number | null>(null);
-  const entrySplashCleanupTimeoutRef = useRef<number | null>(null);
   const foodCommentHintTimeoutRef = useRef<number | null>(null);
   const foodCommentSentTimeoutRef = useRef<number | null>(null);
   const hasShownFoodTopHintRef = useRef(false);
   const hasShownFoodCommentHintRef = useRef(false);
-  const hasPlayedEntrySplashRef = useRef(false);
-  const skipNextEntrySplashRef = useRef(false);
   const foodAutoAdvanceTimeoutRef = useRef<number | null>(null);
   const foodCategorySwitchTimeoutRef = useRef<number | null>(null);
   const heroStageRef = useRef<HTMLElement | null>(null);
@@ -540,12 +529,6 @@ export function InviteFlow() {
 
   useEffect(() => {
     return () => {
-      if (entrySplashExitTimeoutRef.current !== null) {
-        window.clearTimeout(entrySplashExitTimeoutRef.current);
-      }
-      if (entrySplashCleanupTimeoutRef.current !== null) {
-        window.clearTimeout(entrySplashCleanupTimeoutRef.current);
-      }
       if (mobileStageSyncTimeoutRef.current !== null) {
         window.clearTimeout(mobileStageSyncTimeoutRef.current);
       }
@@ -630,30 +613,9 @@ export function InviteFlow() {
     let isMounted = true;
 
     async function restoreInviteSession() {
-      let shouldHoldInitialSplash = false;
-
-      if (window.matchMedia(`(max-width: ${MOBILE_STAGE_BREAKPOINT_PX}px)`).matches) {
-        try {
-          shouldHoldInitialSplash = window.sessionStorage.getItem(INITIAL_RESTORE_SPLASH_SESSION_KEY) !== "true";
-
-          if (shouldHoldInitialSplash) {
-            window.sessionStorage.setItem(INITIAL_RESTORE_SPLASH_SESSION_KEY, "true");
-          }
-        } catch {
-          shouldHoldInitialSplash = true;
-        }
-      }
-
-      const minSplashDelay = shouldHoldInitialSplash
-        ? new Promise<void>((resolve) => {
-            window.setTimeout(resolve, INITIAL_RESTORE_SPLASH_MIN_MS);
-          })
-        : Promise.resolve();
-
       try {
         setFetchError(null);
         const payload = await getInviteSession();
-        await minSplashDelay;
 
         if (!isMounted) {
           return;
@@ -661,12 +623,8 @@ export function InviteFlow() {
 
         if (!hydrateInviteSession(payload)) {
           setAuthRequired(true);
-        } else {
-          skipNextEntrySplashRef.current = true;
         }
       } catch (error) {
-        await minSplashDelay;
-
         if (!isMounted) {
           return;
         }
@@ -686,45 +644,6 @@ export function InviteFlow() {
       isMounted = false;
     };
   }, [hydrateInviteSession]);
-
-  useEffect(() => {
-    if (isRestoringSession || authRequired || hasPlayedEntrySplashRef.current || !isCompactMobile) {
-      return;
-    }
-
-    if (skipNextEntrySplashRef.current) {
-      skipNextEntrySplashRef.current = false;
-      hasPlayedEntrySplashRef.current = true;
-      return;
-    }
-
-    hasPlayedEntrySplashRef.current = true;
-    setShowEntrySplash(true);
-    setIsEntrySplashExiting(false);
-
-    entrySplashExitTimeoutRef.current = window.setTimeout(() => {
-      entrySplashExitTimeoutRef.current = null;
-      setIsEntrySplashExiting(true);
-    }, ENTRY_SPLASH_HOLD_MS);
-
-    entrySplashCleanupTimeoutRef.current = window.setTimeout(() => {
-      entrySplashCleanupTimeoutRef.current = null;
-      setShowEntrySplash(false);
-      setIsEntrySplashExiting(false);
-    }, ENTRY_SPLASH_HOLD_MS + ENTRY_SPLASH_FADE_MS);
-
-    return () => {
-      if (entrySplashExitTimeoutRef.current !== null) {
-        window.clearTimeout(entrySplashExitTimeoutRef.current);
-        entrySplashExitTimeoutRef.current = null;
-      }
-
-      if (entrySplashCleanupTimeoutRef.current !== null) {
-        window.clearTimeout(entrySplashCleanupTimeoutRef.current);
-        entrySplashCleanupTimeoutRef.current = null;
-      }
-    };
-  }, [authRequired, isCompactMobile, isRestoringSession]);
 
   useEffect(() => {
     if (!isCompactMobile) {
@@ -1575,21 +1494,6 @@ export function InviteFlow() {
     handleNext({ openNextDetail: true });
   }
 
-  function handlePlanDownload() {
-    if (readOnly || progress.plan.downloaded) {
-      return;
-    }
-
-    markUnsavedChanges();
-    updateProgress((current) => ({
-      ...current,
-      plan: {
-        opened: true,
-        downloaded: true
-      }
-    }));
-  }
-
   const handleFinalSubmit = useCallback(async () => {
     if (readOnly || !isAllSectionsCompleteValue) {
       return;
@@ -1662,33 +1566,23 @@ export function InviteFlow() {
     setSubmitMessage("Ссылка скопирована в буфер обмена");
   }
 
-  const entrySplashOverlay = showEntrySplash ? (
-    <div className={`entrySplash ${isEntrySplashExiting ? "isExiting" : ""}`} aria-hidden="true">
-      <img className="entrySplashImage" src={ENTRY_SPLASH_URL} alt="" />
-    </div>
-  ) : null;
   const mobileIndicatorIndex = mod(Math.round(mobileStageProgress), SECTION_ORDER.length);
   const mobileHomeActiveSection = SECTION_ORDER[mobileIndicatorIndex];
   const showHomeDateBadge = activeSection === SECTION_ORDER[0];
 
   if (isRestoringSession) {
     return (
-      <>
-        <main className="shell authShell">
-          <section
-            className="authSection authSectionWithLogoBg"
-            style={
-              {
-                "--auth-logo-url": `url("${AUTH_LOGO_URL}")`,
-                "--auth-logo-mobile-url": `url("${AUTH_LOGO_MOBILE_URL}")`
-              } as CSSProperties
-            }
-          />
-        </main>
-        <div className="entrySplash entrySplashRestore" aria-hidden="true">
-          <img className="entrySplashImage" src={ENTRY_SPLASH_URL} alt="" />
-        </div>
-      </>
+      <main className="shell authShell">
+        <section
+          className="authSection authSectionWithLogoBg"
+          style={
+            {
+              "--auth-logo-url": `url("${AUTH_LOGO_URL}")`,
+              "--auth-logo-mobile-url": `url("${AUTH_LOGO_MOBILE_URL}")`
+            } as CSSProperties
+          }
+        />
+      </main>
     );
   }
 
@@ -1734,7 +1628,6 @@ export function InviteFlow() {
   if (detailSection) {
     return (
       <>
-        {entrySplashOverlay}
         <main
           className={`sceneShell sceneShellDetail ${isDresscodeDetail ? "sceneShellDetailDresscode" : ""} ${
             isFoodDetail || isGiftDetail ? "sceneShellDetailFood" : ""
@@ -1800,7 +1693,7 @@ export function InviteFlow() {
                   onToggleSelection={toggleGiftSelection}
                 />
               ) : null}
-              {activeSection === "plan" ? <PlanSection onDownload={handlePlanDownload} /> : null}
+              {activeSection === "plan" ? <PlanSection /> : null}
             </div>
           </section>
 
@@ -1882,7 +1775,6 @@ export function InviteFlow() {
 
   return (
     <>
-      {entrySplashOverlay}
       <main className="sceneShell sceneShellHome">
         <header className="sceneHeader">
           <nav className="sectionTabs sceneTabs" aria-label="Разделы">
@@ -1912,11 +1804,20 @@ export function InviteFlow() {
                     onClick={() => openSectionDetails(section)}
                     aria-label={`Открыть раздел ${SECTION_LABELS[section]}`}
                   >
-                    <img
-                      className={`mobileStageImage ${section === "food" ? "mobileStageImageFood" : ""}`}
-                      src={src}
-                      alt=""
-                    />
+                    {section === "plan" ? (
+                      <span className="mobileStagePlanScene" aria-hidden="true">
+                        <span className="mobileStagePlanFrame">
+                          <img className="mobileStageImage mobileStageImagePlan" src={src} alt="" />
+                        </span>
+                        <span className="mobileStageDateBadge" />
+                      </span>
+                    ) : (
+                      <img
+                        className={`mobileStageImage ${section === "food" ? "mobileStageImageFood" : ""}`}
+                        src={src}
+                        alt=""
+                      />
+                    )}
                   </button>
                 </div>
               ))}

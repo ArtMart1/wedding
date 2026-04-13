@@ -1,4 +1,4 @@
-import { FoodCategoryTabIcon } from "@/components/icons/food-category-tab-icon";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { FOOD_OPTIONS } from "@/config/options";
 import { FoodCommentIcon } from "@/components/icons/food-comment-icon";
 import type { FoodCategoryKey, InviteResponses } from "@/lib/types";
@@ -18,8 +18,47 @@ const DEFAULT_FOOD_INDEX_MAP: Record<FoodCategoryKey, number> = {
   drinks: 0
 };
 
+const FOOD_WIDOW_WORDS = [
+  "а",
+  "без",
+  "в",
+  "во",
+  "вне",
+  "да",
+  "для",
+  "до",
+  "за",
+  "и",
+  "из",
+  "изо",
+  "или",
+  "к",
+  "ко",
+  "на",
+  "над",
+  "не",
+  "но",
+  "о",
+  "об",
+  "обо",
+  "от",
+  "по",
+  "под",
+  "при",
+  "про",
+  "с",
+  "со",
+  "у"
+];
+
+const FOOD_WIDOW_PATTERN = new RegExp(`(^|[\\s(])(${FOOD_WIDOW_WORDS.join("|")})\\s+(?=\\S)`, "giu");
+
 function isFoodCategoryKey(value: unknown): value is FoodCategoryKey {
   return typeof value === "string" && FOOD_CATEGORY_ORDER.includes(value as FoodCategoryKey);
+}
+
+function keepFoodPrepositions(text: string): string {
+  return text.replace(FOOD_WIDOW_PATTERN, (_match, prefix: string, word: string) => `${prefix}${word}\u00A0`);
 }
 
 interface FoodSectionProps {
@@ -53,6 +92,8 @@ export function FoodSection({
   onToggleSelection,
   onCommentClick
 }: FoodSectionProps) {
+  const [mobileBodyHeight, setMobileBodyHeight] = useState<number | null>(null);
+  const bodyMeasureFrameRef = useRef<number | null>(null);
   const safeCategory = isFoodCategoryKey(activeCategory) ? activeCategory : "salad";
   const safeIndexByCategory =
     activeIndexByCategory &&
@@ -72,9 +113,61 @@ export function FoodSection({
     syncIndex: 0
   });
   const selectedKey = responses.food.selections?.[safeCategory]?.[0] ?? null;
+  const sectionStyle =
+    mobileBodyHeight !== null
+      ? ({ "--food-mobile-body-height": `${mobileBodyHeight}px` } as CSSProperties)
+      : undefined;
+
+  useEffect(() => {
+    const gallery = galleryRef.current;
+
+    if (!gallery) {
+      return;
+    }
+
+    const measureBodyHeight = () => {
+      if (bodyMeasureFrameRef.current !== null) {
+        window.cancelAnimationFrame(bodyMeasureFrameRef.current);
+      }
+
+      bodyMeasureFrameRef.current = window.requestAnimationFrame(() => {
+        bodyMeasureFrameRef.current = null;
+
+        const bodyNodes = Array.from(gallery.querySelectorAll<HTMLElement>(".foodSlideBody"));
+        const nextHeight = bodyNodes.reduce((maxHeight, node) => {
+          const nodeHeight = Math.ceil(node.getBoundingClientRect().height);
+          return Math.max(maxHeight, nodeHeight);
+        }, 0);
+
+        setMobileBodyHeight((current) => (current === nextHeight ? current : nextHeight || null));
+      });
+    };
+
+    measureBodyHeight();
+
+    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measureBodyHeight) : null;
+    const bodyNodes = Array.from(gallery.querySelectorAll<HTMLElement>(".foodSlideBody"));
+
+    resizeObserver?.observe(gallery);
+    bodyNodes.forEach((node) => resizeObserver?.observe(node));
+    window.addEventListener("resize", measureBodyHeight);
+
+    return () => {
+      window.removeEventListener("resize", measureBodyHeight);
+      resizeObserver?.disconnect();
+
+      if (bodyMeasureFrameRef.current !== null) {
+        window.cancelAnimationFrame(bodyMeasureFrameRef.current);
+        bodyMeasureFrameRef.current = null;
+      }
+    };
+  }, [galleryRef, openKey, safeCategory]);
 
   return (
-    <article className={`sectionDetail choiceDetail foodDetail ${isCategorySwitching ? "isCategorySwitching" : ""}`}>
+    <article
+      className={`sectionDetail choiceDetail foodDetail ${isCategorySwitching ? "isCategorySwitching" : ""}`}
+      style={sectionStyle}
+    >
       <div className="choiceToolbar foodToolbar">
         <div className="foodCategoryTabs" role="tablist" aria-label="Категории еды">
           {FOOD_CATEGORY_ORDER.map((category) => (
@@ -86,7 +179,6 @@ export function FoodSection({
               aria-selected={safeCategory === category}
               onClick={() => onCategoryChange(category)}
             >
-              {safeCategory !== category ? <FoodCategoryTabIcon className="foodCategoryTabMarker" aria-hidden="true" /> : null}
               <span>{FOOD_CATEGORY_LABELS[category]}</span>
             </button>
           ))}
@@ -118,6 +210,8 @@ export function FoodSection({
             const isSelected = selectedKey === slide.key;
             const isActive = index === activeIndex;
             const isDimmed = Boolean(selectedKey) && !isSelected;
+            const formattedTitle = keepFoodPrepositions(slide.title);
+            const formattedDescription = slide.description ? keepFoodPrepositions(slide.description) : null;
 
             return (
               <button
@@ -152,8 +246,8 @@ export function FoodSection({
                       )}
                     </span>
                     <div className="foodSlideCopy">
-                      <strong className="foodSlideLabel">{slide.title}</strong>
-                      {slide.description ? <span className="foodSlideDescription">{slide.description}</span> : null}
+                      <strong className="foodSlideLabel">{formattedTitle}</strong>
+                      {formattedDescription ? <span className="foodSlideDescription">{formattedDescription}</span> : null}
                     </div>
                   </div>
                 </div>
