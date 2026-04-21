@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DRINKS_SELECTION_LIMIT } from "../types";
 
 export const inviteIdParamSchema = z.object({
   inviteId: z.string().trim().regex(/^[a-fA-F0-9]{24}$/)
@@ -10,6 +11,7 @@ export const profileSchema = z.object({
 });
 
 const optionalMultiSelectSchema = z.array(z.string().trim().min(1)).optional();
+const optionalDrinkSelectSchema = z.array(z.string().trim().min(1)).max(DRINKS_SELECTION_LIMIT).optional();
 
 const dresscodeProgressSchema = z.object({
   viewedByMode: z.object({
@@ -31,7 +33,7 @@ const responsesSchema = z.object({
       .object({
         salad: optionalMultiSelectSchema,
         hot: optionalMultiSelectSchema,
-        drinks: optionalMultiSelectSchema
+        drinks: optionalDrinkSelectSchema
       })
       .optional(),
     comment: z.string().max(400).optional()

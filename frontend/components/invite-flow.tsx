@@ -18,6 +18,7 @@ import { DresscodeFemaleIcon, DresscodeMaleIcon } from "@/components/icons/dress
 import { FoodCommentIcon } from "@/components/icons/food-comment-icon";
 import { FOOD_OPTIONS, GIFT_OPTIONS } from "@/config/options";
 import {
+  DRESSCODE_LOOKS,
   DresscodeSection,
   isDresscodeModeComplete,
   isDresscodeProgressComplete,
@@ -27,13 +28,14 @@ import { FoodSection } from "@/components/sections/food";
 import { GiftsSection } from "@/components/sections/gifts";
 import { PlanSection } from "@/components/sections/plan";
 import { getInviteSession, loginInvite, saveInviteDraft, submitInvite } from "@/lib/api";
-import type {
-  FoodCategoryKey,
-  InvitePayload,
-  InviteProfile,
-  InviteProgress,
-  InviteResponses,
-  SectionKey
+import {
+  DRINKS_SELECTION_LIMIT,
+  type FoodCategoryKey,
+  type InvitePayload,
+  type InviteProfile,
+  type InviteProgress,
+  type InviteResponses,
+  type SectionKey
 } from "@/lib/types";
 
 const SECTION_ORDER: SectionKey[] = ["plan", "food", "dresscode", "gifts"];
@@ -80,6 +82,58 @@ const FOOD_AUTO_ADVANCE_DELAY_MS = 700;
 const FOOD_CATEGORY_SWITCH_FADE_MS = 220;
 const FOOD_COMMENT_SENT_BUBBLE_MS = 4400;
 const MOBILE_STAGE_BREAKPOINT_PX = 680;
+const PLAN_INVITATION_IMAGE_URL = "/assets/plan/invitation-plan.png";
+
+const DETAIL_PRELOAD_PRIORITY_URLS = [
+  PLAN_INVITATION_IMAGE_URL,
+  FOOD_OPTIONS.salad[0]?.iconSrc,
+  FOOD_OPTIONS.hot[0]?.iconSrc,
+  FOOD_OPTIONS.drinks[0]?.iconSrc,
+  GIFT_OPTIONS[0]?.iconSrc,
+  DRESSCODE_LOOKS.male[0]?.src,
+  DRESSCODE_LOOKS.female[0]?.src
+].filter((value): value is string => Boolean(value));
+
+const DETAIL_PRELOAD_ALL_URLS = Array.from(
+  new Set([
+    ...DETAIL_PRELOAD_PRIORITY_URLS,
+    ...Object.values(DRESSCODE_LOOKS).flatMap((looks) => looks.map((look) => look.src)),
+    ...Object.values(FOOD_OPTIONS).flatMap((items) => items.map((item) => item.iconSrc)),
+    ...GIFT_OPTIONS.map((item) => item.iconSrc)
+  ])
+);
+
+function warmImageCache(src: string): Promise<void> {
+  return new Promise((resolve) => {
+    const image = new Image();
+
+    const finalize = () => {
+      image.onload = null;
+      image.onerror = null;
+      resolve();
+    };
+
+    image.decoding = "async";
+    image.loading = "eager";
+    image.onload = finalize;
+    image.onerror = finalize;
+    image.src = src;
+
+    if (image.complete) {
+      finalize();
+    }
+  });
+}
+
+async function preloadImageQueue(urls: string[], shouldCancel: () => boolean) {
+  for (const url of urls) {
+    if (shouldCancel()) {
+      return;
+    }
+
+    await warmImageCache(url);
+  }
+}
 
 function createDefaultResponses(): InviteResponses {
   return {
@@ -118,7 +172,7 @@ function normalizeFoodSelections(
   return {
     salad: selections.salad?.[0] ? [selections.salad[0]] : [],
     hot: selections.hot?.[0] ? [selections.hot[0]] : [],
-    drinks: selections.drinks?.[0] ? [selections.drinks[0]] : []
+    drinks: selections.drinks?.filter(Boolean).slice(0, DRINKS_SELECTION_LIMIT) ?? []
   };
 }
 
@@ -160,7 +214,10 @@ function normalizeInviteProgress(progress?: InviteProgress): InviteProgress {
 }
 
 function isFoodSelectionComplete(responses: InviteResponses): boolean {
-  return FOOD_CATEGORY_ORDER.every((category) => Boolean(responses.food.selections?.[category]?.[0]));
+  return FOOD_CATEGORY_ORDER.every((category) => {
+    const selections = responses.food.selections?.[category] ?? [];
+    return selections.length > 0;
+  });
 }
 
 function isGiftSelectionComplete(responses: InviteResponses): boolean {
@@ -360,6 +417,7 @@ export function InviteFlow() {
   const foodCategorySwitchTimeoutRef = useRef<number | null>(null);
   const heroStageRef = useRef<HTMLElement | null>(null);
   const mobileStageRef = useRef<HTMLDivElement | null>(null);
+  const hasPreloadedDetailAssetsRef = useRef(false);
   const mobileStageSyncTimeoutRef = useRef<number | null>(null);
   const mobileStageIsSyncingRef = useRef(false);
   const dragStartTrackIndexRef = useRef(0);
@@ -392,6 +450,7 @@ export function InviteFlow() {
   const isFoodDetail = detailSection === "food";
   const isGiftDetail = detailSection === "gifts";
   const isPlanDetail = detailSection === "plan";
+  const drinkSelectionTotal = responses.food.selections?.drinks?.length ?? 0;
   const isDresscodeReviewComplete =
     progress.dresscode.completed || isDresscodeModeComplete(dresscodeLookMode, dresscodeMaxViewedIndexByMode[dresscodeLookMode]);
   const isFoodSelectionCompleteValue = isFoodSelectionComplete(responses);
@@ -644,6 +703,45 @@ export function InviteFlow() {
       isMounted = false;
     };
   }, [hydrateInviteSession]);
+
+  useEffect(() => {
+    if (authRequired || isRestoringSession || hasPreloadedDetailAssetsRef.current) {
+      return;
+    }
+
+    hasPreloadedDetailAssetsRef.current = true;
+
+    let cancelled = false;
+    let idleHandle: number | null = null;
+    const canUseIdleCallback = typeof window.requestIdleCallback === "function";
+
+    void preloadImageQueue(DETAIL_PRELOAD_PRIORITY_URLS, () => cancelled);
+
+    const scheduleDeferredWarmup = () => {
+      void preloadImageQueue(
+        DETAIL_PRELOAD_ALL_URLS.filter((url) => !DETAIL_PRELOAD_PRIORITY_URLS.includes(url)),
+        () => cancelled
+      );
+    };
+
+    if (canUseIdleCallback) {
+      idleHandle = window.requestIdleCallback(scheduleDeferredWarmup, { timeout: 1400 });
+    } else {
+      idleHandle = window.setTimeout(scheduleDeferredWarmup, 420);
+    }
+
+    return () => {
+      cancelled = true;
+
+      if (idleHandle !== null) {
+        if (canUseIdleCallback) {
+          window.cancelIdleCallback(idleHandle);
+        } else {
+          window.clearTimeout(idleHandle);
+        }
+      }
+    };
+  }, [authRequired, isRestoringSession]);
 
   useEffect(() => {
     if (!isCompactMobile) {
@@ -1006,6 +1104,10 @@ export function InviteFlow() {
       return;
     }
 
+    if (category === "drinks") {
+      return;
+    }
+
     if (foodAutoAdvanceTimeoutRef.current !== null) {
       window.clearTimeout(foodAutoAdvanceTimeoutRef.current);
       foodAutoAdvanceTimeoutRef.current = null;
@@ -1083,6 +1185,60 @@ export function InviteFlow() {
 
       foodAutoAdvanceTimeoutRef.current = null;
     }, FOOD_AUTO_ADVANCE_DELAY_MS);
+  }
+
+  function adjustDrinkSelection(key: string, delta: 1 | -1) {
+    if (readOnly) {
+      return;
+    }
+
+    const currentValues = responses.food.selections?.drinks ?? [];
+
+    if ((delta > 0 && currentValues.length >= DRINKS_SELECTION_LIMIT) || (delta < 0 && !currentValues.includes(key))) {
+      return;
+    }
+
+    markUnsavedChanges();
+    updateResponses((current) => {
+      const previousValues = current.food.selections?.drinks ?? [];
+
+      if (delta > 0) {
+        if (previousValues.length >= DRINKS_SELECTION_LIMIT) {
+          return current;
+        }
+
+        return {
+          ...current,
+          food: {
+            ...current.food,
+            selections: {
+              ...(current.food.selections ?? {}),
+              drinks: [...previousValues, key]
+            }
+          }
+        };
+      }
+
+      const nextValues = [...previousValues];
+      const removeIndex = nextValues.lastIndexOf(key);
+
+      if (removeIndex === -1) {
+        return current;
+      }
+
+      nextValues.splice(removeIndex, 1);
+
+      return {
+        ...current,
+        food: {
+          ...current.food,
+          selections: {
+            ...(current.food.selections ?? {}),
+            drinks: nextValues
+          }
+        }
+      };
+    });
   }
 
   function toggleGiftSelection(key: string) {
@@ -1216,7 +1372,7 @@ export function InviteFlow() {
       case "dresscode":
         return "Просто посмотреть";
       case "food":
-        return "Выберите позиции";
+        return foodActiveCategory === "drinks" ? "Выберите 3 напитка" : "Выберите позиции";
       case "gifts":
         return "Выберите подарок";
       case "plan":
@@ -1645,6 +1801,13 @@ export function InviteFlow() {
                     {getDetailSubtitle(detailSection) ? <p className="detailHeaderSubtitle">{getDetailSubtitle(detailSection)}</p> : null}
                   </div>
                 </div>
+                {isFoodDetail && foodActiveCategory === "drinks" ? (
+                  <div className="detailHeaderCounter" aria-live="polite">
+                    <span className="detailHeaderCounterBadge">
+                      {drinkSelectionTotal}/{DRINKS_SELECTION_LIMIT}
+                    </span>
+                  </div>
+                ) : null}
                 {isDresscodeDetail ? <div className="dresscodeHeaderPalette" aria-hidden="true" /> : null}
               </div>
             ) : (
@@ -1680,6 +1843,7 @@ export function InviteFlow() {
                   onCategoryChange={handleFoodCategoryChange}
                   onActiveIndexChange={handleFoodActiveIndexChange}
                   onToggleSelection={toggleFoodSelection}
+                  onAdjustDrinkSelection={adjustDrinkSelection}
                   onCommentClick={openFoodCommentDialog}
                 />
               ) : null}

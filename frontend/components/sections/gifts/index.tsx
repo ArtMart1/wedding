@@ -20,7 +20,7 @@ export function GiftsSection({
   onActiveIndexChange,
   onToggleSelection
 }: GiftsSectionProps) {
-  const { galleryRef, handleGalleryScroll, markUserIntent } = useCenteredSnapGallery({
+  const { galleryRef, handleGalleryScroll, handleGalleryWheel, markUserIntent } = useCenteredSnapGallery({
     activeIndex,
     onActiveIndexChange,
     syncKey: `gifts-${openKey}`,
@@ -36,7 +36,7 @@ export function GiftsSection({
           className="choiceGallery foodGallery giftsGallery"
           onScroll={handleGalleryScroll}
           onPointerDown={markUserIntent}
-          onWheel={markUserIntent}
+          onWheel={handleGalleryWheel}
         >
           {GIFT_OPTIONS.map((slide, index) => {
             const isSelected = selectedKey === slide.key;

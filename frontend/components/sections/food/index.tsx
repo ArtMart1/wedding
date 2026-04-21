@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { FOOD_OPTIONS } from "@/config/options";
 import { FoodCommentIcon } from "@/components/icons/food-comment-icon";
-import type { FoodCategoryKey, InviteResponses } from "@/lib/types";
+import { DRINKS_SELECTION_LIMIT, type FoodCategoryKey, type InviteResponses } from "@/lib/types";
 import { useCenteredSnapGallery } from "@/components/sections/shared/use-centered-snap-gallery";
 import { FoodRadioOffIcon, FoodRadioOnIcon } from "@/components/icons/food-radio-icons";
 
@@ -74,6 +74,7 @@ interface FoodSectionProps {
   onCategoryChange: (category: FoodCategoryKey) => void;
   onActiveIndexChange: (index: number) => void;
   onToggleSelection: (category: FoodCategoryKey, key: string) => void;
+  onAdjustDrinkSelection: (key: string, delta: 1 | -1) => void;
   onCommentClick: () => void;
 }
 
@@ -90,9 +91,10 @@ export function FoodSection({
   onCategoryChange,
   onActiveIndexChange,
   onToggleSelection,
+  onAdjustDrinkSelection,
   onCommentClick
 }: FoodSectionProps) {
-  const [mobileBodyHeight, setMobileBodyHeight] = useState<number | null>(null);
+  const [bodyHeight, setBodyHeight] = useState<number | null>(null);
   const bodyMeasureFrameRef = useRef<number | null>(null);
   const safeCategory = isFoodCategoryKey(activeCategory) ? activeCategory : "salad";
   const safeIndexByCategory =
@@ -106,16 +108,28 @@ export function FoodSection({
     ...option,
     category: safeCategory
   }));
-  const { galleryRef, handleGalleryScroll, markUserIntent } = useCenteredSnapGallery({
+  const { galleryRef, handleGalleryScroll, handleGalleryWheel, markUserIntent } = useCenteredSnapGallery({
     activeIndex,
     onActiveIndexChange,
     syncKey: `${safeCategory}-${openKey}`,
     syncIndex: 0
   });
-  const selectedKey = responses.food.selections?.[safeCategory]?.[0] ?? null;
+  const isDrinkCategory = safeCategory === "drinks";
+  const selectedValues = responses.food.selections?.[safeCategory] ?? [];
+  const selectedKey = !isDrinkCategory ? selectedValues[0] ?? null : null;
+  const drinkSelectionTotal = responses.food.selections?.drinks?.length ?? 0;
+  const drinkSelectionCounts = isDrinkCategory
+    ? selectedValues.reduce<Record<string, number>>((accumulator, value) => {
+        accumulator[value] = (accumulator[value] ?? 0) + 1;
+        return accumulator;
+      }, {})
+    : {};
   const sectionStyle =
-    mobileBodyHeight !== null
-      ? ({ "--food-mobile-body-height": `${mobileBodyHeight}px` } as CSSProperties)
+    bodyHeight !== null
+      ? ({
+          "--food-body-height": `${bodyHeight}px`,
+          "--food-mobile-body-height": `${bodyHeight}px`
+        } as CSSProperties)
       : undefined;
 
   useEffect(() => {
@@ -139,7 +153,7 @@ export function FoodSection({
           return Math.max(maxHeight, nodeHeight);
         }, 0);
 
-        setMobileBodyHeight((current) => (current === nextHeight ? current : nextHeight || null));
+        setBodyHeight((current) => (current === nextHeight ? current : nextHeight || null));
       });
     };
 
@@ -204,16 +218,106 @@ export function FoodSection({
           className="choiceGallery foodGallery"
           onScroll={handleGalleryScroll}
           onPointerDown={markUserIntent}
-          onWheel={markUserIntent}
+          onWheel={handleGalleryWheel}
         >
           {activeSlides.map((slide, index) => {
-            const isSelected = selectedKey === slide.key;
+            const drinkCount = isDrinkCategory ? (drinkSelectionCounts[slide.key] ?? 0) : 0;
+            const isSelected = isDrinkCategory ? drinkCount > 0 : selectedKey === slide.key;
             const isActive = index === activeIndex;
-            const isDimmed = Boolean(selectedKey) && !isSelected;
+            const isDimmed = isDrinkCategory ? false : Boolean(selectedKey) && !isSelected;
             const formattedTitle = keepFoodPrepositions(slide.title);
             const formattedDescription = slide.description ? keepFoodPrepositions(slide.description) : null;
+            const drinkMinusDisabled = readOnly || drinkCount === 0;
+            const drinkPlusDisabled = readOnly || drinkSelectionTotal >= DRINKS_SELECTION_LIMIT;
+            const selectionAriaLabel = slide.description ? `${slide.title}. ${slide.description}` : slide.title;
+            const slideInner = (
+              <div className="foodSlideInner">
+                <div
+                  className={`foodSlideArtworkWrap ${
+                    showTopHint && safeCategory === "salad" && index === 0
+                      ? "hintAnchor detailCardHint detailCardHintFood"
+                      : ""
+                  }`}
+                  aria-hidden="true"
+                >
+                  <img className="foodSlideArtwork" src={slide.iconSrc} alt="" draggable="false" />
+                </div>
 
-            return (
+                <div className={`foodSlideBody ${isDrinkCategory ? "foodSlideBodyDrinks" : ""}`}>
+                  {isDrinkCategory ? (
+                    <>
+                      <div className="foodSlideCopy foodSlideCopyDrinks">
+                        <strong className="foodSlideLabel">{formattedTitle}</strong>
+                        {formattedDescription ? (
+                          <span className="foodSlideDescription">{formattedDescription}</span>
+                        ) : null}
+                      </div>
+                      <div className="foodDrinkStepperRow">
+                        <div className="foodDrinkStepper" aria-label={`Выбрано ${drinkCount} порц.`}>
+                          <button
+                            type="button"
+                            className="foodDrinkStepperButton"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onAdjustDrinkSelection(slide.key, -1);
+                            }}
+                            disabled={drinkMinusDisabled}
+                            aria-label={`Уменьшить количество: ${slide.title}`}
+                          >
+                            -
+                          </button>
+                          <span className="foodDrinkStepperCount" aria-live="polite">
+                            {drinkCount}
+                          </span>
+                          <button
+                            type="button"
+                            className="foodDrinkStepperButton"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onAdjustDrinkSelection(slide.key, 1);
+                            }}
+                            disabled={drinkPlusDisabled}
+                            aria-label={`Увеличить количество: ${slide.title}`}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="foodSlideSelection" aria-hidden="true">
+                        {isSelected ? (
+                          <FoodRadioOnIcon className="foodSlideSelectionIcon" />
+                        ) : (
+                          <FoodRadioOffIcon className="foodSlideSelectionIcon" />
+                        )}
+                      </span>
+
+                      <div className="foodSlideCopy">
+                        <strong className="foodSlideLabel">{formattedTitle}</strong>
+                        {formattedDescription ? (
+                          <span className="foodSlideDescription">{formattedDescription}</span>
+                        ) : null}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+
+            return isDrinkCategory ? (
+              <div
+                key={slide.key}
+                className={`foodSlide ${slide.category === "drinks" ? "foodSlideDrinks" : ""} ${isActive ? "isActive" : ""} ${isSelected ? "isSelected" : ""}`}
+                data-slide-index={index}
+                data-food-category={slide.category}
+                role="group"
+                aria-label={`${selectionAriaLabel}. Выбрано: ${drinkCount}.`}
+              >
+                {slideInner}
+              </div>
+            ) : (
               <button
                 key={slide.key}
                 type="button"
@@ -223,34 +327,9 @@ export function FoodSection({
                 onClick={() => onToggleSelection(slide.category, slide.key)}
                 disabled={readOnly}
                 aria-pressed={isSelected}
-                aria-label={slide.description ? `${slide.title}. ${slide.description}` : slide.title}
+                aria-label={selectionAriaLabel}
               >
-                <div className="foodSlideInner">
-                  <div
-                    className={`foodSlideArtworkWrap ${
-                      showTopHint && safeCategory === "salad" && index === 0
-                        ? "hintAnchor detailCardHint detailCardHintFood"
-                        : ""
-                    }`}
-                    aria-hidden="true"
-                  >
-                    <img className="foodSlideArtwork" src={slide.iconSrc} alt="" draggable="false" />
-                  </div>
-
-                  <div className="foodSlideBody">
-                    <span className="foodSlideSelection" aria-hidden="true">
-                      {isSelected ? (
-                        <FoodRadioOnIcon className="foodSlideSelectionIcon" />
-                      ) : (
-                        <FoodRadioOffIcon className="foodSlideSelectionIcon" />
-                      )}
-                    </span>
-                    <div className="foodSlideCopy">
-                      <strong className="foodSlideLabel">{formattedTitle}</strong>
-                      {formattedDescription ? <span className="foodSlideDescription">{formattedDescription}</span> : null}
-                    </div>
-                  </div>
-                </div>
+                {slideInner}
               </button>
             );
           })}

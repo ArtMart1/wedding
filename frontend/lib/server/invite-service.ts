@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { connectToDatabase } from "./db";
 import { InviteModel, type InviteDocument } from "./invite-model";
 import { draftSchema, inviteIdParamSchema, profileSchema, submitSchema } from "./invite-schemas";
+import { DRINKS_SELECTION_LIMIT } from "../types";
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 const SESSION_TTL_MS = 30 * 60 * 1000;
@@ -41,6 +42,22 @@ function uniqueList(values?: string[]) {
   return [...new Set(values)];
 }
 
+function singleChoiceList(values?: string[]) {
+  if (!values?.length || !values[0]) {
+    return undefined;
+  }
+
+  return [values[0]];
+}
+
+function drinksChoiceList(values?: string[]) {
+  if (!values?.length) {
+    return undefined;
+  }
+
+  return values.filter(Boolean).slice(0, DRINKS_SELECTION_LIMIT);
+}
+
 function createDefaultResponses() {
   return {
     dresscode: {},
@@ -76,9 +93,9 @@ function normalizeResponses(responses: ReturnType<typeof draftSchema.parse>["res
     dresscode: {},
     food: {
       selections: {
-        salad: uniqueList(responses.food.selections?.salad),
-        hot: uniqueList(responses.food.selections?.hot),
-        drinks: uniqueList(responses.food.selections?.drinks)
+        salad: singleChoiceList(responses.food.selections?.salad),
+        hot: singleChoiceList(responses.food.selections?.hot),
+        drinks: drinksChoiceList(responses.food.selections?.drinks)
       },
       comment: responses.food.comment ?? ""
     },
@@ -151,9 +168,9 @@ function toPayload(invite: InviteDocument | null) {
     dresscode: {},
     food: {
       selections: {
-        salad: uniqueList(invite.responses.food?.selections?.salad),
-        hot: uniqueList(invite.responses.food?.selections?.hot),
-        drinks: uniqueList(invite.responses.food?.selections?.drinks)
+        salad: singleChoiceList(invite.responses.food?.selections?.salad),
+        hot: singleChoiceList(invite.responses.food?.selections?.hot),
+        drinks: drinksChoiceList(invite.responses.food?.selections?.drinks)
       },
       comment: invite.responses.food?.comment ?? ""
     },

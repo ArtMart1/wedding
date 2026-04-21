@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, type WheelEvent as ReactWheelEvent } from "react";
 
 interface UseCenteredSnapGalleryOptions {
   activeIndex: number;
@@ -20,6 +20,7 @@ export function useCenteredSnapGallery({
   const isSyncingRef = useRef(false);
   const hasUserIntentRef = useRef(false);
   const syncResetTimeoutRef = useRef<number | null>(null);
+  const wheelSnapResetTimeoutRef = useRef<number | null>(null);
 
   useLayoutEffect(() => {
     let frameId = 0;
@@ -128,6 +129,9 @@ export function useCenteredSnapGallery({
       if (syncResetTimeoutRef.current !== null) {
         window.clearTimeout(syncResetTimeoutRef.current);
       }
+      if (wheelSnapResetTimeoutRef.current !== null) {
+        window.clearTimeout(wheelSnapResetTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -182,9 +186,48 @@ export function useCenteredSnapGallery({
     });
   }
 
+  function handleGalleryWheel(event: ReactWheelEvent<HTMLDivElement>) {
+    const gallery = galleryRef.current;
+
+    if (!gallery) {
+      return;
+    }
+
+    hasUserIntentRef.current = true;
+
+    const deltaUnit =
+      event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? gallery.clientWidth : 1;
+    const deltaX = event.deltaX * deltaUnit;
+    const deltaY = event.deltaY * deltaUnit;
+
+    if (window.innerWidth <= 680 || Math.abs(deltaY) < Math.abs(deltaX) || deltaY === 0) {
+      return;
+    }
+
+    if (gallery.scrollWidth <= gallery.clientWidth + 1) {
+      return;
+    }
+
+    event.preventDefault();
+    gallery.dataset.wheelScrolling = "true";
+    gallery.scrollLeft += deltaY * 1.2;
+
+    if (wheelSnapResetTimeoutRef.current !== null) {
+      window.clearTimeout(wheelSnapResetTimeoutRef.current);
+    }
+
+    wheelSnapResetTimeoutRef.current = window.setTimeout(() => {
+      if (galleryRef.current) {
+        delete galleryRef.current.dataset.wheelScrolling;
+      }
+      wheelSnapResetTimeoutRef.current = null;
+    }, 140);
+  }
+
   return {
     galleryRef,
     handleGalleryScroll,
+    handleGalleryWheel,
     markUserIntent() {
       hasUserIntentRef.current = true;
     }

@@ -47,7 +47,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     section: "food",
     category: "salad",
     title: "Салат с лососем",
-    description: "или креветками, кус-кусом, шпинатом и авокадо в соевом соусе",
+    description: "с кус-кусом, шпинатом и авокадо в соевом соусе",
     iconSrc: "/assets/food/salad/salad-salmon.png"
   },
   {
@@ -55,7 +55,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     section: "food",
     category: "hot",
     title: "Маринованная курица",
-    description: "в азиатском соусе с рисом и корейскими огурчиками, подается с кисло-сладким соусом",
+    description: "в азиатском соусе с рисом и корейскими огурчиками",
     iconSrc: "/assets/food/hot/hot-chicken.png"
   },
   {
@@ -87,7 +87,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     section: "food",
     category: "hot",
     title: "Паста с беконом",
-    description: "вешенками и сливочным соусом с белым вином, подается с желтком",
+    description: "вешенками и сливочным соусом с белым вином",
     iconSrc: "/assets/food/hot/hot-bacon-pasta.png"
   },
   {
@@ -115,11 +115,35 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     iconSrc: "/assets/food/drinks/drink-non-alcohol.png"
   },
   {
+    key: "drink_mocktail_serena",
+    section: "food",
+    category: "drinks",
+    title: "Serena van der Woodsen",
+    description: "Б/а игристое, сорбет лайм, персик",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "drink_mocktail_orange_vanilla",
+    section: "food",
+    category: "drinks",
+    title: "Orange Vanilla",
+    description: "Б/а игристое, пюре маракуйя, апельсиновый фреш, ваниль",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
+    key: "drink_mocktail_blair",
+    section: "food",
+    category: "drinks",
+    title: "Blair Waldorf",
+    description: "Б/а игристое, сорбет малина, апельсин, ананас, клубника",
+    iconSrc: "/food-option-heart.png"
+  },
+  {
     key: "drink_spring_punch",
     section: "food",
     category: "drinks",
     title: "Спринг Февер",
-    description: "Джин, трипл сек, синий чай анчан, кордиал павлова, лимон Gin, triple sec, blue tea anchan, cordial pavlova, lemon",
+    description: "Джин, трипл сек, синий чай анчан, кордиал павлова, лимон",
     iconSrc: "/assets/food/drinks/drink-spring-fever.png"
   },
   {
@@ -143,7 +167,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     section: "food",
     category: "drinks",
     title: "Ла Авеню",
-    description: "Клубничный пунш, свежая клубника, Millky punch, strawberry",
+    description: "Клубничный пунш, свежая клубника",
     iconSrc: "/assets/food/drinks/drink-la-avenue.png"
   },
   {
@@ -151,7 +175,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     section: "food",
     category: "drinks",
     title: "Кисс ми",
-    description: "Джин, лимон, малина, Gin, lemon, raspberry",
+    description: "Джин, лимон, малина",
     iconSrc: "/assets/food/drinks/drink-kiss-me.png"
   },
   {
@@ -159,7 +183,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     section: "food",
     category: "drinks",
     title: "Пич клауд",
-    description: "Апероль, персик, сок лимона Gin, kiwi, apple, lemon juice",
+    description: "Апероль, персик, сок лимона",
     iconSrc: "/assets/food/drinks/drink-peach-cloud.png"
   },
   {
@@ -171,20 +195,36 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     iconSrc: "/assets/food/drinks/drink-green-sour.png"
   },
   {
-    key: "drink_red_wine",
+    key: "drink_white_wine_italy",
     section: "food",
     category: "drinks",
-    title: "Бокал красного Вина",
-    description: "Итальянское заебумба",
+    title: "Бокал белого",
+    description: "Италия, Сицилия, полусухое",
+    iconSrc: "/assets/food/drinks/drink-white-wine.png"
+  },
+  {
+    key: "drink_white_wine_argentina",
+    section: "food",
+    category: "drinks",
+    title: "Бокал белого",
+    description: "Аргентина, Мендоса, сухое",
+    iconSrc: "/assets/food/drinks/drink-white-wine.png"
+  },
+  {
+    key: "drink_red_wine_chile",
+    section: "food",
+    category: "drinks",
+    title: "Бокал красного",
+    description: "Чили, Долина Мауле, сухое",
     iconSrc: "/assets/food/drinks/drink-red-wine.png"
   },
   {
-    key: "drink_white_wine",
+    key: "drink_red_wine_argentina",
     section: "food",
     category: "drinks",
-    title: "Бокал белого Вина",
-    description: "Итальянское класс ваще",
-    iconSrc: "/assets/food/drinks/drink-white-wine.png"
+    title: "Бокал красного",
+    description: "Аргентина, Мендоса, сухое",
+    iconSrc: "/assets/food/drinks/drink-red-wine.png"
   },
   {
     key: "gift_cash",
@@ -197,14 +237,14 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     key: "gift_surprise",
     section: "gifts",
     title: "Свой вариант",
-    description: "Описание",
+    description: "мы вам доверяем",
     iconSrc: "/assets/gifts/gift-custom.png"
   },
   {
     key: "gift_certificate",
     section: "gifts",
-    title: "Сертификат",
-    description: "Куда-нибудь",
+    title: "Сертификат на\u00A0цветы",
+    description: "не дарите, пожалуйста, живые цветы",
     iconSrc: "/assets/gifts/gift-certificate.png"
   }
 ];

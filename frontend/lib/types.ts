@@ -2,6 +2,7 @@ export type SectionKey = "dresscode" | "food" | "gifts" | "plan";
 
 export type FoodCategoryKey = "salad" | "hot" | "drinks";
 export type DresscodeLookMode = "male" | "female";
+export const DRINKS_SELECTION_LIMIT = 3;
 
 export interface InviteProfile {
   firstName: string;
