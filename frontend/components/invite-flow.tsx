@@ -1857,7 +1857,7 @@ export function InviteFlow() {
                   onToggleSelection={toggleGiftSelection}
                 />
               ) : null}
-              {activeSection === "plan" ? <PlanSection /> : null}
+              {activeSection === "plan" ? <PlanSection inviteeFirstName={profile?.firstName} /> : null}
             </div>
           </section>
 

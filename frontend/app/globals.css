@@ -904,9 +904,9 @@ textarea {
 .planInvitationLead {
   width: 100%;
   font-size: min(calc(var(--detail-card-width) * 0.047368), 36px);
-  line-height: 0.92;
+  line-height: 1;
   letter-spacing: min(calc(var(--detail-card-width) * 0.000947), 0.72px);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .planInvitationDate {

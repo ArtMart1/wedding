@@ -1,4 +1,16 @@
-export function PlanSection() {
+import { inflectFirstNameToAccusative } from "@/lib/russian-name-cases";
+
+interface PlanSectionProps {
+  inviteeFirstName?: string | null;
+}
+
+export function PlanSection({ inviteeFirstName }: PlanSectionProps) {
+  const normalizedFirstName = inviteeFirstName?.trim() ?? "";
+  const inviteeFirstNameInAccusative = normalizedFirstName
+    ? inflectFirstNameToAccusative(normalizedFirstName)
+    : null;
+  const inviteeTarget = inviteeFirstNameInAccusative ?? "тебя";
+
   return (
     <article className="sectionDetail planDetail">
       <div className="planViewer">
@@ -14,7 +26,11 @@ export function PlanSection() {
           <div className="planInvitationContent">
             <div className="planInvitationHero">
               <p className="planInvitationNames">Илья и Ольга</p>
-              <p className="planInvitationLead">приглашают тебя на свадьбу</p>
+              <p className="planInvitationLead">
+                {`приглашают ${inviteeTarget}`}
+                <br />
+                на свадьбу
+              </p>
             </div>
 
             <p className="planInvitationDate">30 мая 2026</p>
