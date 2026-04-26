@@ -120,7 +120,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Серена ван дер Вудсен",
     description: "Б/а игристое, сорбет лайм, персик",
-    iconSrc: "/assets/food/drinks/drink-mocktail-serena.svg"
+    iconSrc: "/assets/food/drinks/drink-mocktail-serena.png"
   },
   {
     key: "drink_mocktail_orange_vanilla",
@@ -128,7 +128,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Ориндж Ванилла",
     description: "Б/а игристое, пюре маракуйя, апельсиновый фреш, ваниль",
-    iconSrc: "/assets/food/drinks/drink-mocktail-orange-vanilla.svg"
+    iconSrc: "/assets/food/drinks/drink-mocktail-orange-vanilla.png"
   },
   {
     key: "drink_mocktail_blair",
@@ -136,7 +136,7 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     category: "drinks",
     title: "Блэр Уолдорф",
     description: "Б/а игристое, сорбет малина, апельсин, ананас, клубника",
-    iconSrc: "/assets/food/drinks/drink-mocktail-blair.svg"
+    iconSrc: "/assets/food/drinks/drink-mocktail-blair.png"
   },
   {
     key: "drink_spring_punch",
