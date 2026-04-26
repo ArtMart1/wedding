@@ -118,25 +118,25 @@ export const DETAIL_FLOATING_ITEMS: DetailFloatingItem[] = [
     key: "drink_mocktail_serena",
     section: "food",
     category: "drinks",
-    title: "Serena van der Woodsen",
+    title: "Серена ван дер Вудсен",
     description: "Б/а игристое, сорбет лайм, персик",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-mocktail-serena.svg"
   },
   {
     key: "drink_mocktail_orange_vanilla",
     section: "food",
     category: "drinks",
-    title: "Orange Vanilla",
+    title: "Ориндж Ванилла",
     description: "Б/а игристое, пюре маракуйя, апельсиновый фреш, ваниль",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-mocktail-orange-vanilla.svg"
   },
   {
     key: "drink_mocktail_blair",
     section: "food",
     category: "drinks",
-    title: "Blair Waldorf",
+    title: "Блэр Уолдорф",
     description: "Б/а игристое, сорбет малина, апельсин, ананас, клубника",
-    iconSrc: "/food-option-heart.png"
+    iconSrc: "/assets/food/drinks/drink-mocktail-blair.svg"
   },
   {
     key: "drink_spring_punch",
